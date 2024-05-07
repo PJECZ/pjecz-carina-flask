@@ -1,0 +1,61 @@
+[tool.poetry]
+name = "pjecz-carina-flask"
+version = "0.1.0"
+description = "PJECZ Carina es un sistema web hecho con Flaskpara para la interconexión de exhortos entre Poderes Judiciales."
+authors = ["Guillermo Valdes <guillermo@movimientolibre.com>"]
+license = "AGPL3"
+readme = "README.md"
+packages = [{include = "carina"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+click = "^8.1.7"
+cryptography = "^42.0.7"
+email-validator = "^2.1.1"
+flask = "^3.0.3"
+flask-login = "^0.6.3"
+flask-moment = "^1.0.5"
+flask-sqlalchemy = "^3.1.1"
+flask-socketio = "^5.3.6"
+flask-wtf = "^1.2.1"
+google-auth = "^2.29.0"
+google-cloud-secret-manager = "^2.20.0"
+google-cloud-storage = "^2.16.0"
+google-cloud = "^0.34.0"
+gunicorn = "^22.0.0"
+hashids = "^1.3.1"
+jinja2 = "^3.1.4"
+openpyxl = "^3.1.2"
+passlib = "^1.7.4"
+psycopg2-binary = "^2.9.9"
+pydantic = "^2.7.1"
+pydantic-settings = "^2.2.1"
+python-dotenv = "^1.0.1"
+pytz = "^2024.1"
+rq = "^1.16.2"
+sqlalchemy = "^2.0.30"
+sqlalchemy-utils = "^0.41.2"
+unidecode = "^1.3.8"
+uvicorn = "^0.29.0"
+werkzeug = "^3.0.3"
+wtforms = "^3.1.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
+isort = "^5.13.2"
+pytest = "^8.2.0"
+pylint = "^3.1.0"
+pylint-sqlalchemy = "^0.3.0"
+pre-commit = "^3.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 128
+
+[tool.isort]
+line_length = 128
+profile = "black"
