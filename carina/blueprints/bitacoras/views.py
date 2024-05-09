@@ -30,15 +30,15 @@ def datatable_json():
     """DataTable JSON para listado de Bitacoras"""
     # Tomar parámetros de Datatables
     draw, start, rows_per_page = get_datatable_parameters()
+    # Consultar
+    consulta = Bitacora.query
+    # Solo los modulos en Plataforma Carina
+    consulta = consulta.join(Modulo).filter(Modulo.en_plataforma_carina == True)
     # Primero filtrar por columnas propias
-    if "estatus" in request.form:
-        consulta = consulta.filter_by(estatus=request.form["estatus"])
-    else:
-        consulta = consulta.filter_by(estatus="A")
     if "modulo_id" in request.form:
-        consulta = consulta.filter_by(modulo_id=request.form["modulo_id"])
+        consulta = consulta.filter(Bitacora.modulo_id==request.form["modulo_id"])
     if "usuario_id" in request.form:
-        consulta = consulta.filter_by(usuario_id=request.form["usuario_id"])
+        consulta = consulta.filter(Bitacora.usuario_id==request.form["usuario_id"])
     # Luego filtrar por columnas de otras tablas
     if "modulo_nombre" in request.form:
         modulo_nombre = safe_string(request.form["modulo_nombre"], save_enie=True)
