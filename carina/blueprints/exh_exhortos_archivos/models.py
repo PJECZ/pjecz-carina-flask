@@ -10,12 +10,18 @@ from lib.universal_mixin import UniversalMixin
 from carina.extensions import database
 
 
-class ExhExhortoAchivo(database.Model, UniversalMixin):
-    """ExhExhortoAchivo"""
+class ExhExhortoArchivo(database.Model, UniversalMixin):
+    """ExhExhortoArchivo"""
 
     ESTADOS = {
         "PENDIENTE": "Pendiente",
         "RECIBIDO": "Recibido",
+    }
+
+    TIPOS_DOCUMENTOS = {
+        1: "Oficio",
+        2: "Acuerdo",
+        3: "Anexo",
     }
 
     # Nombre de la tabla
@@ -55,6 +61,14 @@ class ExhExhortoAchivo(database.Model, UniversalMixin):
     # Fecha y hora de recepción del documento
     fecha_hora_recepcion = Column(DateTime, nullable=False)
 
+    @property
+    def tipo_documento_nombre(self):
+        """Nombre del tipo de documento"""
+        try:
+            return self.TIPOS_DOCUMENTOS[self.tipo_documento]
+        except KeyError:
+            return "No Definido"
+
     def __repr__(self):
         """Representación"""
-        return f"<ExhExhortoAchivo {self.id}>"
+        return f"<ExhExhortoArchivo {self.id}>"

@@ -1,0 +1,79 @@
+{% extends 'layouts/app.jinja2' %}
+{% import 'macros/list.jinja2' as list %}
+{% import 'macros/topbar.jinja2' as topbar %}
+
+{% block title %}Externos{% endblock %}
+
+{% block topbar_actions %}
+    {% call topbar.page_buttons(titulo) %}
+        {% if current_user.can_view('EXH AREAS') %}
+            {{ topbar.button('Áreas', url_for('exh_areas.list_active'), "mdi:office-building-marker") }}
+        {% endif %}
+        {% if current_user.can_view('EXH EXHORTOS') %}
+            {{ topbar.button('Exhortos', url_for('exh_exhortos.list_active'), 'mdi:email-fast') }}
+        {% endif %}
+        {% if current_user.can_view('EXH EXHORTOS ARCHIVOS') %}
+            {{ topbar.button('Archivos', url_for('exh_exhortos_archivos.list_active'), 'mdi:file-document-multiple') }}
+        {% endif %}
+        {% if current_user.can_view('EXH EXHORTOS PARTES') %}
+            {{ topbar.button('Partes', url_for('exh_exhortos_partes.list_active'), 'mdi:account-multiple') }}
+        {% endif %}
+    {% endcall %}
+{% endblock %}
+
+{% block content %}
+    {% call list.card() %}
+        <table id="exh_externos_datatable" class="table display nowrap" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Clave</th>
+                    <th>Materias</th>
+                    <th>Rec. Exhorto</th>
+                    <th>Rec. Exhorto Arch.</th>
+                    <th>Con. Exhorto</th>
+                    <th>Rec. Resp. Exhorto</th>
+                    <th>Rec. Resp. Exhorto Arch.</th>
+                    <th>Act. Exhorto</th>
+                    <th>Rec. Promoción</th>
+                    <th>Rec. Promoción Arch.</th>
+                </tr>
+            </thead>
+        </table>
+    {% endcall %}
+{% endblock %}
+
+{% block custom_javascript %}
+    <script src="/static/js/datatables-constructor.js"></script>
+    <script src="/static/js/datatables-filtros.js"></script>
+    <script>
+        // DataTable exh_externos_datatable
+        const constructorDataTable = new ConfigDataTable( '{{ csrf_token() }}' );
+        let configDTExhExternos = constructorDataTable.config();
+        configDTExhExternos['ajax']['url'] = '/exh_externos/datatable_json';
+        configDTExhExternos['ajax']['data'] = {{ filtros }};
+        configDTExhExternos['columns'] = [
+            { data: 'detalle' },
+            { data: 'endpoint_consultar_materias' },
+            { data: 'endpoint_recibir_exhorto' },
+            { data: 'endpoint_recibir_exhorto_archivo' },
+            { data: 'endpoint_consultar_exhorto' },
+            { data: 'endpoint_recibir_respuesta_exhorto' },
+            { data: 'endpoint_recibir_respuesta_exhorto_archivo' },
+            { data: 'endpoint_actualizar_exhorto' },
+            { data: 'endpoint_recibir_promocion' },
+            { data: 'endpoint_recibir_promocion_archivo' }
+        ];
+        configDTExhExternos['columnDefs'] = [
+            {
+                targets: 0, // detalle
+                data: null,
+                render: function(data, type, row, meta) {
+                    return '<a href="' + data.url + '">' + data.clave + '</a>';
+                }
+            }
+        ];
+        // Filtros exh_externos_datatable
+        const filtrosExhExternos = new FiltrosDataTable('#exh_externos_datatable', configDTExhExternos);
+        filtrosExhExternos.precargar();
+    </script>
+{% endblock %}

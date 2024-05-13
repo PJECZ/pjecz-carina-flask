@@ -24,8 +24,8 @@ class Municipio(database.Model, UniversalMixin):
     estado = relationship("Estado", back_populates="municipios")
 
     # Columnas
-    clave = Column(String(16), unique=True, nullable=False)
-    descripcion = Column(String(256), nullable=False)
+    clave = Column(String(3), nullable=False)
+    nombre = Column(String(256), nullable=False)
 
     # Hijos
     exh_exhortos_origenes = relationship("ExhExhorto", back_populates="municipio_origen")
