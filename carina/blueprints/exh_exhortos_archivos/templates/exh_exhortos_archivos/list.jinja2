@@ -6,11 +6,17 @@
 
 {% block topbar_actions %}
     {% call topbar.page_buttons(titulo) %}
+        {% if current_user.can_view('EXH AREAS') %}
+            {{ topbar.button('Áreas', url_for('exh_areas.list_active'), "mdi:office-building-marker") }}
+        {% endif %}
         {% if current_user.can_view('EXH EXHORTOS') %}
             {{ topbar.button('Exhortos', url_for('exh_exhortos.list_active'), 'mdi:email-fast') }}
         {% endif %}
         {% if current_user.can_view('EXH EXHORTOS PARTES') %}
             {{ topbar.button('Partes', url_for('exh_exhortos_partes.list_active'), 'mdi:account-multiple') }}
+        {% endif %}
+        {% if current_user.can_view('EXH EXTERNOS') %}
+            {{ topbar.button('Externos', url_for('exh_externos.list_active'), "mdi:key-variant") }}
         {% endif %}
     {% endcall %}
 {% endblock %}

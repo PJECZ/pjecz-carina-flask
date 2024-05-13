@@ -79,3 +79,26 @@ def datatable_json():
         )
     # Entregar JSON
     return output_datatable_json(draw, total, data)
+
+
+@exh_exhortos_archivos.route("/exh_exhortos_archivos")
+def list_active():
+    """Listado de Archivos activos"""
+    return render_template(
+        "exh_exhortos_archivos/list.jinja2",
+        filtros=json.dumps({"estatus": "A"}),
+        titulo="Archivos",
+        estatus="A",
+    )
+
+
+@exh_exhortos_archivos.route("/exh_exhortos_archivos/inactivos")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def list_inactive():
+    """Listado de Archivos inactivos"""
+    return render_template(
+        "exh_exhortos_archivos/list.jinja2",
+        filtros=json.dumps({"estatus": "B"}),
+        titulo="Archivos inactivos",
+        estatus="B",
+    )
