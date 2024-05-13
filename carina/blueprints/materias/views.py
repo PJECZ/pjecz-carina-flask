@@ -57,7 +57,7 @@ def datatable_json():
 
 @materias.route("/materias")
 def list_active():
-    """Listado de Materias activos"""
+    """Listado de Materias activas"""
     return render_template(
         "materias/list.jinja2",
         filtros=json.dumps({"estatus": "A"}),
@@ -69,10 +69,17 @@ def list_active():
 @materias.route("/materias/inactivos")
 @permission_required(MODULO, Permiso.ADMINISTRAR)
 def list_inactive():
-    """Listado de Materias inactivos"""
+    """Listado de Materias inactivas"""
     return render_template(
         "materias/list.jinja2",
         filtros=json.dumps({"estatus": "B"}),
         titulo="Materias inactivos",
         estatus="B",
     )
+
+
+@materias.route("/materias/<int:materia_id>")
+def detail(materia_id):
+    """Detalle de una Materia"""
+    materia = Materia.query.get_or_404(materia_id)
+    return render_template("materias/detail.jinja2", materia=materia)

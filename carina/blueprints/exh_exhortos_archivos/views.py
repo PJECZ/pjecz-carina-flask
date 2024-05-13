@@ -39,8 +39,8 @@ def datatable_json():
         consulta = consulta.filter_by(estatus=request.form["estatus"])
     else:
         consulta = consulta.filter_by(estatus="A")
-    # if "columna_id" in request.form:
-    #     consulta = consulta.filter_by(columna_id=request.form["columna_id"])
+    if "exh_exhorto_id" in request.form:
+        consulta = consulta.filter_by(exh_exhorto_id=request.form["exh_exhorto_id"])
     # if "columna_clave" in request.form:
     #     try:
     #         columna_clave = safe_clave(request.form["columna_clave"])
@@ -65,16 +65,14 @@ def datatable_json():
     for resultado in registros:
         data.append(
             {
-                "detalle": {
-                    "vinculo": {
-                        "nombre_archivo": resultado.nombre_archivo,
-                        "url": resultado.url if resultado.url != "" else "",
-                    },
-                    "tipo_documento_nombre": resultado.tipo_documento_nombre,
-                    "estado": resultado.estado,
-                    "fecha_hora_recepcion": resultado.fecha_hora_recepcion,
-                    "tamano": resultado.tamano,
+                "vinculo": {
+                    "nombre_archivo": resultado.nombre_archivo,
+                    "url": resultado.url if resultado.url != "" else "",
                 },
+                "tipo_documento_nombre": resultado.tipo_documento_nombre,
+                "estado": resultado.estado,
+                "fecha_hora_recepcion": resultado.fecha_hora_recepcion,
+                "tamano": resultado.tamano,
             }
         )
     # Entregar JSON

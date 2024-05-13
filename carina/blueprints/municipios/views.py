@@ -93,3 +93,10 @@ def list_inactive():
         titulo="Municipios inactivos",
         estatus="B",
     )
+
+
+@municipios.route("/municipios/<int:municipio_id>")
+def detail(municipio_id):
+    """Detalle de un Municipio"""
+    municipio = Municipio.query.get_or_404(municipio_id)
+    return render_template("municipios/detail.jinja2", municipio=municipio)

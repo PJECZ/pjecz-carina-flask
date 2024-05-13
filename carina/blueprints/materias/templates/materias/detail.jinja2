@@ -1,0 +1,24 @@
+{% extends 'layouts/app.jinja2' %}
+{% import 'macros/detail.jinja2' as detail %}
+{% import 'macros/modals.jinja2' as modals %}
+{% import 'macros/topbar.jinja2' as topbar %}
+
+{% block title %}Materia {{ materia.nombre }}{% endblock %}
+
+{% block topbar_actions %}
+    {% call topbar.page_buttons('Materia ' + materia.nombre) %}
+        {{ topbar.button_previous('Materias', url_for('materias.list_active')) }}
+    {% endcall %}
+{% endblock %}
+
+{% block content %}
+    {% call detail.card(estatus=materia.estatus) %}
+        {{ detail.label_value_big('Clave', materia.clave) }}
+        {{ detail.label_value('Nombre', materia.nombre) }}
+        {{ detail.label_value('Descripción', materia.descripcion) }}
+    {% endcall %}
+{% endblock %}
+
+{% block custom_javascript %}
+    {{ detail.moment_js(moment) }}
+{% endblock %}
