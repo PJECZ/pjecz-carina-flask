@@ -49,7 +49,12 @@
             <thead>
                 <tr>
                     <th>Nombre</th>
-                    <th>Tipo</th>
+                    <th>Apellido Paterno</th>
+                    <th>Apellido Materno</th>
+                    <th>Género</th>
+                    <th>Es Persona Moral</th>
+                    <th>Tipo Parte</th>
+                    <th>Tipo Parte Nombre</th>
                 </tr>
             </thead>
         </table>
@@ -59,9 +64,11 @@
         <table id="exh_exhortos_archivos_datatable" class="table display nowrap" style="width:100%">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Tipo</th>
-                    <th>URL</th>
+                    <th>Nombre Archivo</th>
+                    <th>Tipo Documento</th>
+                    <th>Estado</th>
+                    <th>Recepción</th>
+                    <th>Tamaño</th>
                 </tr>
             </thead>
         </table>
@@ -81,8 +88,13 @@
         configDTPartes['ajax']['url'] = '/exh_exhortos_partes/datatable_json';
         configDTPartes['ajax']['data'] = {'estatus':'A', 'exh_exhorto_id':{{exh_exhorto.id}}};
         configDTPartes['columns'] = [
-            { data: 'nombre_completo' },
+            { data: 'nombre' },
+            { data: 'apellido_paterno' },
+            { data: 'apellido_materno' },
+            { data: 'genero' },
+            { data: 'es_persona_moral' },
             { data: 'tipo_parte' },
+            { data: 'tipo_parte_nombre' }
         ];
         // Filtros Exhortos Partes
         const filtrosPartes = new FiltrosDataTable('#exh_exhortos_partes_datatable', configDTPartes);
@@ -95,16 +107,22 @@
         configDTArchivos['ajax']['url'] = '/exh_exhortos_archivos/datatable_json';
         configDTArchivos['ajax']['data'] = {'estatus':'A', 'exh_exhorto_id':{{exh_exhorto.id}}};
         configDTArchivos['columns'] = [
-            { data: 'nombre_archivo' },
-            { data: 'tipo_documento' },
-            { data: 'url' },
+            { data: 'vinculo' },
+            { data: 'tipo_documento_nombre' },
+            { data: 'estado' },
+            { data: 'fecha_hora_recepcion' },
+            { data: 'tamano' }
         ];
         configDTArchivos['columnDefs'] = [
             {
-                targets: 2, // url
+                targets: 0, // vinculo
                 data: null,
                 render: function(data, type, row, meta) {
-                    return '<a href="' + data + '" target="blank">Ver <span class="iconify" data-icon="mdi:open-in-new"></span></a>';
+                    if (data.url != '') {
+                        return '<a href="' + data.url + '">' + data.nombre_archivo + '</a>';
+                    } else {
+                        return data.nombre_archivo;
+                    }
                 }
             }
         ];
