@@ -3,18 +3,9 @@
 .~lock.*
 
 *.csv
-*.html
 *.log
 *.py[cod]
 *.sql
-*.sqlite3
-*.sqlite3-journal
-*.session.sql
-*.txt
-*.xls
-*.xlsx
-*.XLS
-*.XLSX
 
 .bashrc
 .env
@@ -23,6 +14,7 @@ poetry.lock
 __pycache__/
 *.egg-info/
 
+/.logs/
 /.venv/
 /seed/
 /venv/
