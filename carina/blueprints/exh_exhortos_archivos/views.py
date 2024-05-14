@@ -65,6 +65,7 @@ def datatable_json():
     for resultado in registros:
         data.append(
             {
+                "creado": resultado.creado.strftime("%Y-%m-%d %H:%M:%S"),
                 "vinculo": {
                     "nombre_archivo": resultado.nombre_archivo,
                     "url": resultado.url if resultado.url != "" else "",

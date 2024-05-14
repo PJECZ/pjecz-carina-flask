@@ -42,13 +42,19 @@ Instalar **poetry** en el entorno virtual si no lo tiene desde el sistema operat
 pip install poetry
 ```
 
-Configurar **poetry** para que use el entorno virtual dentro del proyecto
+Verificar que la configuracion `virtualenvs.in-project` sea True
+
+```bash
+poetry config virtualenvs.in-project
+```
+
+Si es falso, configurar **poetry** para que use el entorno virtual dentro del proyecto
 
 ```bash
 poetry config virtualenvs.in-project true
 ```
 
-Instalar las dependencias por medio de **poetry**
+Instalar los paquetes por medio de **poetry**
 
 ```bash
 poetry install

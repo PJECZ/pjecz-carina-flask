@@ -59,13 +59,14 @@ def datatable_json():
     #     consulta = consulta.join(OtroModelo)
     #     consulta = consulta.filter(OtroModelo.rfc.contains(otra_columna_descripcion))
     # Ordenar y paginar
-    registros = consulta.order_by(ExhExhorto.id).offset(start).limit(rows_per_page).all()
+    registros = consulta.order_by(ExhExhorto.id.desc()).offset(start).limit(rows_per_page).all()
     total = consulta.count()
     # Elaborar datos para DataTable
     data = []
     for resultado in registros:
         data.append(
             {
+                "creado": resultado.creado.strftime("%Y-%m-%d %H:%M:%S"),
                 "detalle": {
                     "uuid": resultado.exhorto_origen_id,
                     "url": url_for("exh_exhortos.detail", exh_exhorto_id=resultado.id),
