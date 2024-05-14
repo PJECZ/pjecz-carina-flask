@@ -26,6 +26,7 @@
         <table id="exh_exhortos_datatable" class="table display nowrap" style="width:100%">
             <thead>
                 <tr>
+                    <th>Creado</th>
                     <th>UUID</th>
                     <th>Juzgado Origen ID</th>
                     <th>Juzgado Origen Nombre</th>
@@ -46,6 +47,7 @@
         configDTExhExhortos['ajax']['url'] = '/exh_exhortos/datatable_json';
         configDTExhExhortos['ajax']['data'] = {{ filtros }};
         configDTExhExhortos['columns'] = [
+            { data: 'creado' },
             { data: 'detalle' },
             { data: 'juzgado_origen' },
             { data: 'juzgado_nombre' },
@@ -53,7 +55,7 @@
         ];
         configDTExhExhortos['columnDefs'] = [
             {
-                targets: 0, // detalle
+                targets: 1, // detalle
                 data: null,
                 render: function(data, type, row, meta) {
                     return '<a href="' + data.url + '">' + data.uuid + '</a>';

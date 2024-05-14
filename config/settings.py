@@ -3,13 +3,13 @@ Settings
 
 Para produccion, configure los siguientes secretos en Google Cloud Secret Manager:
 
-- pjecz_carina_cloud_storage_deposito
-- pjecz_carina_host
-- pjecz_carina_redis_url
-- pjecz_carina_salt
-- pjecz_carina_secret_key
-- pjecz_carina_sqlalchemy_database_uri
-- pjecz_carina_task_queue
+- pjecz_carina_flask_cloud_storage_deposito
+- pjecz_carina_flask_host
+- pjecz_carina_flask_redis_url
+- pjecz_carina_flask_salt
+- pjecz_carina_flask_secret_key
+- pjecz_carina_flask_sqlalchemy_database_uri
+- pjecz_carina_flask_task_queue
 
 Para desarrollo, debe crear un archivo .env con las variables de entorno:
 
@@ -32,7 +32,7 @@ from pydantic_settings import BaseSettings
 load_dotenv()
 
 PROJECT_ID = os.getenv("PROJECT_ID", "")  # Por defecto esta vacio, esto significa estamos en modo local
-SERVICE_PREFIX = os.getenv("SERVICE_PREFIX", "pjecz_carina")
+SERVICE_PREFIX = os.getenv("SERVICE_PREFIX", "pjecz_carina_flask")
 
 
 def get_secret(secret_id: str) -> str:
