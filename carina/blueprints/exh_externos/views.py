@@ -7,7 +7,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_clave, safe_string, safe_message
+from lib.safe_string import safe_clave, safe_string, safe_message, safe_url
 
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.modulos.models import Modulo
@@ -40,24 +40,6 @@ def datatable_json():
         consulta = consulta.filter_by(estatus=request.form["estatus"])
     else:
         consulta = consulta.filter_by(estatus="A")
-    # if "columna_id" in request.form:
-    #     consulta = consulta.filter_by(columna_id=request.form["columna_id"])
-    # if "columna_clave" in request.form:
-    #     try:
-    #         columna_clave = safe_clave(request.form["columna_clave"])
-    #         if clave != "":
-    #             consulta = consulta.filter(ExhExterno.clave.contains(columna_clave))
-    #     except ValueError:
-    #         pass
-    # if "columna_descripcion" in request.form:
-    #     columna_descripcion = safe_string(request.form["columna_descripcion"], save_enie=True)
-    #     if columna_descripcion != "":
-    #         consulta = consulta.filter(ExhExterno.descripcion.contains(columna_descripcion))
-    # Luego filtrar por columnas de otras tablas
-    # if "otra_columna_descripcion" in request.form:
-    #     otra_columna_descripcion = safe_string(request.form["otra_columna_descripcion"], save_enie=True)
-    #     consulta = consulta.join(OtroModelo)
-    #     consulta = consulta.filter(OtroModelo.rfc.contains(otra_columna_descripcion))
     # Ordenar y paginar
     registros = consulta.order_by(ExhExterno.id).offset(start).limit(rows_per_page).all()
     total = consulta.count()
@@ -118,6 +100,45 @@ def detail(exh_externo_id):
     return render_template("exh_externos/detail.jinja2", exh_externo=exh_externo)
 
 
+@exh_externos.route("/exh_externos/nuevo", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.CREAR)
+def new():
+    """Nuevo Externo"""
+    form = ExhExternoForm()
+    if form.validate_on_submit():
+        # Validar que la clave no se repita
+        clave = safe_clave(form.clave.data)
+        if ExhExterno.query.filter_by(clave=clave).first():
+            flash("La clave ya está en uso. Debe de ser única.", "warning")
+            return render_template("exh_externos/new.jinja2", form=form)
+        # Guardar
+        exh_externo = ExhExterno(
+            clave=clave,
+            descripcion=safe_string(form.descripcion.data, save_enie=True),
+            api_key=safe_string(form.api_key.data, to_uppercase=False),
+            endpoint_consultar_materias=safe_url(form.endpoint_consultar_materias.data),
+            endpoint_recibir_exhorto=safe_url(form.api_key.data),
+            endpoint_recibir_exhorto_archivo=safe_url(form.endpoint_recibir_exhorto_archivo.data),
+            endpoint_consultar_exhorto=safe_url(form.endpoint_consultar_exhorto.data),
+            endpoint_recibir_respuesta_exhorto=safe_url(form.endpoint_recibir_respuesta_exhorto.data),
+            endpoint_recibir_respuesta_exhorto_archivo=safe_url(form.endpoint_recibir_respuesta_exhorto_archivo.data),
+            endpoint_actualizar_exhorto=safe_url(form.endpoint_actualizar_exhorto.data),
+            endpoint_recibir_promocion=safe_url(form.endpoint_recibir_promocion.data),
+            endpoint_recibir_promocion_archivo=safe_url(form.endpoint_recibir_promocion_archivo.data),
+        )
+        exh_externo.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Nuevo Externo {exh_externo.clave}"),
+            url=url_for("exh_externos.detail", exh_externo_id=exh_externo.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    return render_template("exh_externos/new.jinja2", form=form)
+
+
 @exh_externos.route("/exh_externos/edicion/<int:exh_externo_id>", methods=["GET", "POST"])
 @permission_required(MODULO, Permiso.MODIFICAR)
 def edit(exh_externo_id):
@@ -125,31 +146,41 @@ def edit(exh_externo_id):
     exh_externo = ExhExterno.query.get_or_404(exh_externo_id)
     form = ExhExternoForm()
     if form.validate_on_submit():
-        exh_externo.clave = safe_clave(form.clave.data)
-        exh_externo.descripcion = safe_string(form.descripcion.data)
-        exh_externo.api_key = safe_string(form.api_key.data)
-        exh_externo.endpoint_consultar_materias = safe_message(form.endpoint_consultar_materias.data)
-        exh_externo.endpoint_recibir_exhorto = safe_message(form.endpoint_recibir_exhorto.data)
-        exh_externo.endpoint_recibir_exhorto_archivo = safe_message(form.endpoint_recibir_exhorto_archivo.data)
-        exh_externo.endpoint_consultar_exhorto = safe_message(form.endpoint_consultar_exhorto.data)
-        exh_externo.endpoint_recibir_respuesta_exhorto = safe_message(form.endpoint_recibir_respuesta_exhorto.data)
-        exh_externo.endpoint_recibir_respuesta_exhorto_archivo = safe_message(
-            form.endpoint_recibir_respuesta_exhorto_archivo.data
-        )
-        exh_externo.endpoint_actualizar_exhorto = safe_message(form.endpoint_actualizar_exhorto.data)
-        exh_externo.endpoint_recibir_promocion = safe_message(form.endpoint_recibir_promocion.data)
-        exh_externo.endpoint_recibir_promocion_archivo = safe_message(form.endpoint_recibir_promocion_archivo.data)
-        exh_externo.save()
-        bitacora = Bitacora(
-            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
-            usuario=current_user,
-            descripcion=safe_message(f"Editado Externo {exh_externo.clave}"),
-            url=url_for("exh_externos.detail", exh_externo_id=exh_externo.id),
-        )
-        bitacora.save()
-        flash(bitacora.descripcion, "success")
-        return redirect(bitacora.url)
-    # Cargar valor almacenado de campos en el formulario
+        es_valido = True
+        # Si cambia la clave verificar que no este en uso
+        clave = safe_clave(form.clave.data)
+        if exh_externo.clave != clave:
+            oficina_existente = ExhExterno.query.filter_by(clave=clave).first()
+            if oficina_existente and oficina_existente.id != exh_externo_id:
+                es_valido = False
+                flash("La clave ya está en uso. Debe de ser única.", "warning")
+        # Si es valido actualizar
+        if es_valido:
+            exh_externo.clave = clave
+            exh_externo.descripcion = safe_string(form.descripcion.data, save_enie=True)
+            exh_externo.api_key = safe_string(form.api_key.data, to_uppercase=False)
+            exh_externo.endpoint_consultar_materias = safe_url(form.endpoint_consultar_materias.data)
+            exh_externo.endpoint_recibir_exhorto = safe_url(form.endpoint_recibir_exhorto.data)
+            exh_externo.endpoint_recibir_exhorto_archivo = safe_url(form.endpoint_recibir_exhorto_archivo.data)
+            exh_externo.endpoint_consultar_exhorto = safe_url(form.endpoint_consultar_exhorto.data)
+            exh_externo.endpoint_recibir_respuesta_exhorto = safe_url(form.endpoint_recibir_respuesta_exhorto.data)
+            exh_externo.endpoint_recibir_respuesta_exhorto_archivo = safe_url(
+                form.endpoint_recibir_respuesta_exhorto_archivo.data
+            )
+            exh_externo.endpoint_actualizar_exhorto = safe_url(form.endpoint_actualizar_exhorto.data)
+            exh_externo.endpoint_recibir_promocion = safe_url(form.endpoint_recibir_promocion.data)
+            exh_externo.endpoint_recibir_promocion_archivo = safe_url(form.endpoint_recibir_promocion_archivo.data)
+            exh_externo.save()
+            bitacora = Bitacora(
+                modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+                usuario=current_user,
+                descripcion=safe_message(f"Editado Externo {exh_externo.clave}"),
+                url=url_for("exh_externos.detail", exh_externo_id=exh_externo.id),
+            )
+            bitacora.save()
+            flash(bitacora.descripcion, "success")
+            return redirect(bitacora.url)
+    # Cargar valores en el formulario
     form.clave.data = exh_externo.clave
     form.descripcion.data = exh_externo.descripcion
     form.api_key.data = exh_externo.api_key
@@ -162,5 +193,41 @@ def edit(exh_externo_id):
     form.endpoint_actualizar_exhorto.data = exh_externo.endpoint_actualizar_exhorto
     form.endpoint_recibir_promocion.data = exh_externo.endpoint_recibir_promocion
     form.endpoint_recibir_promocion_archivo.data = exh_externo.endpoint_recibir_promocion_archivo
-    # Entregar el template
+    # Entregar
     return render_template("exh_externos/edit.jinja2", form=form, exh_externo=exh_externo)
+
+
+@exh_externos.route("/exh_externos/eliminar/<int:exh_externo_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def delete(exh_externo_id):
+    """Eliminar Externo"""
+    exh_externo = ExhExterno.query.get_or_404(exh_externo_id)
+    if exh_externo.estatus == "A":
+        exh_externo.delete()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Eliminado Externo {exh_externo.clave}"),
+            url=url_for("exh_externos.detail", exh_externo_id=exh_externo.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_externos.detail", exh_externo_id=exh_externo.id))
+
+
+@exh_externos.route("/exh_externos/recuperar/<int:exh_externo_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def recover(exh_externo_id):
+    """Recuperar Externo"""
+    exh_externo = ExhExterno.query.get_or_404(exh_externo_id)
+    if exh_externo.estatus == "B":
+        exh_externo.recover()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Recuperado Externo {exh_externo.clave}"),
+            url=url_for("exh_externos.detail", exh_externo_id=exh_externo.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_externos.detail", exh_externo_id=exh_externo.id))
