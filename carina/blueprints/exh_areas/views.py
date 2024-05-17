@@ -95,26 +95,27 @@ def new():
     """Nueva Área"""
     form = ExhAreaForm()
     if form.validate_on_submit():
-        # Validar si ya está en uso la clave
+        # Validar que la clave no se repita
         clave = safe_clave(form.clave.data)
         area_repetida = ExhArea.query.filter_by(clave=clave).first()
         if area_repetida:
-            flash(f"La clave <strong>{clave}</strong> ya se encuentra en uso.", "warning")
-        else:
-            exh_area = ExhArea(
-                clave=clave,
-                nombre=safe_string(form.nombre.data),
-            )
-            exh_area.save()
-            bitacora = Bitacora(
-                modulo=Modulo.query.filter_by(nombre=MODULO).first(),
-                usuario=current_user,
-                descripcion=safe_message(f"Nueva Área {exh_area.clave}"),
-                url=url_for("exh_areas.detail", exh_area_id=exh_area.id),
-            )
-            bitacora.save()
-            flash(bitacora.descripcion, "success")
-            return redirect(bitacora.url)
+            flash("La clave ya está en uso. Debe de ser única.", "warning")
+            return render_template("exh_areas/new.jinja2", form=form)
+        # Guardar
+        exh_area = ExhArea(
+            clave=clave,
+            nombre=safe_string(form.nombre.data),
+        )
+        exh_area.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Nueva Área {exh_area.clave}"),
+            url=url_for("exh_areas.detail", exh_area_id=exh_area.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
     return render_template("exh_areas/new.jinja2", form=form)
 
 
@@ -125,11 +126,16 @@ def edit(exh_area_id):
     exh_area = ExhArea.query.get_or_404(exh_area_id)
     form = ExhAreaForm()
     if form.validate_on_submit():
+        es_valido = True
+        # Si cambia la clave verificar que no este en uso
         clave = safe_clave(form.clave.data)
-        exh_area_repetida = ExhArea.query.filter_by(clave=clave).filter(ExhArea.id != exh_area_id).first()
-        if exh_area_repetida:
-            flash(f"La clave <strong>{clave}</strong> ya se encuentra en uso.", "warning")
-        else:
+        if exh_area.clave != clave:
+            exh_area_existente = ExhArea.query.filter_by(clave=clave).first()
+            if exh_area_existente and exh_area_existente.id != exh_area_id:
+                es_valido = False
+                flash("La clave ya está en uso. Debe de ser única.", "warning")
+        # Si es valido actualizar
+        if es_valido:
             exh_area.clave = clave
             exh_area.nombre = safe_string(form.nombre.data)
             exh_area.save()

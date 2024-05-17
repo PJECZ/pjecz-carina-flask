@@ -150,8 +150,8 @@ def edit(exh_externo_id):
         # Si cambia la clave verificar que no este en uso
         clave = safe_clave(form.clave.data)
         if exh_externo.clave != clave:
-            oficina_existente = ExhExterno.query.filter_by(clave=clave).first()
-            if oficina_existente and oficina_existente.id != exh_externo_id:
+            exh_externo_existente = ExhExterno.query.filter_by(clave=clave).first()
+            if exh_externo_existente and exh_externo_existente.id != exh_externo_id:
                 es_valido = False
                 flash("La clave ya está en uso. Debe de ser única.", "warning")
         # Si es valido actualizar
