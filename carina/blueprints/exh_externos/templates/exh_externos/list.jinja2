@@ -27,6 +27,7 @@
             <thead>
                 <tr>
                     <th>Clave</th>
+                    <th>API-Key</th>
                     <th>Materias</th>
                     <th>Rec. Exhorto</th>
                     <th>Rec. Exhorto Arch.</th>
@@ -53,6 +54,7 @@
         configDTExhExternos['ajax']['data'] = {{ filtros }};
         configDTExhExternos['columns'] = [
             { data: 'detalle' },
+            { data: 'api_key' },
             { data: 'endpoint_consultar_materias' },
             { data: 'endpoint_recibir_exhorto' },
             { data: 'endpoint_recibir_exhorto_archivo' },
