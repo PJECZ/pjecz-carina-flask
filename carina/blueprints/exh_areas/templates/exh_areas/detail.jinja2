@@ -8,6 +8,9 @@
 {% block topbar_actions %}
     {% call topbar.page_buttons('Área ' + exh_area.clave) %}
         {{ topbar.button_previous('Áreas', url_for('exh_areas.list_active')) }}
+        {% if current_user.can_edit('EXH AREAS') %}
+            {{ topbar.button_edit('Editar', url_for('exh_areas.edit', exh_area_id=exh_area.id)) }}
+        {% endif %}
         {% if current_user.can_admin('EXH AREAS') %}
             {% if exh_area.estatus == 'A' %}{{ topbar.button_delete('Eliminar', url_for('exh_areas.delete', exh_area_id=exh_area.id)) }}{% endif %}
             {% if exh_area.estatus == 'B' %}{{ topbar.button_recover('Recuperar', url_for('exh_areas.recover', exh_area_id=exh_area.id)) }}{% endif %}
@@ -28,3 +31,4 @@
         {% if exh_area.estatus == 'B' %}{{ modals.custom_javascript_recover('Recuperar', '¿Recuperar el área <strong>' + exh_area.clave + '</strong>?') }}{% endif %}
     {% endif %}
 {% endblock %}
+
