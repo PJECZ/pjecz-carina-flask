@@ -116,3 +116,61 @@ def new():
             flash(bitacora.descripcion, "success")
             return redirect(bitacora.url)
     return render_template("exh_areas/new.jinja2", form=form)
+
+
+@exh_areas.route("/exh_areas/edicion/<int:exh_area_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def edit(exh_area_id):
+    """Editar Área"""
+    exh_area = ExhArea.query.get_or_404(exh_area_id)
+    form = ExhAreaEditForm()
+    if form.validate_on_submit():
+        exh_area.clave = safe_string(form.clave.data)
+        exh_area.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Editada Área {exh_area.clave}"),
+            url=url_for("exh_areas.detail", exh_area_id=exh_area.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    form.clave.data = exh_area.clave
+    return render_template("exh_areas/edit.jinja2", form=form, exh_area=exh_area)
+
+
+@exh_areas.route("/exh_areas/eliminar/<int:exh_area_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def delete(exh_area_id):
+    """Eliminar Área"""
+    exh_area = ExhArea.query.get_or_404(exh_area_id)
+    if exh_area.estatus == "A":
+        exh_area.delete()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Eliminada Área {exh_area.clave}"),
+            url=url_for("exh_areas.detail", exh_area_id=exh_area.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_areas.detail", exh_area_id=exh_area.id))
+
+
+@exh_areas.route("/exh_areas/recuperar/<int:exh_area_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def recover(exh_area_id):
+    """Recuperar Área"""
+    exh_area = ExhArea.query.get_or_404(exh_area_id)
+    if exh_area.estatus == "B":
+        exh_area.recover()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Recuperada Área {exh_area.clave}"),
+            url=url_for("exh_areas.detail", exh_area_id=exh_area.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_areas.detail", exh_area_id=exh_area.id))

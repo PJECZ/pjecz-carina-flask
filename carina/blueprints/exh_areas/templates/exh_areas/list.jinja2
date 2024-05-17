@@ -21,7 +21,7 @@
 
 {% block content %}
     {% call list.card() %}
-        <table id="exh_areas_datatable" class="table display nowrap" style="width:100%">
+        <table id="exh_areas_datatable" class="table {% if estatus == 'B'%}table-dark{% endif %} display nowrap" style="width:100%">
             <thead>
                 <tr>
                     <th>Clave</th>
@@ -59,3 +59,4 @@
         filtrosExhAreas.precargar();
     </script>
 {% endblock %}
+
