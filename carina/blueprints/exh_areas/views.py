@@ -7,13 +7,14 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_string, safe_message
+from lib.safe_string import safe_clave, safe_string, safe_message
 
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.exh_areas.models import ExhArea
+from carina.blueprints.exh_areas.forms import ExhAreaForm
 
 MODULO = "EXH AREAS"
 
@@ -86,3 +87,97 @@ def detail(exh_area_id):
     """Detalle de un Area"""
     exh_area = ExhArea.query.get_or_404(exh_area_id)
     return render_template("exh_areas/detail.jinja2", exh_area=exh_area)
+
+
+@exh_areas.route("/exh_areas/nuevo", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.CREAR)
+def new():
+    """Nueva Área"""
+    form = ExhAreaForm()
+    if form.validate_on_submit():
+        # Validar si ya está en uso la clave
+        clave = safe_clave(form.clave.data)
+        area_repetida = ExhArea.query.filter_by(clave=clave).first()
+        if area_repetida:
+            flash(f"La clave <strong>{clave}</strong> ya se encuentra en uso.", "warning")
+        else:
+            exh_area = ExhArea(
+                clave=clave,
+                nombre=safe_string(form.nombre.data),
+            )
+            exh_area.save()
+            bitacora = Bitacora(
+                modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+                usuario=current_user,
+                descripcion=safe_message(f"Nueva Área {exh_area.clave}"),
+                url=url_for("exh_areas.detail", exh_area_id=exh_area.id),
+            )
+            bitacora.save()
+            flash(bitacora.descripcion, "success")
+            return redirect(bitacora.url)
+    return render_template("exh_areas/new.jinja2", form=form)
+
+
+@exh_areas.route("/exh_areas/edicion/<int:exh_area_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def edit(exh_area_id):
+    """Editar Área"""
+    exh_area = ExhArea.query.get_or_404(exh_area_id)
+    form = ExhAreaForm()
+    if form.validate_on_submit():
+        clave = safe_clave(form.clave.data)
+        exh_area_repetida = ExhArea.query.filter_by(clave=clave).filter(ExhArea.id != exh_area_id).first()
+        if exh_area_repetida:
+            flash(f"La clave <strong>{clave}</strong> ya se encuentra en uso.", "warning")
+        else:
+            exh_area.clave = clave
+            exh_area.nombre = safe_string(form.nombre.data)
+            exh_area.save()
+            bitacora = Bitacora(
+                modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+                usuario=current_user,
+                descripcion=safe_message(f"Editada Área {exh_area.clave}"),
+                url=url_for("exh_areas.detail", exh_area_id=exh_area.id),
+            )
+            bitacora.save()
+            flash(bitacora.descripcion, "success")
+            return redirect(bitacora.url)
+    form.clave.data = exh_area.clave
+    form.nombre.data = exh_area.nombre
+    return render_template("exh_areas/edit.jinja2", form=form, exh_area=exh_area)
+
+
+@exh_areas.route("/exh_areas/eliminar/<int:exh_area_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def delete(exh_area_id):
+    """Eliminar Área"""
+    exh_area = ExhArea.query.get_or_404(exh_area_id)
+    if exh_area.estatus == "A":
+        exh_area.delete()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Eliminada Área {exh_area.clave}"),
+            url=url_for("exh_areas.detail", exh_area_id=exh_area.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_areas.detail", exh_area_id=exh_area.id))
+
+
+@exh_areas.route("/exh_areas/recuperar/<int:exh_area_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def recover(exh_area_id):
+    """Recuperar Área"""
+    exh_area = ExhArea.query.get_or_404(exh_area_id)
+    if exh_area.estatus == "B":
+        exh_area.recover()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Recuperada Área {exh_area.clave}"),
+            url=url_for("exh_areas.detail", exh_area_id=exh_area.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_areas.detail", exh_area_id=exh_area.id))
