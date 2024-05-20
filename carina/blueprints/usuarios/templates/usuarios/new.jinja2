@@ -46,7 +46,6 @@
         // Llamar a /autoridades/select_json para cargar el select autoridad, si el distrito cambia
         document.getElementById('distrito').addEventListener('change', () => {
             const distritoId = document.getElementById('distrito').value;
-            console.log(distritoId);
             fetch(`/autoridades/select_json/${distritoId}`)
                 .then(response => response.json())
                 .then(data => {
