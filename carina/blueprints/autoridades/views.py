@@ -87,6 +87,27 @@ def datatable_json():
     return output_datatable_json(draw, total, data)
 
 
+@autoridades.route("/autoridades/select_json/<int:distrito_id>", methods=["GET", "POST"])
+def select_json(distrito_id=None):
+    """Select JSON para Autoridades"""
+    # Si distrito_id es None, entonces no se entregan autoriades
+    if distrito_id is None:
+        return json.dumps([])
+    # Consultar
+    consulta = Autoridad.query.filter_by(distrito_id=distrito_id, estatus="A").order_by(Autoridad.descripcion_corta)
+    # Elaborar datos para Select
+    data = []
+    for resultado in consulta.all():
+        data.append(
+            {
+                "id": resultado.id,
+                "descripcion_corta": resultado.descripcion_corta,
+            }
+        )
+    # Entregar JSON
+    return json.dumps(data)
+
+
 @autoridades.route("/autoridades")
 def list_active():
     """Listado de Autoridades activas"""
