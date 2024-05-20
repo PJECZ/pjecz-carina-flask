@@ -2,6 +2,7 @@
 Exh Exhortos, vistas
 """
 
+import uuid
 import json
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
@@ -15,6 +16,7 @@ from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.exh_exhortos.models import ExhExhorto
+from carina.blueprints.exh_exhortos.forms import ExhExhortoNewForm
 
 MODULO = "EXH EXHORTOS"
 
@@ -118,3 +120,27 @@ def detail(exh_exhorto_id):
         exh_exhorto=exh_exhorto,
         municipio_destino=municipio_destino,
     )
+
+
+@exh_exhortos.route("/exh_exhortos/nuevo", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.CREAR)
+def new():
+    """Nuevo Exhorto"""
+    form = ExhExhortoNewForm()
+    if form.validate_on_submit():
+        exh_exhorto = ExhExhorto(
+            exhorto_origen_id=form.exhorto_origen_id.data,
+            municipio_destino_id=form.municipio_destino.data,
+        )
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Nuevo Exhorto {exh_exhorto.nombre_o_descripcion}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    form.exhorto_origen_id.data = str(uuid.uuid4())
+    return render_template("exh_exhortos/new.jinja2", form=form)
