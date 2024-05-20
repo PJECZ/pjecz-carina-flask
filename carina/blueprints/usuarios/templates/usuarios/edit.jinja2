@@ -47,7 +47,6 @@
         // Llamar a /autoridades/select_json para cargar el select autoridad, si el distrito cambia
         document.getElementById('distrito').addEventListener('change', () => {
             const distritoId = document.getElementById('distrito').value;
-            console.log(distritoId);
             fetch(`/autoridades/select_json/${distritoId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -59,8 +58,9 @@
                         option.text = autoridad.descripcion_corta;
                         autoridadSelect.appendChild(option);
                     });
-                    // Seleccionar la autoridad del usuario
-                    document.getElementById('autoridad').value = {{ usuario.autoridad_id }};
+                    // Seleccionar la autoridad del usuario, solo si la autoridad no esta definida
+                    if (!document.getElementById('autoridad').value)
+                        document.getElementById('autoridad').value = {{ usuario.autoridad_id }};
                 });
         });
     </script>
