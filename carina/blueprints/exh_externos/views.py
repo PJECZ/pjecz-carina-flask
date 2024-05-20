@@ -117,7 +117,7 @@ def new():
             descripcion=safe_string(form.descripcion.data, save_enie=True),
             api_key=safe_string(form.api_key.data, to_uppercase=False),
             endpoint_consultar_materias=safe_url(form.endpoint_consultar_materias.data),
-            endpoint_recibir_exhorto=safe_url(form.api_key.data),
+            endpoint_recibir_exhorto=safe_url(form.endpoint_recibir_exhorto.data),
             endpoint_recibir_exhorto_archivo=safe_url(form.endpoint_recibir_exhorto_archivo.data),
             endpoint_consultar_exhorto=safe_url(form.endpoint_consultar_exhorto.data),
             endpoint_recibir_respuesta_exhorto=safe_url(form.endpoint_recibir_respuesta_exhorto.data),
