@@ -41,7 +41,7 @@ def datatable_json():
     else:
         consulta = consulta.filter_by(estatus="A")
     # Ordenar y paginar
-    registros = consulta.order_by(ExhExterno.id).offset(start).limit(rows_per_page).all()
+    registros = consulta.order_by(ExhExterno.clave).offset(start).limit(rows_per_page).all()
     total = consulta.count()
     # Elaborar datos para DataTable
     data = []
