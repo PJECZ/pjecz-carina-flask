@@ -66,6 +66,24 @@ def datatable_json():
     return output_datatable_json(draw, total, data)
 
 
+@estados.route("/estados/select_json", methods=["GET", "POST"])
+def select_json():
+    """Select JSON para Estados"""
+    # Consultar
+    consulta = Estado.query.filter_by(estatus="A").order_by(Estado.nombre)
+    # Elaborar datos para Select
+    data = []
+    for resultado in consulta.all():
+        data.append(
+            {
+                "id": resultado.id,
+                "nombre": resultado.nombre,
+            }
+        )
+    # Entregar JSON
+    return json.dumps(data)
+
+
 @estados.route("/estados")
 def list_active():
     """Listado de Estados activos"""

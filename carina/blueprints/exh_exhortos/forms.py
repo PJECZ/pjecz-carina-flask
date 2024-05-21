@@ -18,9 +18,15 @@ class ExhExhortoNewForm(FlaskForm):
     """Formulario ExhExhortoNew"""
 
     exhorto_origen_id = StringField("Exhorto Origen ID", validators=[DataRequired(), Length(max=128)])
-    municipio_destino = IntegerField("Municipio Destino", validators=[DataRequired()])
+    estado_destino = SelectField("Estado Destino", choices=None, validate_choice=False)  # Las opciones se agregan con JS
+    municipio_destino = SelectField(
+        "Municipio Destino", choices=None, validate_choice=False, validators=[DataRequired()]
+    )  # Las opciones se agregan con JS
     materia = SelectField("Materia", coerce=int, validators=[DataRequired()])
-    municipio_origen = IntegerField("Municipio Origen ID", validators=[DataRequired(), Length(max=256)])
+    estado_origen = SelectField("Estado Origen", choices=None, validate_choice=False)  # Las opciones se agregan con JS
+    municipio_origen = SelectField(
+        "Municipio Origen", choices=None, validate_choice=False, validators=[DataRequired()]
+    )  # Las opciones se agregan con JS
     juzgado_origen = StringField("Juzgado Origen Clave", validators=[Optional(), Length(max=64)])
     juzgado_origen_nombre = StringField("Juzgado Origen Nombre", validators=[DataRequired(), Length(max=256)])
     numero_expediente_origen = StringField("Número de Expediente Origen", validators=[DataRequired(), Length(max=256)])
