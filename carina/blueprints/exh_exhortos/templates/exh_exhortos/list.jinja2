@@ -18,6 +18,10 @@
         {% if current_user.can_view('EXH EXTERNOS') %}
             {{ topbar.button('Externos', url_for('exh_externos.list_active'), "mdi:key-variant") }}
         {% endif %}
+        {% if current_user.can_admin('EXH EXHORTOS') %}
+            {% if estatus == 'A' %}{{ topbar.button_list_inactive('Inactivos', url_for('exh_exhortos.list_inactive')) }}{% endif %}
+            {% if estatus == 'B' %}{{ topbar.button_list_active('Activos', url_for('exh_exhortos.list_active')) }}{% endif %}
+        {% endif %}
         {% if current_user.can_insert('EXH EXHORTOS') %}
             {{ topbar.button_new('Nuevo Exhorto', url_for('exh_exhortos.new')) }}
         {% endif %}

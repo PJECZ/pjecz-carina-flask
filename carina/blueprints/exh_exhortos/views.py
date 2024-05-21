@@ -2,6 +2,7 @@
 Exh Exhortos, vistas
 """
 
+from datetime import datetime
 import uuid
 import json
 from flask import Blueprint, flash, redirect, render_template, request, url_for
@@ -16,7 +17,7 @@ from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.exh_exhortos.models import ExhExhorto
-from carina.blueprints.exh_exhortos.forms import ExhExhortoNewForm
+from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
 
 MODULO = "EXH EXHORTOS"
 
@@ -130,13 +131,30 @@ def new():
     if form.validate_on_submit():
         exh_exhorto = ExhExhorto(
             exhorto_origen_id=form.exhorto_origen_id.data,
-            municipio_destino_id=form.municipio_destino.data,
+            municipio_destino_id=str(form.municipio_destino.data).zfill(3),
+            materia_id=form.materia.data,
+            municipio_origen_id=str(form.materia.data).zfill(3),
+            juzgado_origen_id=safe_string(form.juzgado_origen_id.data),
+            juzgado_origen_nombre=safe_string(form.juzgado_origen_nombre.data),
+            numero_expediente_origen=safe_string(form.numero_expediente_origen.data),
+            numero_oficio_origen=safe_string(form.numero_oficio_origen.data),
+            tipo_juicio_asunto_delitos=safe_string(form.tipo_juicio_asunto_delitos.data),
+            juez_exhortante=safe_string(form.juez_exhortante.data),
+            fojas=form.fojas.data,
+            observaciones=safe_message(form.observaciones.data, default_output_str=None),
+            remitente=form.remitente.data,
+            # Datos insertatos por defecto
+            dias_responder=0,
+            fecha_origen=datetime.now(),
+            folio_seguimiento=str(uuid.uuid4()),
+            exh_area_id=1,
+            estado="PENDIENTE",
         )
         exh_exhorto.save()
         bitacora = Bitacora(
             modulo=Modulo.query.filter_by(nombre=MODULO).first(),
             usuario=current_user,
-            descripcion=safe_message(f"Nuevo Exhorto {exh_exhorto.nombre_o_descripcion}"),
+            descripcion=safe_message(f"Nuevo Exhorto {exh_exhorto.exhorto_origen_id}"),
             url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
         )
         bitacora.save()
@@ -144,3 +162,84 @@ def new():
         return redirect(bitacora.url)
     form.exhorto_origen_id.data = str(uuid.uuid4())
     return render_template("exh_exhortos/new.jinja2", form=form)
+
+
+@exh_exhortos.route("/exh_exhortos/edicion/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def edit(exh_exhorto_id):
+    """Editar Exhorto"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoEditForm()
+    if form.validate_on_submit():
+        exh_exhorto.municipio_destino_id = str(form.municipio_destino.data).zfill(3)
+        exh_exhorto.materia_id = form.materia.data
+        exh_exhorto.municipio_origen_id = str(form.municipio_origen.data).zfill(3)
+        exh_exhorto.juzgado_origen_id = safe_string(form.juzgado_origen_id.data)
+        exh_exhorto.juzgado_origen_nombre = safe_string(form.juzgado_origen_nombre.data)
+        exh_exhorto.numero_expediente_origen = safe_string(form.numero_expediente_origen.data)
+        exh_exhorto.numero_oficio_origen = safe_string(form.numero_oficio_origen.data)
+        exh_exhorto.tipo_juicio_asunto_delitos = safe_string(form.tipo_juicio_asunto_delitos.data)
+        exh_exhorto.juez_exhortante = safe_string(form.juez_exhortante.data)
+        exh_exhorto.fojas = form.fojas.data
+        exh_exhorto.observaciones = safe_message(form.observaciones.data)
+        exh_exhorto.remitente = form.remitente.data
+
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Editado Exhorto {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    form.exhorto_origen_id.data = exh_exhorto.exhorto_origen_id
+    form.materia.data = exh_exhorto.materia
+    form.juzgado_origen_id.data = exh_exhorto.juzgado_origen_id
+    form.juzgado_origen_nombre.data = exh_exhorto.juzgado_origen_nombre
+    form.numero_expediente_origen.data = exh_exhorto.numero_expediente_origen
+    form.numero_oficio_origen.data = exh_exhorto.numero_oficio_origen
+    form.tipo_juicio_asunto_delitos.data = exh_exhorto.tipo_juicio_asunto_delitos
+    form.juez_exhortante.data = exh_exhorto.juez_exhortante
+    form.fojas.data = exh_exhorto.fojas
+    form.observaciones.data = exh_exhorto.observaciones
+    form.remitente.data = exh_exhorto.remitente
+
+    return render_template("exh_exhortos/edit.jinja2", form=form, exh_exhorto=exh_exhorto)
+
+
+@exh_exhortos.route("/exh_exhortos/eliminar/<int:exh_exhorto_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def delete(exh_exhorto_id):
+    """Eliminar Exhorto"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    if exh_exhorto.estatus == "A":
+        exh_exhorto.delete()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Eliminado Exhorto {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
+
+
+@exh_exhortos.route("/exh_exhortos/recuperar/<int:exh_exhorto_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def recover(exh_exhorto_id):
+    """Recuperar Exhorto"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    if exh_exhorto.estatus == "B":
+        exh_exhorto.recover()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Recuperado Exhorto {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
