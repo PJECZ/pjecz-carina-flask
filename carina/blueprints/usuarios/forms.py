@@ -7,7 +7,6 @@ from wtforms import HiddenField, PasswordField, SelectField, StringField, Submit
 from wtforms.validators import DataRequired, Email, Length, Optional, Regexp
 
 from lib.safe_string import CONTRASENA_REGEXP
-from carina.blueprints.autoridades.models import Autoridad
 
 CONTRASENA_MENSAJE = "De 8 a 48 caracteres con al menos una mayúscula, una minúscula y un número. No acentos, ni eñe."
 
