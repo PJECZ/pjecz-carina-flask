@@ -209,8 +209,9 @@ def edit(exh_exhorto_id):
     form.fecha_origen.data = exh_exhorto.fecha_origen
     form.observaciones.data = exh_exhorto.observaciones
     form.remitente.data = exh_exhorto.remitente
+    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
 
-    return render_template("exh_exhortos/edit.jinja2", form=form, exh_exhorto=exh_exhorto)
+    return render_template("exh_exhortos/edit.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino)
 
 
 @exh_exhortos.route("/exh_exhortos/eliminar/<int:exh_exhorto_id>")

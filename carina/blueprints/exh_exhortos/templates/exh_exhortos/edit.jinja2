@@ -52,7 +52,7 @@
                     estadoSelect.appendChild(option);
                 });
                 // Efectuar el cambio de selección
-                //document.getElementById('estado_destino').value = {{ exh_exhorto.estado_destino }};
+                document.getElementById('estado_destino').value = {{ municipio_destino.estado.id }};
                 document.getElementById('estado_destino').dispatchEvent(new Event('change'));
             });
         // Llamar a /municipios/select_json para cargar el select municipio, si el municipio cambia
@@ -87,7 +87,7 @@
                     estadoSelect.appendChild(option);
                 });
                 // Efectuar el cambio de selección
-                //document.getElementById('estado_origen').value = {{ exh_exhorto.estado_origen }};
+                document.getElementById('estado_origen').value = {{ exh_exhorto.municipio_origen.estado.id }};
                 document.getElementById('estado_origen').dispatchEvent(new Event('change'));
             });
         // Llamar a /municipios/select_json para cargar el select municipio, si el municipio cambia
