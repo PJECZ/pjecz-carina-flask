@@ -40,7 +40,7 @@ class ExhExhortoForm(FlaskForm):
     juez_exhortante = StringField("Juez Exhortante", validators=[Optional(), Length(max=256)])
     fojas = IntegerField("Fojas", validators=[DataRequired()])
     dias_responder = IntegerField("Días Responder", validators=[DataRequired()])
-    fecha_origen = StringField("Fecha Origen", validators=[DataRequired()])
+    fecha_origen = StringField("Fecha Origen", validators=[Optional()])
     observaciones = TextAreaField("Observaciones", validators=[Optional(), Length(max=1024)])
     remitente = RadioField("Remitente", validators=[DataRequired()], choices=REMITENTES, coerce=str)
     guardar = SubmitField("Guardar")
