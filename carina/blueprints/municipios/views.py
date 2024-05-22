@@ -85,7 +85,7 @@ def select_json(estado_id=None):
     for resultado in consulta.all():
         data.append(
             {
-                "clave": resultado.clave,
+                "id": resultado.id,
                 "nombre": resultado.nombre,
             }
         )

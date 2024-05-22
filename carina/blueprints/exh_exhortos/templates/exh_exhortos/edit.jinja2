@@ -27,6 +27,8 @@
             {% call f.form_group(form.tipo_juicio_asunto_delitos) %}{% endcall %}
             {% call f.form_group(form.juez_exhortante) %}{% endcall %}
             {% call f.form_group(form.fojas) %}{% endcall %}
+            {% call f.form_group(form.dias_responder) %}{% endcall %}
+            {% call f.form_group(form.fecha_origen) %}{% endcall %}
             {% call f.form_group(form.observaciones) %}{% endcall %}
             <hr />
             {% call f.form_group(form.remitente) %}{% endcall %}
@@ -63,7 +65,7 @@
                     municipioSelect.innerHTML = '';
                     data.forEach(municipio => {
                         const option = document.createElement('option');
-                        option.value = municipio.clave;
+                        option.value = municipio.id;
                         option.text = municipio.nombre;
                         municipioSelect.appendChild(option);
                     });
@@ -98,7 +100,7 @@
                     municipioSelect.innerHTML = '';
                     data.forEach(municipio => {
                         const option = document.createElement('option');
-                        option.value = municipio.clave;
+                        option.value = municipio.id;
                         option.text = municipio.nombre;
                         municipioSelect.appendChild(option);
                     });

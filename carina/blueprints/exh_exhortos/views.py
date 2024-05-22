@@ -17,7 +17,7 @@ from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.exh_exhortos.models import ExhExhorto
-from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
+from carina.blueprints.exh_exhortos.forms import ExhExhortoForm
 
 MODULO = "EXH EXHORTOS"
 
@@ -127,13 +127,13 @@ def detail(exh_exhorto_id):
 @permission_required(MODULO, Permiso.CREAR)
 def new():
     """Nuevo Exhorto"""
-    form = ExhExhortoNewForm()
+    form = ExhExhortoForm()
     if form.validate_on_submit():
         exh_exhorto = ExhExhorto(
             exhorto_origen_id=form.exhorto_origen_id.data,
-            municipio_destino_id=str(form.municipio_destino.data).zfill(3),
+            municipio_destino_id=form.municipio_destino.data,
             materia_id=form.materia.data,
-            municipio_origen_id=str(form.materia.data).zfill(3),
+            municipio_origen_id=form.materia.data,
             juzgado_origen_id=safe_string(form.juzgado_origen_id.data),
             juzgado_origen_nombre=safe_string(form.juzgado_origen_nombre.data),
             numero_expediente_origen=safe_string(form.numero_expediente_origen.data),
@@ -142,12 +142,12 @@ def new():
             juez_exhortante=safe_string(form.juez_exhortante.data),
             fojas=form.fojas.data,
             observaciones=safe_message(form.observaciones.data, default_output_str=None),
+            dias_responder=form.dias_responder.data,
+            fecha_origen=form.fecha_origen.data,
             remitente=form.remitente.data,
-            # Datos insertatos por defecto
-            dias_responder=0,
-            fecha_origen=datetime.now(),
+            # Datos por defecto
             folio_seguimiento=str(uuid.uuid4()),
-            exh_area_id=1,
+            exh_area_id=1,  # valor: NO DEFINIDO
             estado="PENDIENTE",
         )
         exh_exhorto.save()
@@ -169,11 +169,11 @@ def new():
 def edit(exh_exhorto_id):
     """Editar Exhorto"""
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
-    form = ExhExhortoEditForm()
+    form = ExhExhortoForm()
     if form.validate_on_submit():
-        exh_exhorto.municipio_destino_id = str(form.municipio_destino.data).zfill(3)
+        exh_exhorto.municipio_destino_id = form.municipio_destino.data
         exh_exhorto.materia_id = form.materia.data
-        exh_exhorto.municipio_origen_id = str(form.municipio_origen.data).zfill(3)
+        exh_exhorto.municipio_origen_id = form.municipio_origen.data
         exh_exhorto.juzgado_origen_id = safe_string(form.juzgado_origen_id.data)
         exh_exhorto.juzgado_origen_nombre = safe_string(form.juzgado_origen_nombre.data)
         exh_exhorto.numero_expediente_origen = safe_string(form.numero_expediente_origen.data)
@@ -181,7 +181,9 @@ def edit(exh_exhorto_id):
         exh_exhorto.tipo_juicio_asunto_delitos = safe_string(form.tipo_juicio_asunto_delitos.data)
         exh_exhorto.juez_exhortante = safe_string(form.juez_exhortante.data)
         exh_exhorto.fojas = form.fojas.data
-        exh_exhorto.observaciones = safe_message(form.observaciones.data)
+        exh_exhorto.dias_responder = form.dias_responder.data
+        exh_exhorto.fecha_origen = form.fecha_origen.data
+        exh_exhorto.observaciones = safe_message(form.observaciones.data, default_output_str=None)
         exh_exhorto.remitente = form.remitente.data
 
         exh_exhorto.save()
@@ -195,7 +197,7 @@ def edit(exh_exhorto_id):
         flash(bitacora.descripcion, "success")
         return redirect(bitacora.url)
     form.exhorto_origen_id.data = exh_exhorto.exhorto_origen_id
-    form.materia.data = exh_exhorto.materia
+    form.materia.data = exh_exhorto.materia.id
     form.juzgado_origen_id.data = exh_exhorto.juzgado_origen_id
     form.juzgado_origen_nombre.data = exh_exhorto.juzgado_origen_nombre
     form.numero_expediente_origen.data = exh_exhorto.numero_expediente_origen
@@ -203,6 +205,8 @@ def edit(exh_exhorto_id):
     form.tipo_juicio_asunto_delitos.data = exh_exhorto.tipo_juicio_asunto_delitos
     form.juez_exhortante.data = exh_exhorto.juez_exhortante
     form.fojas.data = exh_exhorto.fojas
+    form.dias_responder.data = exh_exhorto.dias_responder
+    form.fecha_origen.data = exh_exhorto.fecha_origen
     form.observaciones.data = exh_exhorto.observaciones
     form.remitente.data = exh_exhorto.remitente
 
