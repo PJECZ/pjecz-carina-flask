@@ -185,7 +185,6 @@ def edit(exh_exhorto_id):
         exh_exhorto.fecha_origen = form.fecha_origen.data
         exh_exhorto.observaciones = safe_message(form.observaciones.data, default_output_str=None)
         exh_exhorto.remitente = form.remitente.data
-
         exh_exhorto.save()
         bitacora = Bitacora(
             modulo=Modulo.query.filter_by(nombre=MODULO).first(),
@@ -210,7 +209,7 @@ def edit(exh_exhorto_id):
     form.observaciones.data = exh_exhorto.observaciones
     form.remitente.data = exh_exhorto.remitente
     municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
-
+    # Entregar
     return render_template("exh_exhortos/edit.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino)
 
 
