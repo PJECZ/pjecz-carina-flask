@@ -1,0 +1,103 @@
+{% extends 'layouts/app.jinja2' %}
+{% import 'macros/form.jinja2' as f with context %}
+{% import 'macros/topbar.jinja2' as topbar %}
+
+{% block title %}Nuevo Exhorto{% endblock %}
+
+{% block topbar_actions %}
+    {% call topbar.page_buttons('Nuevo Exhorto') %}
+        {{ topbar.button_cancel() }}
+    {% endcall %}
+{% endblock %}
+
+{% block content %}
+    {% call f.card() %}
+        {% call f.form_tag('exh_exhortos.new', fid='exh_exhorto_form') %}
+            {% call f.form_group(form.exhorto_origen_id) %}{% endcall %}
+            {% call f.form_group(form.estado_destino) %}{% endcall %}
+            {% call f.form_group(form.municipio_destino) %}{% endcall %}
+            {% call f.form_group(form.materia) %}{% endcall %}
+            {% call f.form_group(form.estado_origen) %}{% endcall %}
+            {% call f.form_group(form.municipio_origen) %}{% endcall %}
+            {% call f.form_group(form.juzgado_origen_id) %}{% endcall %}
+            {% call f.form_group(form.juzgado_origen_nombre) %}{% endcall %}
+            {% call f.form_group(form.numero_expediente_origen) %}{% endcall %}
+            {% call f.form_group(form.numero_oficio_origen) %}{% endcall %}
+            {% call f.form_group(form.tipo_juicio_asunto_delitos) %}{% endcall %}
+            {% call f.form_group(form.juez_exhortante) %}{% endcall %}
+            {% call f.form_group(form.fojas) %}{% endcall %}
+            {% call f.form_group(form.dias_responder) %}{% endcall %}
+            {% call f.form_group(form.fecha_origen) %}{% endcall %}
+            {% call f.form_group(form.observaciones) %}{% endcall %}
+            {% call f.form_group(form.remitente) %}{% endcall %}
+            {% call f.form_group(form.guardar) %}{% endcall %}
+        {% endcall %}
+    {% endcall %}
+{% endblock %}
+
+{% block custom_javascript %}
+    <script>
+        // Llamar a /estados/select_json para cargar el select estados
+        fetch('/estados/select_json')
+            .then(response => response.json())
+            .then(data => {
+                const estadoSelect = document.getElementById('estado_destino');
+                data.forEach(estado => {
+                    const option = document.createElement('option');
+                    option.value = estado.id;
+                    option.text = estado.nombre;
+                    estadoSelect.appendChild(option);
+                });
+                // Efectuar el cambio de selección
+                document.getElementById('estado_destino').dispatchEvent(new Event('change'));
+            });
+        // Llamar a /municipios/select_json para cargar el select municipio, si el municipio cambia
+        document.getElementById('estado_destino').addEventListener('change', () => {
+            const estadoId = document.getElementById('estado_destino').value;
+            fetch(`/municipios/select_json/${estadoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const municipioSelect = document.getElementById('municipio_destino');
+                    municipioSelect.innerHTML = '';
+                    data.forEach(municipio => {
+                        const option = document.createElement('option');
+                        option.value = municipio.id;
+                        option.text = municipio.nombre;
+                        municipioSelect.appendChild(option);
+                    });
+                });
+        });
+    </script>
+    <script>
+        // Llamar a /estados/select_json para cargar el select estados
+        fetch('/estados/select_json')
+            .then(response => response.json())
+            .then(data => {
+                const estadoSelect = document.getElementById('estado_origen');
+                data.forEach(estado => {
+                    const option = document.createElement('option');
+                    option.value = estado.id;
+                    option.text = estado.nombre;
+                    estadoSelect.appendChild(option);
+                });
+                // Efectuar el cambio de selección
+                document.getElementById('estado_origen').dispatchEvent(new Event('change'));
+            });
+        // Llamar a /municipios/select_json para cargar el select municipio, si el municipio cambia
+        document.getElementById('estado_origen').addEventListener('change', () => {
+            const estadoId = document.getElementById('estado_origen').value;
+            fetch(`/municipios/select_json/${estadoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const municipioSelect = document.getElementById('municipio_origen');
+                    municipioSelect.innerHTML = '';
+                    data.forEach(municipio => {
+                        const option = document.createElement('option');
+                        option.value = municipio.id;
+                        option.text = municipio.nombre;
+                        municipioSelect.appendChild(option);
+                    });
+                });
+        });
+    </script>
+{% endblock %}

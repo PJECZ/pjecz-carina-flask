@@ -41,7 +41,7 @@ def datatable_json():
     else:
         consulta = consulta.filter_by(estatus="A")
     # Ordenar y paginar
-    registros = consulta.order_by(ExhExterno.id).offset(start).limit(rows_per_page).all()
+    registros = consulta.order_by(ExhExterno.clave).offset(start).limit(rows_per_page).all()
     total = consulta.count()
     # Elaborar datos para DataTable
     data = []
@@ -117,7 +117,7 @@ def new():
             descripcion=safe_string(form.descripcion.data, save_enie=True),
             api_key=safe_string(form.api_key.data, to_uppercase=False),
             endpoint_consultar_materias=safe_url(form.endpoint_consultar_materias.data),
-            endpoint_recibir_exhorto=safe_url(form.api_key.data),
+            endpoint_recibir_exhorto=safe_url(form.endpoint_recibir_exhorto.data),
             endpoint_recibir_exhorto_archivo=safe_url(form.endpoint_recibir_exhorto_archivo.data),
             endpoint_consultar_exhorto=safe_url(form.endpoint_consultar_exhorto.data),
             endpoint_recibir_respuesta_exhorto=safe_url(form.endpoint_recibir_respuesta_exhorto.data),

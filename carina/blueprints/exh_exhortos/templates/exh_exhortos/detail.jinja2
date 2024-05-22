@@ -8,6 +8,13 @@
 {% block topbar_actions %}
     {% call topbar.page_buttons('Exhorto ' + exh_exhorto.exhorto_origen_id) %}
         {{ topbar.button_previous('Exhortos', url_for('exh_exhortos.list_active')) }}
+        {% if current_user.can_edit('EXH EXHORTOS') %}
+            {{ topbar.button_edit('Editar', url_for('exh_exhortos.edit', exh_exhorto_id=exh_exhorto.id)) }}
+        {% endif %}
+        {% if current_user.can_admin('EXH EXHORTOS') %}
+            {% if exh_exhorto.estatus == 'A' %}{{ topbar.button_delete('Eliminar', url_for('exh_exhortos.delete', exh_exhorto_id=exh_exhorto.id)) }}{% endif %}
+            {% if exh_exhorto.estatus == 'B' %}{{ topbar.button_recover('Recuperar', url_for('exh_exhortos.recover', exh_exhorto_id=exh_exhorto.id)) }}{% endif %}
+        {% endif %}
     {% endcall %}
 {% endblock %}
 
@@ -45,6 +52,7 @@
                 {{ detail.label_value('Tipo de diligenciación', exh_exhorto.tipo_diligenciacion_nombre) }}
                 {{ detail.label_value('Fecha de origen', exh_exhorto.fecha_origen) }}
                 {{ detail.label_value('Observaciones', exh_exhorto.observaciones) }}
+                {{ detail.label_value('Remitente', exh_exhorto.remitente) }}
                 {{ detail.label_value_big('Estado', exh_exhorto.estado) }}
             </div>
         </div>
@@ -84,6 +92,11 @@
 {% endblock %}
 
 {% block custom_javascript %}
+    {% if current_user.can_admin('EXH EXHORTOS') %}
+        {% if exh_exhorto.estatus == 'A' %}{{ modals.custom_javascript_delete('Eliminar', '¿Eliminar el exhorto <strong>' + exh_exhorto.exhorto_origen_id + '</strong>?') }}{% endif %}
+        {% if exh_exhorto.estatus == 'B' %}{{ modals.custom_javascript_recover('Recuperar', '¿Recuperar el exhorto <strong>' + exh_exhorto.exhorto_origen_id + '</strong>?') }}{% endif %}
+    {% endif %}
+
     <script src="/static/js/datatables-constructor.js"></script>
     <script src="/static/js/datatables-filtros.js"></script>
     {# Tabla de Partes #}
