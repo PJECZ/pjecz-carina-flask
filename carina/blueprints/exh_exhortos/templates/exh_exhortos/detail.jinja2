@@ -52,6 +52,7 @@
                 {{ detail.label_value('Tipo de diligenciación', exh_exhorto.tipo_diligenciacion_nombre) }}
                 {{ detail.label_value('Fecha de origen', exh_exhorto.fecha_origen) }}
                 {{ detail.label_value('Observaciones', exh_exhorto.observaciones) }}
+                {{ detail.label_value('Área', exh_exhorto.exh_area.clave + ' - ' + exh_exhorto.exh_area.nombre) }}
                 {{ detail.label_value('Remitente', exh_exhorto.remitente) }}
                 {{ detail.label_value_big('Estado', exh_exhorto.estado) }}
             </div>

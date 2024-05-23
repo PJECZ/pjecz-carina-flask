@@ -17,7 +17,7 @@ from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.exh_exhortos.models import ExhExhorto
-from carina.blueprints.exh_exhortos.forms import ExhExhortoForm
+from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
 
 MODULO = "EXH EXHORTOS"
 
@@ -127,7 +127,7 @@ def detail(exh_exhorto_id):
 @permission_required(MODULO, Permiso.CREAR)
 def new():
     """Nuevo Exhorto"""
-    form = ExhExhortoForm()
+    form = ExhExhortoNewForm()
     if form.validate_on_submit():
         exh_exhorto = ExhExhorto(
             exhorto_origen_id=form.exhorto_origen_id.data,
@@ -169,7 +169,7 @@ def new():
 def edit(exh_exhorto_id):
     """Editar Exhorto"""
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
-    form = ExhExhortoForm()
+    form = ExhExhortoEditForm()
     if form.validate_on_submit():
         exh_exhorto.municipio_destino_id = form.municipio_destino.data
         exh_exhorto.materia_id = form.materia.data
@@ -185,6 +185,7 @@ def edit(exh_exhorto_id):
         exh_exhorto.fecha_origen = form.fecha_origen.data
         exh_exhorto.observaciones = safe_message(form.observaciones.data, default_output_str=None)
         exh_exhorto.remitente = form.remitente.data
+        exh_exhorto.exh_area_id = form.exh_area.data
         exh_exhorto.save()
         bitacora = Bitacora(
             modulo=Modulo.query.filter_by(nombre=MODULO).first(),
@@ -208,6 +209,7 @@ def edit(exh_exhorto_id):
     form.fecha_origen.data = exh_exhorto.fecha_origen
     form.observaciones.data = exh_exhorto.observaciones
     form.remitente.data = exh_exhorto.remitente
+    form.exh_area.data = exh_exhorto.exh_area.id
     municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
     # Entregar
     return render_template("exh_exhortos/edit.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino)
