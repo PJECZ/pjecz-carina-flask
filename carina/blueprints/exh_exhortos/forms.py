@@ -77,6 +77,8 @@ class ExhExhortoEditForm(FlaskForm):
     observaciones = TextAreaField("Observaciones", validators=[Optional(), Length(max=1024)])
     remitente = RadioField("Remitente", validators=[DataRequired()], choices=REMITENTES, coerce=str)
     exh_area = SelectField("Área", coerce=int, validators=[DataRequired()])
+    distrito = SelectField("Distrito", choices=None, validate_choice=False)  # Las opciones se agregan con JS
+    autoridad = SelectField("Autoridad", choices=None, validate_choice=False)  # Las opciones se agregan con JS
     numero_exhorto = StringField("Número de Exhorto", validators=[Optional(), Length(max=256)])
     guardar = SubmitField("Guardar")
 

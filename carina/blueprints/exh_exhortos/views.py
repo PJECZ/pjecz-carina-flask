@@ -186,6 +186,7 @@ def edit(exh_exhorto_id):
         exh_exhorto.observaciones = safe_message(form.observaciones.data, default_output_str=None)
         exh_exhorto.remitente = form.remitente.data
         exh_exhorto.exh_area_id = form.exh_area.data
+        exh_exhorto.autoridad_id = form.autoridad.data
         exh_exhorto.numero_exhorto = safe_string(form.numero_exhorto.data)
         exh_exhorto.save()
         bitacora = Bitacora(
