@@ -77,6 +77,7 @@ class ExhExhortoEditForm(FlaskForm):
     observaciones = TextAreaField("Observaciones", validators=[Optional(), Length(max=1024)])
     remitente = RadioField("Remitente", validators=[DataRequired()], choices=REMITENTES, coerce=str)
     exh_area = SelectField("Área", coerce=int, validators=[DataRequired()])
+    numero_exhorto = StringField("Número de Exhorto", validators=[Optional(), Length(max=256)])
     guardar = SubmitField("Guardar")
 
     def __init__(self, *args, **kwargs):

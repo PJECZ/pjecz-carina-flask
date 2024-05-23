@@ -99,6 +99,11 @@ class ExhExhorto(database.Model, UniversalMixin):
     # Campo para saber si es un proceso interno o extorno
     remitente = Column(Enum(*REMITENTES, name="exh_exhortos_remitentes", native_enum=False), nullable=True)
 
+    # Juzgado/Área al que se turna el Exhorto y hará el correspondiente proceso de este
+
+    # Número de Exhorto con el que se radica en el Juzgado/Área que se turnó el exhorto. Este número sirve para que el usuario pueda indentificar su exhorto dentro del Juzgado/Área donde se turnó.
+    numero_exhorto = Column(String(256))
+
     def __repr__(self):
         """Representación"""
         return f"<ExhExhorto {self.id}>"
