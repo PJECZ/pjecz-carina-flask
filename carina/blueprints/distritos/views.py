@@ -78,6 +78,10 @@ def select_json():
     """Select JSON para Distritos"""
     # Consultar
     consulta = Distrito.query.filter_by(estatus="A").order_by(Distrito.nombre)
+    # Si viene es_archivo_solicitante como parametro en el URL como true o false
+    if "es_distrito" in request.args:
+        es_distrito = request.args["es_distrito"] == "true"
+        consulta = consulta.filter_by(es_distrito=es_distrito)
     # Elaborar datos para Select
     data = []
     for resultado in consulta.all():

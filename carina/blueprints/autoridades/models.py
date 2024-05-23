@@ -36,6 +36,7 @@ class Autoridad(database.Model, UniversalMixin):
     es_revisor_escrituras = Column(Boolean, nullable=False, default=False)
 
     # Hijos
+    exh_exhortos = relationship("ExhExhorto", back_populates="autoridad")
     usuarios = relationship("Usuario", back_populates="autoridad")
 
     def __repr__(self):
