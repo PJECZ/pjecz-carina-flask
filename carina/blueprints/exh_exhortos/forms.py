@@ -47,7 +47,7 @@ class ExhExhortoNewForm(FlaskForm):
     crear = SubmitField("Crear")
 
     def __init__(self, *args, **kwargs):
-        """Inicializar y cargar opciones para materias"""
+        """Inicializar y cargar opciones para materia"""
         super().__init__(*args, **kwargs)
         self.materia.choices = [(m.id, m.nombre) for m in Materia.query.filter_by(estatus="A").order_by(Materia.clave).all()]
 
@@ -73,6 +73,7 @@ class ExhExhortoEditForm(FlaskForm):
     juez_exhortante = StringField("Juez Exhortante", validators=[Optional(), Length(max=256)])
     fojas = IntegerField("Fojas", validators=[DataRequired()])
     dias_responder = IntegerField("Días Responder", validators=[DataRequired()])
+    tipo_diligenciacion_nombre = StringField("Tipo Diligenciación Nombre", validators=[Optional(), Length(max=256)])
     fecha_origen = StringField("Fecha Origen", validators=[Optional()])
     observaciones = TextAreaField("Observaciones", validators=[Optional(), Length(max=1024)])
     remitente = RadioField("Remitente", validators=[DataRequired()], choices=REMITENTES, coerce=str)
@@ -83,7 +84,7 @@ class ExhExhortoEditForm(FlaskForm):
     guardar = SubmitField("Guardar")
 
     def __init__(self, *args, **kwargs):
-        """Inicializar y cargar opciones para materias"""
+        """Inicializar y cargar opciones para materia y exh_area"""
         super().__init__(*args, **kwargs)
         self.materia.choices = [(m.id, m.nombre) for m in Materia.query.filter_by(estatus="A").order_by(Materia.clave).all()]
         self.exh_area.choices = [

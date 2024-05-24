@@ -35,6 +35,10 @@
                 {{ detail.label_value('Tipo de Juicio', exh_exhorto.tipo_juicio_asunto_delitos) }}
                 {{ detail.label_value('Juez Exhortante', exh_exhorto.juez_exhortante) }}
                 {{ detail.label_value('Fojas', exh_exhorto.fojas) }}
+                {{ detail.label_value('Días en responder', exh_exhorto.dias_responder) }}
+                {{ detail.label_value('Tipo de diligenciación', exh_exhorto.tipo_diligenciacion_nombre) }}
+                {{ detail.label_value('Fecha de origen', exh_exhorto.fecha_origen) }}
+                {{ detail.label_value('Observaciones', exh_exhorto.observaciones) }}
             </div>
             <div class="col-md-6">
                 {{ detail.label_value('Folio Seguimiento', exh_exhorto.folio_seguimiento) }}
@@ -48,10 +52,6 @@
                 {% else %}
                     {{ detail.label_value('Municipio Destino', 'NO DEFINIDO') }}
                 {% endif %}
-                {{ detail.label_value('Días en responder', exh_exhorto.dias_responder) }}
-                {{ detail.label_value('Tipo de diligenciación', exh_exhorto.tipo_diligenciacion_nombre) }}
-                {{ detail.label_value('Fecha de origen', exh_exhorto.fecha_origen) }}
-                {{ detail.label_value('Observaciones', exh_exhorto.observaciones) }}
                 {{ detail.label_value('Área', exh_exhorto.exh_area.clave + ' - ' + exh_exhorto.exh_area.nombre) }}
                 {{ detail.label_value('Remitente', exh_exhorto.remitente) }}
                 {{ detail.label_value('Autoridad', exh_exhorto.autoridad.clave + ' - ' + exh_exhorto.autoridad.descripcion_corta) }}
@@ -62,8 +62,8 @@
         {# detail.label_value('ID', exh_exhorto.id) #}
         {# detail.label_value('Creado', moment(exh_exhorto.creado, local=True).format('DD MMM YYYY')) #}
     {% endcall %}
-    {# Listado de Partes #}
-    {% call detail.card("Partes")%}
+    <!-- Tabla de Partes -->
+    {% call detail.card("Partes") %}
         <table id="exh_exhortos_partes_datatable" class="table display nowrap" style="width:100%">
             <thead>
                 <tr>
@@ -78,8 +78,8 @@
             </thead>
         </table>
     {% endcall %}
-    {# Listado de Archivos #}
-    {% call detail.card("Archivos")%}
+    <!-- Tabla de Archivos -->
+    {% call detail.card("Archivos") %}
         <table id="exh_exhortos_archivos_datatable" class="table display nowrap" style="width:100%">
             <thead>
                 <tr>
@@ -99,13 +99,12 @@
         {% if exh_exhorto.estatus == 'A' %}{{ modals.custom_javascript_delete('Eliminar', '¿Eliminar el exhorto <strong>' + exh_exhorto.exhorto_origen_id + '</strong>?') }}{% endif %}
         {% if exh_exhorto.estatus == 'B' %}{{ modals.custom_javascript_recover('Recuperar', '¿Recuperar el exhorto <strong>' + exh_exhorto.exhorto_origen_id + '</strong>?') }}{% endif %}
     {% endif %}
-
     <script src="/static/js/datatables-constructor.js"></script>
     <script src="/static/js/datatables-filtros.js"></script>
-    {# Tabla de Partes #}
     <script>
         const constructorDataTable = new ConfigDataTable( '{{ csrf_token() }}' );
     </script>
+    <!-- Tabla de Partes -->
     <script>
         // DataTable Partes
         let configDTPartes = constructorDataTable.config();
@@ -124,7 +123,7 @@
         const filtrosPartes = new FiltrosDataTable('#exh_exhortos_partes_datatable', configDTPartes);
         filtrosPartes.precargar();
     </script>
-    {# Tabla de Archivos #}
+    <!-- Tabla de Archivos -->
     <script>
         // DataTable Archivos
         let configDTArchivos = constructorDataTable.config();

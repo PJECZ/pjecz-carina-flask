@@ -36,6 +36,7 @@
 {% endblock %}
 
 {% block custom_javascript %}
+    <!-- Combo select Estados Destino - Municipios Destino -->
     <script>
         // Llamar a /estados/select_json para cargar el select estados
         fetch('/estados/select_json')
@@ -68,6 +69,7 @@
                 });
         });
     </script>
+    <!-- Combo select Estados Origen - Municipios Origen -->
     <script>
         // Llamar a /estados/select_json para cargar el select estados
         fetch('/estados/select_json')
