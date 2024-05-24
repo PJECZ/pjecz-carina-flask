@@ -13,23 +13,36 @@
 {% block content %}
     {% call f.card() %}
         {% call f.form_tag('exh_exhortos.new', fid='exh_exhorto_form') %}
-            {% call f.form_group(form.exhorto_origen_id) %}{% endcall %}
-            {% call f.form_group(form.estado_destino) %}{% endcall %}
-            {% call f.form_group(form.municipio_destino) %}{% endcall %}
-            {% call f.form_group(form.materia) %}{% endcall %}
-            {% call f.form_group(form.estado_origen) %}{% endcall %}
-            {% call f.form_group(form.municipio_origen) %}{% endcall %}
-            {% call f.form_group(form.juzgado_origen_id) %}{% endcall %}
-            {% call f.form_group(form.juzgado_origen_nombre) %}{% endcall %}
-            {% call f.form_group(form.numero_expediente_origen) %}{% endcall %}
-            {% call f.form_group(form.numero_oficio_origen) %}{% endcall %}
-            {% call f.form_group(form.tipo_juicio_asunto_delitos) %}{% endcall %}
-            {% call f.form_group(form.juez_exhortante) %}{% endcall %}
-            {% call f.form_group(form.fojas) %}{% endcall %}
-            {% call f.form_group(form.dias_responder) %}{% endcall %}
-            {% call f.form_group(form.fecha_origen) %}{% endcall %}
-            {% call f.form_group(form.observaciones) %}{% endcall %}
-            {% call f.form_group(form.remitente) %}{% endcall %}
+            <div class="row">
+                <div class="col-md-6">
+                    {% call f.form_group(form.exhorto_origen_id, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.estado_origen, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.municipio_origen) %}{% endcall %}
+                    {% call f.form_group(form.juzgado_origen_id) %}{% endcall %}
+                    {% call f.form_group(form.juzgado_origen_nombre) %}{% endcall %}
+                    {% call f.form_group(form.numero_expediente_origen) %}{% endcall %}
+                    {% call f.form_group(form.numero_oficio_origen) %}{% endcall %}
+                    {% call f.form_group(form.tipo_juicio_asunto_delitos) %}{% endcall %}
+                    {% call f.form_group(form.juez_exhortante) %}{% endcall %}
+                    {% call f.form_group(form.fojas) %}{% endcall %}
+                    {% call f.form_group(form.dias_responder) %}{% endcall %}
+                    {% call f.form_group(form.tipo_diligenciacion_nombre) %}{% endcall %}
+                    {% call f.form_group(form.fecha_origen) %}{% endcall %}
+                    {% call f.form_group(form.observaciones) %}{% endcall %}
+            </div>
+                <div class="col-md-6">
+                    {% call f.form_group(form.folio_seguimiento, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.materia) %}{% endcall %}
+                    {% call f.form_group(form.estado_destino) %}{% endcall %}
+                    {% call f.form_group(form.municipio_destino) %}{% endcall %}
+                    {% call f.form_group(form.exh_area, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.remitente) %}{% endcall %}
+                    {% call f.form_group(form.distrito, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.autoridad, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.numero_exhorto, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.estado, readonly=true) %}{% endcall %}
+                </div>
+            </div>
             {% call f.form_group(form.crear) %}{% endcall %}
         {% endcall %}
     {% endcall %}
@@ -87,7 +100,7 @@
             });
         // Llamar a /municipios/select_json para cargar el select municipio, si el municipio cambia
         document.getElementById('estado_origen').addEventListener('change', () => {
-            const estadoId = document.getElementById('estado_origen').value;
+            const estadoId = 5;
             fetch(`/municipios/select_json/${estadoId}`)
                 .then(response => response.json())
                 .then(data => {
