@@ -14,27 +14,36 @@
     {% call f.card() %}
         {% set form_kwargs = {'exh_exhorto_id': exh_exhorto.id} %}
         {% call f.form_tag('exh_exhortos.edit', fid='exh_exhorto_form', **form_kwargs) %}
-            {% call f.form_group(form.exhorto_origen_id, readonly=true) %}{% endcall %}
-            {% call f.form_group(form.estado_destino) %}{% endcall %}
-            {% call f.form_group(form.municipio_destino) %}{% endcall %}
-            {% call f.form_group(form.materia) %}{% endcall %}
-            {% call f.form_group(form.estado_origen) %}{% endcall %}
-            {% call f.form_group(form.municipio_origen) %}{% endcall %}
-            {% call f.form_group(form.juzgado_origen_id) %}{% endcall %}
-            {% call f.form_group(form.juzgado_origen_nombre) %}{% endcall %}
-            {% call f.form_group(form.numero_expediente_origen) %}{% endcall %}
-            {% call f.form_group(form.numero_oficio_origen) %}{% endcall %}
-            {% call f.form_group(form.tipo_juicio_asunto_delitos) %}{% endcall %}
-            {% call f.form_group(form.juez_exhortante) %}{% endcall %}
-            {% call f.form_group(form.fojas) %}{% endcall %}
-            {% call f.form_group(form.dias_responder) %}{% endcall %}
-            {% call f.form_group(form.fecha_origen) %}{% endcall %}
-            {% call f.form_group(form.observaciones) %}{% endcall %}
-            {% call f.form_group(form.remitente) %}{% endcall %}
-            {% call f.form_group(form.exh_area) %}{% endcall %}
-            {% call f.form_group(form.distrito) %}{% endcall %}
-            {% call f.form_group(form.autoridad) %}{% endcall %}
-            {% call f.form_group(form.numero_exhorto) %}{% endcall %}
+            <div class="row">
+                <div class="col-md-6">
+                    {% call f.form_group(form.exhorto_origen_id, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.estado_origen) %}{% endcall %}
+                    {% call f.form_group(form.municipio_origen) %}{% endcall %}
+                    {% call f.form_group(form.juzgado_origen_id) %}{% endcall %}
+                    {% call f.form_group(form.juzgado_origen_nombre) %}{% endcall %}
+                    {% call f.form_group(form.numero_expediente_origen) %}{% endcall %}
+                    {% call f.form_group(form.numero_oficio_origen) %}{% endcall %}
+                    {% call f.form_group(form.tipo_juicio_asunto_delitos) %}{% endcall %}
+                    {% call f.form_group(form.juez_exhortante) %}{% endcall %}
+                    {% call f.form_group(form.fojas) %}{% endcall %}
+                    {% call f.form_group(form.dias_responder) %}{% endcall %}
+                    {% call f.form_group(form.tipo_diligenciacion_nombre) %}{% endcall %}
+                    {% call f.form_group(form.fecha_origen) %}{% endcall %}
+                    {% call f.form_group(form.observaciones) %}{% endcall %}
+                </div>
+                <div class="col-md-6">
+                    {% call f.form_group(form.folio_seguimiento, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.materia) %}{% endcall %}
+                    {% call f.form_group(form.estado_destino) %}{% endcall %}
+                    {% call f.form_group(form.municipio_destino) %}{% endcall %}
+                    {% call f.form_group(form.exh_area) %}{% endcall %}
+                    {% call f.form_group(form.remitente) %}{% endcall %}
+                    {% call f.form_group(form.distrito) %}{% endcall %}
+                    {% call f.form_group(form.autoridad) %}{% endcall %}
+                    {% call f.form_group(form.numero_exhorto) %}{% endcall %}
+                    {% call f.form_group(form.estado, readonly=true) %}{% endcall %}
+                </div>
+            </div>
             {% call f.form_group(form.guardar) %}{% endcall %}
         {% endcall %}
     {% endcall %}
@@ -42,6 +51,7 @@
 
 
 {% block custom_javascript %}
+    {# Combo select Estados Destino - Municipios Destino #}
     <script>
         // Llamar a /estados/select_json para cargar el select estados
         fetch('/estados/select_json')
@@ -77,6 +87,7 @@
                 });
         });
     </script>
+    {# Combo select Estados Origen - Municipios Origen #}
     <script>
         // Llamar a /estados/select_json para cargar el select estados
         fetch('/estados/select_json')
@@ -112,6 +123,7 @@
                 });
         });
     </script>
+    {# Combo select Distrito - Autoridades #}
     <script>
         // Llamar a /distritos/select_json para cargar el select distrito
         fetch('/distritos/select_json?es_distrito=true')

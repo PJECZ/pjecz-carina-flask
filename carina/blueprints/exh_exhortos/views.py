@@ -2,7 +2,6 @@
 Exh Exhortos, vistas
 """
 
-from datetime import datetime
 import uuid
 import json
 from flask import Blueprint, flash, redirect, render_template, request, url_for
@@ -160,7 +159,7 @@ def new():
         bitacora.save()
         flash(bitacora.descripcion, "success")
         return redirect(bitacora.url)
-    form.exhorto_origen_id.data = str(uuid.uuid4())
+    form.exhorto_origen_id.data = str(uuid.uuid4()) # Elaborar un UUID para mostrar READ ONLY
     return render_template("exh_exhortos/new.jinja2", form=form)
 
 
