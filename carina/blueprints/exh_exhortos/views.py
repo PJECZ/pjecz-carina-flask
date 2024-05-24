@@ -132,7 +132,7 @@ def new():
             exhorto_origen_id=form.exhorto_origen_id.data,
             municipio_destino_id=form.municipio_destino.data,
             materia_id=form.materia.data,
-            municipio_origen_id=form.materia.data,
+            municipio_origen_id=form.municipio_origen.data,
             juzgado_origen_id=safe_string(form.juzgado_origen_id.data),
             juzgado_origen_nombre=safe_string(form.juzgado_origen_nombre.data),
             numero_expediente_origen=safe_string(form.numero_expediente_origen.data),
@@ -140,13 +140,16 @@ def new():
             tipo_juicio_asunto_delitos=safe_string(form.tipo_juicio_asunto_delitos.data),
             juez_exhortante=safe_string(form.juez_exhortante.data),
             fojas=form.fojas.data,
-            observaciones=safe_message(form.observaciones.data, default_output_str=None),
             dias_responder=form.dias_responder.data,
+            tipo_diligenciacion_nombre=form.tipo_diligenciacion_nombre.data,
             fecha_origen=form.fecha_origen.data,
-            remitente=form.remitente.data,
+            observaciones=safe_message(form.observaciones.data, default_output_str=None),
             # Datos por defecto
             folio_seguimiento=str(uuid.uuid4()),
             exh_area_id=1,  # valor: NO DEFINIDO
+            autoridad_id=342,  # valor por defecto: ND - NO DEFINIDO
+            numero_exhorto="",
+            remitente="INTERNO",
             estado="PENDIENTE",
         )
         exh_exhorto.save()
@@ -160,6 +163,12 @@ def new():
         flash(bitacora.descripcion, "success")
         return redirect(bitacora.url)
     form.exhorto_origen_id.data = str(uuid.uuid4())  # Elaborar un UUID para mostrar READ ONLY
+    form.estado_origen.data = "COAHUILA DE ZARAGOZA"
+    form.exh_area.data = "ND - NO DEFINIDO"
+    form.remitente.data = "INTERNO"
+    form.distrito.data = "ND - NO DEFINIDO"
+    form.autoridad.data = "ND - NO DEFINIDO"
+    form.estado.data = "PENDIENTE"
     return render_template("exh_exhortos/new.jinja2", form=form)
 
 

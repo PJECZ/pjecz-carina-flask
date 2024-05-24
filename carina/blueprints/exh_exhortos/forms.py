@@ -24,12 +24,14 @@ class ExhExhortoNewForm(FlaskForm):
     """Formulario New Exhorto"""
 
     exhorto_origen_id = StringField("Exhorto Origen ID", validators=[DataRequired(), Length(max=128)])
-    estado_destino = SelectField("Estado Destino", choices=None, validate_choice=False)  # Las opciones se agregan con JS
+    estado_destino = SelectField(
+        "Estado Destino", choices=None, validate_choice=False, validators=[DataRequired()]
+    )  # Las opciones se agregan con JS
     municipio_destino = SelectField(
         "Municipio Destino", choices=None, validate_choice=False, validators=[DataRequired()]
     )  # Las opciones se agregan con JS
     materia = SelectField("Materia", coerce=int, validators=[DataRequired()])
-    estado_origen = SelectField("Estado Origen", choices=None, validate_choice=False)  # Las opciones se agregan con JS
+    estado_origen = StringField("Estado Origen")  # Las opciones se agregan con JS
     municipio_origen = SelectField(
         "Municipio Origen", choices=None, validate_choice=False, validators=[DataRequired()]
     )  # Las opciones se agregan con JS
@@ -41,9 +43,16 @@ class ExhExhortoNewForm(FlaskForm):
     juez_exhortante = StringField("Juez Exhortante", validators=[Optional(), Length(max=256)])
     fojas = IntegerField("Fojas", validators=[DataRequired()])
     dias_responder = IntegerField("Días Responder", validators=[DataRequired()])
+    tipo_diligenciacion_nombre = StringField("Tipo Diligenciación Nombre", validators=[Optional(), Length(max=256)])
     fecha_origen = StringField("Fecha Origen", validators=[Optional()])
     observaciones = TextAreaField("Observaciones", validators=[Optional(), Length(max=1024)])
     remitente = RadioField("Remitente", validators=[DataRequired()], choices=REMITENTES, coerce=str)
+    exh_area = StringField("Área")
+    folio_seguimiento = StringField("Folio de Seguimiento", validators=[Optional(), Length(max=256)])
+    distrito = StringField("Distrito")  # Las opciones se agregan con JS
+    autoridad = StringField("Autoridad")  # Las opciones se agregan con JS
+    numero_exhorto = StringField("Número de Exhorto", validators=[Optional(), Length(max=256)])
+    estado = StringField("Estado")
     crear = SubmitField("Crear")
 
     def __init__(self, *args, **kwargs):
@@ -56,12 +65,16 @@ class ExhExhortoEditForm(FlaskForm):
     """Formulario Edit Exhorto"""
 
     exhorto_origen_id = StringField("Exhorto Origen ID", validators=[DataRequired(), Length(max=128)])
-    estado_destino = SelectField("Estado Destino", choices=None, validate_choice=False)  # Las opciones se agregan con JS
+    estado_destino = SelectField(
+        "Estado Destino", choices=None, validate_choice=False, validators=[DataRequired()]
+    )  # Las opciones se agregan con JS
     municipio_destino = SelectField(
         "Municipio Destino", choices=None, validate_choice=False, validators=[DataRequired()]
     )  # Las opciones se agregan con JS
     materia = SelectField("Materia", coerce=int, validators=[DataRequired()])
-    estado_origen = SelectField("Estado Origen", choices=None, validate_choice=False)  # Las opciones se agregan con JS
+    estado_origen = SelectField(
+        "Estado Origen", choices=None, validate_choice=False, validators=[DataRequired()]
+    )  # Las opciones se agregan con JS
     municipio_origen = SelectField(
         "Municipio Origen", choices=None, validate_choice=False, validators=[DataRequired()]
     )  # Las opciones se agregan con JS
@@ -80,7 +93,9 @@ class ExhExhortoEditForm(FlaskForm):
     exh_area = SelectField("Área", coerce=int, validators=[DataRequired()])
     folio_seguimiento = StringField("Folio de Seguimiento", validators=[Optional(), Length(max=256)])
     distrito = SelectField("Distrito", choices=None, validate_choice=False)  # Las opciones se agregan con JS
-    autoridad = SelectField("Autoridad", choices=None, validate_choice=False)  # Las opciones se agregan con JS
+    autoridad = SelectField(
+        "Autoridad", choices=None, validate_choice=False, validators=[DataRequired()]
+    )  # Las opciones se agregan con JS
     numero_exhorto = StringField("Número de Exhorto", validators=[Optional(), Length(max=256)])
     estado = StringField("Estado")
     guardar = SubmitField("Guardar")
