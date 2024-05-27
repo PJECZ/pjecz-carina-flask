@@ -160,3 +160,39 @@ def detail(exh_exhorto_parte_id):
     """Detalle de un Parte"""
     exh_exhorto_parte = ExhExhortoParte.query.get_or_404(exh_exhorto_parte_id)
     return render_template("exh_exhortos_partes/detail.jinja2", exh_exhorto_parte=exh_exhorto_parte)
+
+
+@exh_exhortos_partes.route("/exh_exhortos_partes/eliminar/<int:exh_exhorto_parte_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def delete(exh_exhorto_parte_id):
+    """Eliminar Parte"""
+    exh_exhorto_parte = ExhExhortoParte.query.get_or_404(exh_exhorto_parte_id)
+    if exh_exhorto_parte.estatus == "A":
+        exh_exhorto_parte.delete()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Eliminado Parte {exh_exhorto_parte.nombre_completo}"),
+            url=url_for("exh_exhortos_partes.detail", exh_exhorto_parte_id=exh_exhorto_parte.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_exhortos_partes.detail", exh_exhorto_parte_id=exh_exhorto_parte.id))
+
+
+@exh_exhortos_partes.route("/exh_exhortos_partes/recuperar/<int:exh_exhorto_parte_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def recover(exh_exhorto_parte_id):
+    """Recuperar Parte"""
+    exh_exhorto_parte = ExhExhortoParte.query.get_or_404(exh_exhorto_parte_id)
+    if exh_exhorto_parte.estatus == "B":
+        exh_exhorto_parte.recover()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Recuperado Parte {exh_exhorto_parte.nombre_completo}"),
+            url=url_for("exh_exhortos_partes.detail", exh_exhorto_parte_id=exh_exhorto_parte.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_exhortos_partes.detail", exh_exhorto_parte_id=exh_exhorto_parte.id))

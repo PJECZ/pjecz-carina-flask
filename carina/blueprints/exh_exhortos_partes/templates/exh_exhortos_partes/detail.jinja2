@@ -12,8 +12,8 @@
             {# {{ topbar.button_edit('Editar', url_for('exh_exhortos_partes.edit', exh_exhorto_parte_id=exh_exhorto_parte.id)) }} #}
         {% endif %}
         {% if current_user.can_admin('EXH EXHORTOS PARTES') %}
-            {# {% if exh_exhorto_parte.estatus == 'A' %}{{ topbar.button_delete('Eliminar', url_for('exh_exhortos_partes.delete', exh_exhorto_parte_id=exh_exhorto_parte.id)) }}{% endif %}
-            {% if exh_exhorto_parte.estatus == 'B' %}{{ topbar.button_recover('Recuperar', url_for('exh_exhortos_partes.recover', exh_exhorto_parte_id=exh_exhorto_parte.id)) }}{% endif %} #}
+            {% if exh_exhorto_parte.estatus == 'A' %}{{ topbar.button_delete('Eliminar', url_for('exh_exhortos_partes.delete', exh_exhorto_parte_id=exh_exhorto_parte.id)) }}{% endif %}
+            {% if exh_exhorto_parte.estatus == 'B' %}{{ topbar.button_recover('Recuperar', url_for('exh_exhortos_partes.recover', exh_exhorto_parte_id=exh_exhorto_parte.id)) }}{% endif %}
         {% endif %}
     {% endcall %}
 {% endblock %}
