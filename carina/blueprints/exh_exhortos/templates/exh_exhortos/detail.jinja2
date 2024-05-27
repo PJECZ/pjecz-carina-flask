@@ -67,9 +67,7 @@
         <table id="exh_exhortos_partes_datatable" class="table display nowrap" style="width:100%">
             <thead>
                 <tr>
-                    <th>Nombre</th>
-                    <th>Apellido Paterno</th>
-                    <th>Apellido Materno</th>
+                    <th>Nombre Completo</th>
                     <th>Género</th>
                     <th>Es Persona Moral</th>
                     <th>Tipo Parte</th>
@@ -112,13 +110,41 @@
         configDTPartes['ajax']['url'] = '/exh_exhortos_partes/datatable_json';
         configDTPartes['ajax']['data'] = {'estatus':'A', 'exh_exhorto_id':{{exh_exhorto.id}}};
         configDTPartes['columns'] = [
-            { data: 'nombre' },
-            { data: 'apellido_paterno' },
-            { data: 'apellido_materno' },
+            { data: 'detalle' },
             { data: 'genero' },
             { data: 'es_persona_moral' },
             { data: 'tipo_parte' },
             { data: 'tipo_parte_nombre' }
+        ];
+        configDTPartes['columnDefs'] = [
+            {
+                targets: 0, // detalle
+                data: null,
+                render: function(data, type, row, meta) {
+                    return '<a href="' + data.url + '">' + data.nombre + '</a>';
+                }
+            },
+            {
+                targets: 2, // es_persona_moral
+                data: null,
+                render: function(data, type, row, meta) {
+                    if (data == true) {
+                        return "SÍ";
+                    }
+                    return "NO";
+                }
+            },
+            {
+                targets: 3, // tipo_parte
+                data: null,
+                render: function(data, type, row, meta) {
+                    switch (data) {
+                        case 0: return "ND";
+                        case 1: return "ACTOR";
+                        case 2: return "DEMANDADO";
+                    }
+                }
+            }
         ];
         // Filtros Exhortos Partes
         const filtrosPartes = new FiltrosDataTable('#exh_exhortos_partes_datatable', configDTPartes);

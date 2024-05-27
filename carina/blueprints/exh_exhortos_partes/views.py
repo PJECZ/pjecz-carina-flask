@@ -68,6 +68,10 @@ def datatable_json():
     for resultado in registros:
         data.append(
             {
+                "detalle": {
+                    "url": url_for("exh_exhortos_partes.detail", exh_exhorto_parte_id=resultado.id),
+                    "nombre": resultado.nombre_completo,
+                },
                 "nombre": resultado.nombre,
                 "apellido_paterno": resultado.apellido_paterno,
                 "apellido_materno": resultado.apellido_materno,
@@ -134,6 +138,7 @@ def new_with_exh_exhorto(exh_exhorto_id):
                 nombre=safe_string(form.nombre.data),
                 apellido_paterno=safe_string(form.apellido_paterno.data),
                 apellido_materno=safe_string(form.apellido_materno.data),
+                genero=safe_string(form.genero.data),
                 tipo_parte=form.tipo_parte.data,
                 tipo_parte_nombre=tipo_parte_nombre,
             )
@@ -148,3 +153,10 @@ def new_with_exh_exhorto(exh_exhorto_id):
             flash(bitacora.descripcion, "success")
             return redirect(bitacora.url)
     return render_template("exh_exhortos_partes/new_with_exh_exhorto.jinja2", form=form, exh_exhorto=exh_exhorto)
+
+
+@exh_exhortos_partes.route("/exh_exhortos_partes/<int:exh_exhorto_parte_id>")
+def detail(exh_exhorto_parte_id):
+    """Detalle de un Parte"""
+    exh_exhorto_parte = ExhExhortoParte.query.get_or_404(exh_exhorto_parte_id)
+    return render_template("exh_exhortos_partes/detail.jinja2", exh_exhorto_parte=exh_exhorto_parte)
