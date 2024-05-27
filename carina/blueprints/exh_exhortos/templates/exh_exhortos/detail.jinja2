@@ -77,6 +77,7 @@
                 </tr>
             </thead>
         </table>
+        <a class="btn btn-primary" href="{{url_for('exh_exhortos_partes.new_with_exh_exhorto', exh_exhorto_id=exh_exhorto.id)}}">Agregar</a>
     {% endcall %}
     <!-- Tabla de Archivos -->
     {% call detail.card("Archivos") %}

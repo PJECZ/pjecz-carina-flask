@@ -14,6 +14,9 @@ from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.exh_exhortos_partes.models import ExhExhortoParte
+from carina.blueprints.exh_exhortos_partes.forms import ExhExhortoParteForm
+from carina.blueprints.exh_exhortos.models import ExhExhorto
+
 
 MODULO = "EXH EXHORTOS PARTES"
 
@@ -99,3 +102,49 @@ def list_inactive():
         titulo="Partes inactivos",
         estatus="B",
     )
+
+
+@exh_exhortos_partes.route("/exh_exhortos_partes/nuevo_con_exhorto/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.CREAR)
+def new_with_exh_exhorto(exh_exhorto_id):
+    """Nueva Parte"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoParteForm()
+    if form.validate_on_submit():
+        es_persona_moral = form.es_persona_moral.data
+        pedir_tipo_parte_nombre = False
+        tipo_parte_nombre = None
+        if form.tipo_parte.data == 0:
+            pedir_tipo_parte_nombre = True
+            tipo_parte_nombre = form.tipo_parte_nombre.data
+        if pedir_tipo_parte_nombre == True and tipo_parte_nombre == "":
+            flash("Debe especificar un 'Tipo Parte Nombre'", "warning")
+        else:
+            if es_persona_moral:
+                exh_exhorto_parte = ExhExhortoParte(
+                    exh_exhorto=exh_exhorto,
+                    es_persona_moral=es_persona_moral,
+                    nombre=safe_string(form.nombre.data),
+                    tipo_parte=form.tipo_parte.data,
+                    tipo_parte_nombre=tipo_parte_nombre,
+                )
+            exh_exhorto_parte = ExhExhortoParte(
+                exh_exhorto=exh_exhorto,
+                es_persona_moral=es_persona_moral,
+                nombre=safe_string(form.nombre.data),
+                apellido_paterno=safe_string(form.apellido_paterno.data),
+                apellido_materno=safe_string(form.apellido_materno.data),
+                tipo_parte=form.tipo_parte.data,
+                tipo_parte_nombre=tipo_parte_nombre,
+            )
+            exh_exhorto_parte.save()
+            bitacora = Bitacora(
+                modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+                usuario=current_user,
+                descripcion=safe_message(f"Nueva Parte {exh_exhorto_parte.nombre}"),
+                url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+            )
+            bitacora.save()
+            flash(bitacora.descripcion, "success")
+            return redirect(bitacora.url)
+    return render_template("exh_exhortos_partes/new_with_exh_exhorto.jinja2", form=form, exh_exhorto=exh_exhorto)
