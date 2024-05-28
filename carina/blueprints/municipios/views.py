@@ -39,6 +39,8 @@ def datatable_json():
         consulta = consulta.filter_by(estatus=request.form["estatus"])
     else:
         consulta = consulta.filter_by(estatus="A")
+    if "estado_id" in request.form:
+        consulta = consulta.filter_by(estado_id=request.form["estado_id"])
     if "clave" in request.form:
         try:
             clave = str(int(request.form["clave"])).zfill(3)
@@ -50,11 +52,6 @@ def datatable_json():
         nombre = safe_string(request.form["nombre"], save_enie=True)
         if nombre != "":
             consulta = consulta.filter(Municipio.nombre.contains(nombre))
-    # Luego filtrar por columnas de otras tablas
-    # if "otra_columna_descripcion" in request.form:
-    #     otra_columna_descripcion = safe_string(request.form["otra_columna_descripcion"], save_enie=True)
-    #     consulta = consulta.join(OtroModelo)
-    #     consulta = consulta.filter(OtroModelo.rfc.contains(otra_columna_descripcion))
     # Ordenar y paginar
     registros = consulta.order_by(Municipio.id).offset(start).limit(rows_per_page).all()
     total = consulta.count()
@@ -64,7 +61,10 @@ def datatable_json():
         data.append(
             {
                 "estado_nombre": resultado.estado.nombre,
-                "clave": resultado.clave,
+                "detalle": {
+                    "clave": resultado.clave,
+                    "url": url_for("municipios.detail", municipio_id=resultado.id),
+                },
                 "nombre": resultado.nombre,
             }
         )
@@ -101,18 +101,6 @@ def list_active():
         filtros=json.dumps({"estatus": "A"}),
         titulo="Municipios",
         estatus="A",
-    )
-
-
-@municipios.route("/municipios/inactivos")
-@permission_required(MODULO, Permiso.ADMINISTRAR)
-def list_inactive():
-    """Listado de Municipios inactivos"""
-    return render_template(
-        "municipios/list.jinja2",
-        filtros=json.dumps({"estatus": "B"}),
-        titulo="Municipios inactivos",
-        estatus="B",
     )
 
 

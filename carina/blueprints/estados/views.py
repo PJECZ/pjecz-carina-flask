@@ -58,7 +58,10 @@ def datatable_json():
     for resultado in registros:
         data.append(
             {
-                "clave": resultado.clave,
+                "detalle": {
+                    "clave": resultado.clave,
+                    "url": url_for("estados.detail", estado_id=resultado.id),
+                },
                 "nombre": resultado.nombre,
             }
         )
@@ -95,13 +98,8 @@ def list_active():
     )
 
 
-@estados.route("/estados/inactivos")
-@permission_required(MODULO, Permiso.ADMINISTRAR)
-def list_inactive():
-    """Listado de Estados inactivos"""
-    return render_template(
-        "estados/list.jinja2",
-        filtros=json.dumps({"estatus": "B"}),
-        titulo="Estados inactivos",
-        estatus="B",
-    )
+@estados.route("/estados/<int:estado_id>")
+def detail(estado_id):
+    """Detalle de un Estado"""
+    estado = Estado.query.get_or_404(estado_id)
+    return render_template("estados/detail.jinja2", estado=estado)
