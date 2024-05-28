@@ -6,12 +6,14 @@
 
 {% block topbar_actions %}
     {% call topbar.page_buttons(titulo) %}
-        {% if current_user.can_admin('MUNICIPIOS') %}
-            {% if estatus == 'A' %}{{ topbar.button_list_inactive('Inactivos', url_for('municipios.list_inactive')) }}{% endif %}
-            {% if estatus == 'B' %}{{ topbar.button_list_active('Activos', url_for('municipios.list_active')) }}{% endif %}
+        {% if current_user.can_view('AUTORIDADES') %}
+            {{ topbar.button('Autoridades', url_for('autoridades.list_active'), 'mdi:scale-balance') }}
         {% endif %}
-        {% if current_user.can_insert('MUNICIPIOS') %}
-            {{ topbar.button_new('Nuevo Municipio', url_for('municipios.new')) }}
+        {% if current_user.can_view('DISTRITOS') %}
+            {{ topbar.button('Distritos', url_for('distritos.list_active'), 'mdi:map-marker') }}
+        {% endif %}
+        {% if current_user.can_view('ESTADOS') %}
+            {{ topbar.button('Estados', url_for('estados.list_active'), 'mdi:map') }}
         {% endif %}
     {% endcall %}
 {% endblock %}
@@ -65,8 +67,17 @@
         configDataTable['ajax']['data'] = {{ filtros }};
         configDataTable['columns'] = [
             { data: 'estado_nombre' },
-            { data: 'clave' },
+            { data: 'detalle' },
             { data: 'nombre' }
+        ];
+        configDataTable['columnDefs'] = [
+            {
+                targets: 1, // detalle
+                data: null,
+                render: function(data, type, row, meta) {
+                    return '<a href="' + data.url + '">' + data.clave + '</a>';
+                }
+            }
         ];
         // Filtros Municipios
         const filtrosMunicipios = new FiltrosDataTable('#municipios_datatable', configDataTable);

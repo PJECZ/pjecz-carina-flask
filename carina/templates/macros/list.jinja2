@@ -12,7 +12,7 @@
 
 {# JavaScript Datatable #}
 {%- macro datatable(table_id, order="asc") -%}
-    <!-- Datatable -->
+    <!-- DataTable -->
     <script>
         $('#{{ table_id }}').DataTable({
             {% if order == "asc" %}order: [[ 0, "asc" ]],{% endif %}
@@ -38,7 +38,7 @@
 
 {# JavaScript Datatable times in first column from UTC to local #}
 {%- macro datatable_times(table_id, order="desc") -%}
-    <!-- Datatable with datetime in first column -->
+    <!-- DataTable with datetime in first column -->
     <script>
         $('#{{ table_id }}').DataTable({
             {% if order == "asc" %}order: [[ 0, "asc" ]],{% endif %}

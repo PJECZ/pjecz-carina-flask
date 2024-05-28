@@ -8,12 +8,14 @@ from wtforms.validators import DataRequired, Length, Optional, Regexp
 
 from lib.safe_string import CLAVE_REGEXP
 from carina.blueprints.distritos.models import Distrito
+from carina.blueprints.municipios.models import Municipio
 
 
 class AutoridadForm(FlaskForm):
     """Formulario Autoridad"""
 
     distrito = SelectField("Distrito", coerce=int, validators=[DataRequired()])
+    municipio = SelectField("Municipio", coerce=int, validators=[DataRequired()])
     clave = StringField("Clave (hasta 16 caracteres)", validators=[DataRequired(), Regexp(CLAVE_REGEXP)])
     descripcion = StringField("Descripción", validators=[DataRequired(), Length(max=256)])
     descripcion_corta = StringField("Descripción corta (máximo 64 caracteres)", validators=[DataRequired(), Length(max=64)])
@@ -28,9 +30,12 @@ class AutoridadForm(FlaskForm):
     guardar = SubmitField("Guardar")
 
     def __init__(self, *args, **kwargs):
-        """Inicializar y cargar opciones de distritos"""
+        """Inicializar y cargar opciones para distrito y municipio"""
         super().__init__(*args, **kwargs)
         self.distrito.choices = [
             (d.id, d.clave + " - " + d.nombre_corto)
             for d in Distrito.query.filter_by(estatus="A").order_by(Distrito.clave).all()
+        ]
+        self.municipio.choices = [
+            (m.id, m.clave + " - " + m.nombre) for m in Municipio.query.filter_by(estatus="A").order_by(Municipio.nombre).all()
         ]
