@@ -118,7 +118,7 @@
 
 {# JavaScript Datatable #}
 {%- macro datatable(table_id, order="asc") -%}
-    <!-- Datatable -->
+    <!-- DataTable -->
     <script>
         $('#{{ table_id }}').DataTable({
             {% if order == "asc" %}order: [[ 0, "asc" ]],{% endif %}

@@ -43,6 +43,8 @@ def datatable_json():
         consulta = consulta.filter_by(estatus="A")
     if "distrito_id" in request.form:
         consulta = consulta.filter_by(distrito_id=request.form["distrito_id"])
+    if "municipio_id" in request.form:
+        consulta = consulta.filter_by(municipio_id=request.form["municipio_id"])
     if "clave" in request.form:
         try:
             clave = safe_clave(request.form["clave"])
@@ -77,6 +79,14 @@ def datatable_json():
                     "url": (
                         url_for("distritos.detail", distrito_id=resultado.distrito_id)
                         if current_user.can_view("DISTRITOS")
+                        else ""
+                    ),
+                },
+                "municipio": {
+                    "nombre": f"{resultado.municipio.clave} {resultado.municipio.nombre}",
+                    "url": (
+                        url_for("municipios.detail", municipio_id=resultado.municipio_id)
+                        if current_user.can_view("MUNICIPIOS")
                         else ""
                     ),
                 },

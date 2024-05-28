@@ -28,6 +28,7 @@ class Municipio(database.Model, UniversalMixin):
     nombre = Column(String(256), nullable=False)
 
     # Hijos
+    autoridades = relationship("Autoridad", back_populates="municipio")
     exh_exhortos_origenes = relationship("ExhExhorto", back_populates="municipio_origen")
 
     def __repr__(self):
