@@ -5,6 +5,15 @@
 
 {% block title %}Exhorto{% endblock %}
 
+{% block custom_head %}
+    <style>
+    .bg-pink {
+        color: white;
+        background-color: #d63384;
+    }
+    </style>
+{% endblock %}
+
 {% block topbar_actions %}
     {% call topbar.page_buttons('Exhorto ' + exh_exhorto.exhorto_origen_id) %}
         {{ topbar.button_previous('Exhortos', url_for('exh_exhortos.list_active')) }}
@@ -71,7 +80,6 @@
                     <th>Género</th>
                     <th>Es Persona Moral</th>
                     <th>Tipo Parte</th>
-                    <th>Tipo Parte Nombre</th>
                 </tr>
             </thead>
         </table>
@@ -114,7 +122,6 @@
             { data: 'genero' },
             { data: 'es_persona_moral' },
             { data: 'tipo_parte' },
-            { data: 'tipo_parte_nombre' }
         ];
         configDTPartes['columnDefs'] = [
             {
@@ -125,6 +132,17 @@
                 }
             },
             {
+                targets: 1, // genero
+                data: null,
+                render: function(data, type, row, meta) {
+                    switch (data) {
+                        case "M": return "<span class='badge rounded-pill bg-primary' title='Masculino'>M <span class='iconify' data-icon='mdi:gender-male'></span></span>";
+                        case "F": return "<span class='badge rounded-pill bg-pink' title='Femenino'>F <span class='iconify' data-icon='mdi:gender-female'></span></span>";
+                    }
+                    return "-";
+                }
+            },
+            {
                 targets: 2, // es_persona_moral
                 data: null,
                 render: function(data, type, row, meta) {
@@ -132,17 +150,6 @@
                         return "SÍ";
                     }
                     return "NO";
-                }
-            },
-            {
-                targets: 3, // tipo_parte
-                data: null,
-                render: function(data, type, row, meta) {
-                    switch (data) {
-                        case 0: return "ND";
-                        case 1: return "ACTOR";
-                        case 2: return "DEMANDADO";
-                    }
                 }
             }
         ];

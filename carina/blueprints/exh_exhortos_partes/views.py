@@ -66,6 +66,18 @@ def datatable_json():
     # Elaborar datos para DataTable
     data = []
     for resultado in registros:
+        genero = resultado.genero
+        if resultado.es_persona_moral == True:
+            genero = "-"
+        tipo_parte = resultado.tipo_parte
+        if tipo_parte == 0:
+            tipo_parte = resultado.tipo_parte_nombre
+        elif tipo_parte == 1:
+            tipo_parte = "ACTOR"
+        elif tipo_parte == 2:
+            tipo_parte = "DEMANDADO"
+        else:
+            tipo_parte = "ERROR"
         data.append(
             {
                 "detalle": {
@@ -75,9 +87,9 @@ def datatable_json():
                 "nombre": resultado.nombre,
                 "apellido_paterno": resultado.apellido_paterno,
                 "apellido_materno": resultado.apellido_materno,
-                "genero": resultado.genero,
+                "genero": genero,
                 "es_persona_moral": resultado.es_persona_moral,
-                "tipo_parte": resultado.tipo_parte,
+                "tipo_parte": tipo_parte,
                 "tipo_parte_nombre": resultado.tipo_parte_nombre,
             }
         )
@@ -196,3 +208,47 @@ def recover(exh_exhorto_parte_id):
         bitacora.save()
         flash(bitacora.descripcion, "success")
     return redirect(url_for("exh_exhortos_partes.detail", exh_exhorto_parte_id=exh_exhorto_parte.id))
+
+
+@exh_exhortos_partes.route("/exh_exhortos_partes/edicion/<int:exh_exhorto_parte_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def edit(exh_exhorto_parte_id):
+    """Editar Parte"""
+    exh_exhorto_parte = ExhExhortoParte.query.get_or_404(exh_exhorto_parte_id)
+    form = ExhExhortoParteForm()
+    if form.validate_on_submit():
+        es_persona_moral = form.es_persona_moral.data
+        if es_persona_moral == True:
+            exh_exhorto_parte.nombre = safe_string(form.nombre.data)
+            exh_exhorto_parte.apellido_paterno = None
+            exh_exhorto_parte.apellido_materno = None
+        else:
+            exh_exhorto_parte.nombre = safe_string(form.nombre.data)
+            exh_exhorto_parte.apellido_paterno = safe_string(form.apellido_paterno.data)
+            exh_exhorto_parte.apellido_materno = safe_string(form.apellido_materno.data)
+        exh_exhorto_parte.es_persona_moral = form.es_persona_moral.data
+        exh_exhorto_parte.genero = safe_string(form.genero.data)
+        tipo_parte = form.tipo_parte.data
+        if tipo_parte == 0:
+            exh_exhorto_parte.tipo_parte_nombre = safe_string(form.tipo_parte_nombre.data)
+        else:
+            exh_exhorto_parte.tipo_parte_nombre = None
+        exh_exhorto_parte.tipo_parte = form.tipo_parte.data
+        exh_exhorto_parte.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Editado Parte {exh_exhorto_parte.nombre}"),
+            url=url_for("exh_exhortos_partes.detail", exh_exhorto_parte_id=exh_exhorto_parte.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    form.nombre.data = exh_exhorto_parte.nombre
+    form.apellido_paterno.data = exh_exhorto_parte.apellido_paterno
+    form.apellido_materno.data = exh_exhorto_parte.apellido_materno
+    form.es_persona_moral.data = exh_exhorto_parte.es_persona_moral
+    form.genero.data = exh_exhorto_parte.genero
+    form.tipo_parte.data = exh_exhorto_parte.tipo_parte
+    form.tipo_parte_nombre.data = exh_exhorto_parte.tipo_parte_nombre
+    return render_template("exh_exhortos_partes/edit.jinja2", form=form, exh_exhorto_parte=exh_exhorto_parte)

@@ -2,18 +2,18 @@
 {% import 'macros/form.jinja2' as f with context %}
 {% import 'macros/topbar.jinja2' as topbar %}
 
-{% block title %}Nuevo Parte{% endblock %}
+{% block title %}Editar Parte{% endblock %}
 
 {% block topbar_actions %}
-    {% call topbar.page_buttons('Nuevo Parte') %}
+    {% call topbar.page_buttons('Editar ' + exh_exhorto_parte.nombre_completo) %}
         {{ topbar.button_cancel() }}
     {% endcall %}
 {% endblock %}
 
 {% block content %}
     {% call f.card() %}
-        {% set form_kwargs = {'exh_exhorto_id': exh_exhorto.id} %}
-        {% call f.form_tag('exh_exhortos_partes.new_with_exh_exhorto', fid='exh_exhorto_parte_form', **form_kwargs) %}
+        {% set form_kwargs = {'exh_exhorto_parte_id': exh_exhorto_parte.id} %}
+        {% call f.form_tag('exh_exhortos_partes.edit', fid='exh_exhorto_parte_form', **form_kwargs) %}
             {% call f.form_group(form.nombre) %}{% endcall %}
             {% call f.form_group(form.es_persona_moral) %}{% endcall %}
             {% call f.form_group(form.apellido_paterno) %}{% endcall %}
@@ -35,20 +35,27 @@
         const tipo_parte_input = document.getElementById("tipo_parte");
         const tipo_parte_nombre_input = document.getElementById("tipo_parte_nombre");
 
-        checkbox.addEventListener('change', function() {
+        const deshabilitar_es_persona_moral = function() {
             const habilitar = checkbox.checked;
 
             apellido_paterno_input.disabled = habilitar;
             apellido_materno_input.disabled = habilitar;
-            genero_input.disabled = habilitar;
-        });
+        };
 
-        tipo_parte_input.addEventListener('change', function() {
+        const deshabilitar_tipo_parte = function() {
             if (tipo_parte_input.value == 0) {
                 tipo_parte_nombre_input.disabled = false;
             } else {
                 tipo_parte_nombre_input.disabled = true;
             }
-        });
+        };
+
+        // Añadir eventos de cambio
+        checkbox.addEventListener('change', deshabilitar_es_persona_moral);
+        tipo_parte_input.addEventListener('change', deshabilitar_tipo_parte);
+
+        // Ejecutar por primera vez
+        deshabilitar_es_persona_moral();
+        deshabilitar_tipo_parte();
     </script>
 {% endblock %}

@@ -29,4 +29,4 @@ class ExhExhortoParteForm(FlaskForm):
     es_persona_moral = BooleanField("Es Persona Moral")
     tipo_parte = SelectField("Tipo de Parte", coerce=int, choices=TIPOS_PARTES, validators=[Optional()])
     tipo_parte_nombre = StringField("Tipo Parte Nombre")
-    crear = SubmitField("Crear")
+    guardar = SubmitField("Guardar")
