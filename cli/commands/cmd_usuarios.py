@@ -1,5 +1,5 @@
 """
-CLI usuarios
+CLI Usuarios
 """
 
 import sys
