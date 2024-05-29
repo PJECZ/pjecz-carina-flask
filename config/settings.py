@@ -4,6 +4,7 @@ Settings
 Para produccion, configure los siguientes secretos en Google Cloud Secret Manager:
 
 - pjecz_carina_flask_cloud_storage_deposito
+- pjecz_carina_flask_estado_clave
 - pjecz_carina_flask_host
 - pjecz_carina_flask_redis_url
 - pjecz_carina_flask_salt
@@ -14,6 +15,7 @@ Para produccion, configure los siguientes secretos en Google Cloud Secret Manage
 Para desarrollo, debe crear un archivo .env con las variables de entorno:
 
 - CLOUD_STORAGE_DEPOSITO
+- ESTADO_CLAVE
 - HOST
 - REDIS_URL
 - SALT
@@ -60,6 +62,7 @@ class Settings(BaseSettings):
     """Settings"""
 
     CLOUD_STORAGE_DEPOSITO: str = get_secret("cloud_storage_deposito")
+    ESTADO_CLAVE: str = get_secret("estado_clave")
     HOST: str = get_secret("host")
     REDIS_URL: str = get_secret("redis_url")
     SALT: str = get_secret("salt")
