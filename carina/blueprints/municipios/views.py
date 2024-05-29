@@ -3,14 +3,12 @@ Municipios, vistas
 """
 
 import json
-from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_login import current_user, login_required
+from flask import Blueprint, render_template, request, url_for
+from flask_login import login_required
 
 from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_string, safe_message
+from lib.safe_string import safe_string
 
-from carina.blueprints.bitacoras.models import Bitacora
-from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.municipios.models import Municipio

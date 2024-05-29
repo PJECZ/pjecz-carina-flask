@@ -182,7 +182,7 @@ def detail(autoridad_id):
 @autoridades.route("/autoridades/nuevo", methods=["GET", "POST"])
 @permission_required(MODULO, Permiso.CREAR)
 def new():
-    """Nuevo Autoridad"""
+    """Nueva Autoridad"""
     form = AutoridadForm()
     if form.validate_on_submit():
         # Validar que la clave no se repita
@@ -191,9 +191,9 @@ def new():
             flash("La clave ya está en uso. Debe de ser única.", "warning")
             return render_template("autoridades/new.jinja2", form=form)
         # Guardar
-        distrito = Distrito.query.get_or_404(form.distrito.data)
         autoridad = Autoridad(
-            distrito=distrito,
+            distrito_id=form.distrito.data,
+            municipio_id=form.municipio.data,
             clave=clave,
             descripcion=safe_string(form.descripcion.data, save_enie=True),
             descripcion_corta=safe_string(form.descripcion_corta.data, save_enie=True),
@@ -236,8 +236,8 @@ def edit(autoridad_id):
                 flash("La clave ya está en uso. Debe de ser única.", "warning")
         # Si es valido actualizar
         if es_valido:
-            distrito = Distrito.query.get_or_404(form.distrito.data)
-            autoridad.distrito = distrito
+            autoridad.distrito_id = form.distrito.data
+            autoridad.municipio_id = form.municipio.data
             autoridad.clave = clave
             autoridad.descripcion = safe_string(form.descripcion.data, save_enie=True)
             autoridad.descripcion_corta = safe_string(form.descripcion_corta.data, save_enie=True)
@@ -260,6 +260,7 @@ def edit(autoridad_id):
             flash(bitacora.descripcion, "success")
             return redirect(bitacora.url)
     form.distrito.data = autoridad.distrito_id  # Usa id porque es un SelectField
+    form.municipio.data = autoridad.municipio_id  # Usa id porque es un SelectField
     form.clave.data = autoridad.clave
     form.descripcion.data = autoridad.descripcion
     form.descripcion_corta.data = autoridad.descripcion_corta
