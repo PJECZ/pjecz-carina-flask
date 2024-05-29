@@ -4,9 +4,10 @@ Exh Exhortos, vistas
 
 import uuid
 import json
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
+from carina.blueprints.estados.models import Estado
 from lib.datatables import get_datatable_parameters, output_datatable_json
 from lib.safe_string import safe_string, safe_message
 
@@ -169,7 +170,10 @@ def new():
     form.distrito.data = "ND - NO DEFINIDO"
     form.autoridad.data = "ND - NO DEFINIDO"
     form.estado.data = "PENDIENTE"
-    return render_template("exh_exhortos/new.jinja2", form=form)
+    # Consultar el estado de origen por medio de la clave INEGI en las variables de entorno ESTADO_CLAVE
+    estado_origen_id = Estado.query.filter_by(clave=current_app.config["ESTADO_CLAVE"]).first().id
+    # Entregar
+    return render_template("exh_exhortos/new.jinja2", form=form, estado_origen_id=estado_origen_id)
 
 
 @exh_exhortos.route("/exh_exhortos/edicion/<int:exh_exhorto_id>", methods=["GET", "POST"])
