@@ -100,8 +100,7 @@
             });
         // Llamar a /municipios/select_json para cargar el select municipio, si el municipio cambia
         document.getElementById('estado_origen').addEventListener('change', () => {
-            const estadoId = 5;
-            fetch(`/municipios/select_json/${estadoId}`)
+            fetch(`/municipios/select_json/{{ estado_origen_id }}`)
                 .then(response => response.json())
                 .then(data => {
                     const municipioSelect = document.getElementById('municipio_origen');

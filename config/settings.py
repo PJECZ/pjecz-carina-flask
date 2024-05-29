@@ -37,12 +37,12 @@ PROJECT_ID = os.getenv("PROJECT_ID", "")  # Por defecto esta vacio, esto signifi
 SERVICE_PREFIX = os.getenv("SERVICE_PREFIX", "pjecz_carina_flask")
 
 
-def get_secret(secret_id: str) -> str:
+def get_secret(secret_id: str, default: str = "") -> str:
     """Get secret from google cloud secret manager"""
 
     # If not in google cloud, return environment variable
     if PROJECT_ID == "":
-        return os.getenv(secret_id.upper(), "")
+        return os.getenv(secret_id.upper(), default)
 
     # Create the secret manager client
     client = secretmanager.SecretManagerServiceClient()
@@ -62,7 +62,7 @@ class Settings(BaseSettings):
     """Settings"""
 
     CLOUD_STORAGE_DEPOSITO: str = get_secret("cloud_storage_deposito")
-    ESTADO_CLAVE: str = get_secret("estado_clave")
+    ESTADO_CLAVE: str = get_secret("estado_clave", "05")  # Por defecto es 05 que es Coahuila de Zaragoza
     HOST: str = get_secret("host")
     REDIS_URL: str = get_secret("redis_url")
     SALT: str = get_secret("salt")
