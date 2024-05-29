@@ -9,12 +9,6 @@
         {% if current_user.can_view('AUTORIDADES') %}
             {{ topbar.button('Autoridades', url_for('autoridades.list_active'), 'mdi:scale-balance') }}
         {% endif %}
-        {% if current_user.can_view('ESTADOS') %}
-            {{ topbar.button('Estados', url_for('estados.list_active'), 'mdi:map') }}
-        {% endif %}
-        {% if current_user.can_view('MUNICIPIOS') %}
-            {{ topbar.button('Municipios', url_for('municipios.list_active'), 'mdi:crosshairs-gps') }}
-        {% endif %}
         {% if current_user.can_admin('DISTRITOS') %}
             {% if estatus == 'A' %}{{ topbar.button_list_inactive('Inactivos', url_for('distritos.list_inactive')) }}{% endif %}
             {% if estatus == 'B' %}{{ topbar.button_list_active('Activos', url_for('distritos.list_active')) }}{% endif %}
