@@ -34,14 +34,14 @@
         const genero_input = document.getElementById("genero");
         const tipo_parte_input = document.getElementById("tipo_parte");
         const tipo_parte_nombre_input = document.getElementById("tipo_parte_nombre");
-
+        // Deshabilita campos de apellidos cuando es persona moral
         const deshabilitar_es_persona_moral = function() {
             const habilitar = checkbox.checked;
 
             apellido_paterno_input.disabled = habilitar;
             apellido_materno_input.disabled = habilitar;
         };
-
+        // Deshabilita campo tipo parte nombre cuando No es NO DEFINIDO
         const deshabilitar_tipo_parte = function() {
             if (tipo_parte_input.value == 0) {
                 tipo_parte_nombre_input.disabled = false;
@@ -49,11 +49,9 @@
                 tipo_parte_nombre_input.disabled = true;
             }
         };
-
         // Añadir eventos de cambio
         checkbox.addEventListener('change', deshabilitar_es_persona_moral);
         tipo_parte_input.addEventListener('change', deshabilitar_tipo_parte);
-
         // Ejecutar por primera vez
         deshabilitar_es_persona_moral();
         deshabilitar_tipo_parte();

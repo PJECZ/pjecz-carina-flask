@@ -34,7 +34,7 @@
         const genero_input = document.getElementById("genero");
         const tipo_parte_input = document.getElementById("tipo_parte");
         const tipo_parte_nombre_input = document.getElementById("tipo_parte_nombre");
-
+        // Deshabilita los campos de apellidos cunado es persona moral
         checkbox.addEventListener('change', function() {
             const habilitar = checkbox.checked;
 
@@ -42,7 +42,7 @@
             apellido_materno_input.disabled = habilitar;
             genero_input.disabled = habilitar;
         });
-
+        // Habilita el campo tipo parte nombre cuando en NO DEFINIDO el tipo de parte
         tipo_parte_input.addEventListener('change', function() {
             if (tipo_parte_input.value == 0) {
                 tipo_parte_nombre_input.disabled = false;

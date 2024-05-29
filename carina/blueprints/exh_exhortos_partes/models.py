@@ -62,6 +62,13 @@ class ExhExhortoParte(database.Model, UniversalMixin):
         return self.nombre + " " + self.apellido_paterno + " " + self.apellido_materno
 
     @property
+    def genero_descripcion(self):
+        """Descripción del genero de la persona"""
+        if self.genero == "M":
+            return "M) Masculino"
+        return "F) Femenino"
+
+    @property
     def tipo_parte_descripcion(self):
         """Descripción del tipo de parte"""
         if self.tipo_parte == 0:
@@ -71,7 +78,7 @@ class ExhExhortoParte(database.Model, UniversalMixin):
         elif self.tipo_parte == 2:
             return "2) Demandado"
         else:
-            return "E) ERROR VALOR DESCONOCIDO"
+            return "-"
 
     def __repr__(self):
         """Representación"""
