@@ -59,8 +59,6 @@
                 {{ detail.label_value_big('Estado', exh_exhorto.estado) }}
             </div>
         </div>
-        {# detail.label_value('ID', exh_exhorto.id) #}
-        {# detail.label_value('Creado', moment(exh_exhorto.creado, local=True).format('DD MMM YYYY')) #}
     {% endcall %}
     <!-- Tabla de Partes -->
     {% call detail.card("Partes") %}
@@ -74,7 +72,9 @@
                 </tr>
             </thead>
         </table>
-        <a class="btn btn-primary" href="{{url_for('exh_exhortos_partes.new_with_exh_exhorto', exh_exhorto_id=exh_exhorto.id)}}">Agregar</a>
+        {% if current_user.can_insert('EXH EXHORTOS PARTES') %}
+            <a class="btn btn-primary" href="{{url_for('exh_exhortos_partes.new_with_exh_exhorto', exh_exhorto_id=exh_exhorto.id)}}">Agregar</a>
+        {% endif %}
     {% endcall %}
     <!-- Tabla de Archivos -->
     {% call detail.card("Archivos") %}
@@ -89,6 +89,9 @@
                 </tr>
             </thead>
         </table>
+        {% if current_user.can_insert('EXH EXHORTOS ARCHIVOS') %}
+            <a class="btn btn-primary" href="{{url_for('exh_exhortos_archivos.new_with_exh_exhorto', exh_exhorto_id=exh_exhorto.id)}}">Agregar</a>
+        {% endif %}
     {% endcall %}
 {% endblock %}
 
