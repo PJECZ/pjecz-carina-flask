@@ -26,7 +26,8 @@
         <table id="exh_exhortos_archivos_datatable" class="table display nowrap" style="width:100%">
             <thead>
                 <tr>
-                    <th>Nombre Archivo</th>
+                    <th>Archivo</th>
+                    <th>Descargar</th>
                     <th>Tipo Documento</th>
                     <th>Estado</th>
                     <th>Recepción</th>
@@ -47,7 +48,8 @@
         configDTExhExhortosArchivos['ajax']['url'] = '/exh_exhortos_archivos/datatable_json';
         configDTExhExhortosArchivos['ajax']['data'] = {{ filtros }};
         configDTExhExhortosArchivos['columns'] = [
-            { data: 'vinculo' },
+            { data: 'detalle' },
+            { data: 'descargar_pdf' },
             { data: 'tipo_documento_nombre' },
             { data: 'estado' },
             { data: 'fecha_hora_recepcion' },
@@ -55,7 +57,7 @@
         ];
         configDTExhExhortosArchivos['columnDefs'] = [
             {
-                targets: 0, // vinculo
+                targets: 0, // detalle
                 data: null,
                 render: function(data, type, row, meta) {
                     if (data.url != '') {
@@ -63,6 +65,13 @@
                     } else {
                         return data.nombre_archivo;
                     }
+                }
+            },
+            {
+                targets: 1, // descargar_pdf
+                data: null,
+                render: function(data, type, row, meta) {
+                    return '<a href="' + data.url + '" download="' + data.nombre_archivo + '"><span class="iconify" data-icon="mdi:file-pdf-box"></span></a>';
                 }
             }
         ];

@@ -37,7 +37,7 @@
                 {{ detail.label_value('Fojas', exh_exhorto.fojas) }}
                 {{ detail.label_value('Días en responder', exh_exhorto.dias_responder) }}
                 {{ detail.label_value('Tipo de diligenciación', exh_exhorto.tipo_diligenciacion_nombre) }}
-                {{ detail.label_value('Fecha de origen', exh_exhorto.fecha_origen) }}
+                {{ detail.label_value('Fecha de origen', moment(exh_exhorto.fecha_origen).format('llll')) }}
                 {{ detail.label_value('Observaciones', exh_exhorto.observaciones) }}
             </div>
             <div class="col-md-6">
@@ -72,8 +72,10 @@
                 </tr>
             </thead>
         </table>
-        {% if current_user.can_insert('EXH EXHORTOS PARTES') %}
-            <a class="btn btn-primary" href="{{url_for('exh_exhortos_partes.new_with_exh_exhorto', exh_exhorto_id=exh_exhorto.id)}}">Agregar</a>
+        {% if exh_exhorto.estado == 'PENDIENTE' %}
+            {% if current_user.can_insert('EXH EXHORTOS PARTES') %}
+                <a class="btn btn-primary" href="{{url_for('exh_exhortos_partes.new_with_exh_exhorto', exh_exhorto_id=exh_exhorto.id)}}">Agregar</a>
+            {% endif %}
         {% endif %}
     {% endcall %}
     <!-- Tabla de Archivos -->
@@ -81,7 +83,8 @@
         <table id="exh_exhortos_archivos_datatable" class="table display nowrap" style="width:100%">
             <thead>
                 <tr>
-                    <th>Nombre Archivo</th>
+                    <th>Archivo</th>
+                    <th>Descargar</th>
                     <th>Tipo Documento</th>
                     <th>Estado</th>
                     <th>Recepción</th>
@@ -89,8 +92,10 @@
                 </tr>
             </thead>
         </table>
-        {% if current_user.can_insert('EXH EXHORTOS ARCHIVOS') %}
-            <a class="btn btn-primary" href="{{url_for('exh_exhortos_archivos.new_with_exh_exhorto', exh_exhorto_id=exh_exhorto.id)}}">Agregar</a>
+        {% if exh_exhorto.estado == 'PENDIENTE' %}
+            {% if current_user.can_insert('EXH EXHORTOS ARCHIVOS') %}
+                <a class="btn btn-primary" href="{{url_for('exh_exhortos_archivos.new_with_exh_exhorto', exh_exhorto_id=exh_exhorto.id)}}">Agregar</a>
+            {% endif %}
         {% endif %}
     {% endcall %}
 {% endblock %}
@@ -158,7 +163,8 @@
         configDTArchivos['ajax']['url'] = '/exh_exhortos_archivos/datatable_json';
         configDTArchivos['ajax']['data'] = {'estatus':'A', 'exh_exhorto_id':{{exh_exhorto.id}}};
         configDTArchivos['columns'] = [
-            { data: 'vinculo' },
+            { data: 'detalle' },
+            { data: 'descargar_pdf' },
             { data: 'tipo_documento_nombre' },
             { data: 'estado' },
             { data: 'fecha_hora_recepcion' },
@@ -166,7 +172,7 @@
         ];
         configDTArchivos['columnDefs'] = [
             {
-                targets: 0, // vinculo
+                targets: 0, // detalle
                 data: null,
                 render: function(data, type, row, meta) {
                     if (data.url != '') {
@@ -174,6 +180,13 @@
                     } else {
                         return data.nombre_archivo;
                     }
+                }
+            },
+            {
+                targets: 1, // descargar_pdf
+                data: null,
+                render: function(data, type, row, meta) {
+                    return '<a href="' + data.url + '" download="' + data.nombre_archivo + '"><span class="iconify" data-icon="mdi:file-pdf-box" style="font-size:2.0rem"></span></a>';
                 }
             }
         ];
