@@ -3,6 +3,7 @@ Exh Exhortos Archivos, vistas
 """
 
 import json
+from datetime import datetime
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
@@ -14,6 +15,8 @@ from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
+from carina.blueprints.exh_exhortos.models import ExhExhorto
+from carina.blueprints.exh_exhortos_archivos.forms import ExhExhortoArchivoEditForm, ExhExhortoArchivoNewForm
 
 MODULO = "EXH EXHORTOS ARCHIVOS"
 
@@ -68,12 +71,12 @@ def datatable_json():
                 "creado": resultado.creado.strftime("%Y-%m-%d %H:%M:%S"),
                 "vinculo": {
                     "nombre_archivo": resultado.nombre_archivo,
-                    "url": resultado.url if resultado.url != "" else "",
+                    "url": url_for("exh_exhortos_archivos.detail", exh_exhorto_archivo_id=resultado.id),
                 },
                 "tipo_documento_nombre": resultado.tipo_documento_nombre,
                 "estado": resultado.estado,
-                "fecha_hora_recepcion": resultado.fecha_hora_recepcion,
-                "tamano": resultado.tamano,
+                "fecha_hora_recepcion": resultado.fecha_hora_recepcion.strftime("%Y-%m-%d %H:%M:%S"),
+                "tamano": f"{resultado.tamano / 1024} MB",
             }
         )
     # Entregar JSON
@@ -101,3 +104,107 @@ def list_inactive():
         titulo="Archivos inactivos",
         estatus="B",
     )
+
+
+@exh_exhortos_archivos.route("/exh_exhortos_archivos/<int:exh_exhorto_archivo_id>")
+def detail(exh_exhorto_archivo_id):
+    """Detalle de un Archivo"""
+    exh_exhorto_archivo = ExhExhortoArchivo.query.get_or_404(exh_exhorto_archivo_id)
+    return render_template("exh_exhortos_archivos/detail.jinja2", exh_exhorto_archivo=exh_exhorto_archivo)
+
+
+@exh_exhortos_archivos.route("/exh_exhortos_archivos/nuevo_con_exhorto/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.CREAR)
+def new_with_exh_exhorto(exh_exhorto_id):
+    """Nuevo Archivo"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoArchivoNewForm()
+    if form.validate_on_submit():
+        exh_exhorto_archivo = ExhExhortoArchivo(
+            exh_exhorto=exh_exhorto,
+            nombre_archivo=safe_string(form.nombre_archivo.data),
+            hash_sha1="ABC-123-XXX",
+            hash_sha256="ABC-123-256-999-ZZZ",
+            tipo_documento=form.tipo_documento.data,
+            url="www.google.com/data.pdf",
+            estado="RECIBIDO",
+            tamano=1024 * 3,
+            fecha_hora_recepcion=datetime.now(),
+        )
+        exh_exhorto_archivo.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Nuevo Archivo {exh_exhorto_archivo.nombre_archivo}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto_id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    return render_template("exh_exhortos_archivos/new_with_exh_exhorto.jinja2", form=form, exh_exhorto=exh_exhorto)
+
+
+@exh_exhortos_archivos.route("/exh_exhortos_archivos/edicion/<int:exh_exhorto_archivo_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def edit(exh_exhorto_archivo_id):
+    """Editar Archivo"""
+    exh_exhorto_archivo = ExhExhortoArchivo.query.get_or_404(exh_exhorto_archivo_id)
+    form = ExhExhortoArchivoEditForm()
+    if form.validate_on_submit():
+        exh_exhorto_archivo.nombre_archivo = safe_string(form.nombre_archivo.data)
+        exh_exhorto_archivo.tipo_documento = form.tipo_documento.data
+        exh_exhorto_archivo.fecha_hora_recepcion = datetime.now()
+        exh_exhorto_archivo.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Editado Archivo {exh_exhorto_archivo.nombre_archivo}"),
+            url=url_for("exh_exhortos_archivos.detail", exh_exhorto_archivo_id=exh_exhorto_archivo.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    form.nombre_archivo.data = exh_exhorto_archivo.nombre_archivo
+    form.hash_sha1.data = exh_exhorto_archivo.hash_sha1
+    form.hash_sha256.data = exh_exhorto_archivo.hash_sha256
+    form.tipo_documento.data = exh_exhorto_archivo.tipo_documento
+    form.url.data = exh_exhorto_archivo.url
+    form.tamano.data = f"{exh_exhorto_archivo.tamano / 1024} MB"
+    form.fecha_hora_recepcion.data = exh_exhorto_archivo.fecha_hora_recepcion.strftime("%Y-%m-%d %H:%M:%S")
+    return render_template("exh_exhortos_archivos/edit.jinja2", form=form, exh_exhorto_archivo=exh_exhorto_archivo)
+
+
+@exh_exhortos_archivos.route("/exh_exhortos_archivos/eliminar/<int:exh_exhorto_archivo_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def delete(exh_exhorto_archivo_id):
+    """Eliminar Archivo"""
+    exh_exhorto_archivo = ExhExhortoArchivo.query.get_or_404(exh_exhorto_archivo_id)
+    if exh_exhorto_archivo.estatus == "A":
+        exh_exhorto_archivo.delete()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Eliminado Archivo {exh_exhorto_archivo.nombre_archivo}"),
+            url=url_for("exh_exhortos_archivos.detail", exh_exhorto_archivo_id=exh_exhorto_archivo.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_exhortos_archivos.detail", exh_exhorto_archivo_id=exh_exhorto_archivo.id))
+
+
+@exh_exhortos_archivos.route("/exh_exhortos_archivos/recuperar/<int:exh_exhorto_archivo_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def recover(exh_exhorto_archivo_id):
+    """Recuperar Archivo"""
+    exh_exhorto_archivo = ExhExhortoArchivo.query.get_or_404(exh_exhorto_archivo_id)
+    if exh_exhorto_archivo.estatus == "B":
+        exh_exhorto_archivo.recover()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Recuperado Archivo {exh_exhorto_archivo.nombre_archivo}"),
+            url=url_for("exh_exhortos_archivos.detail", exh_exhorto_archivo_id=exh_exhorto_archivo.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_exhortos_archivos.detail", exh_exhorto_archivo_id=exh_exhorto_archivo.id))
