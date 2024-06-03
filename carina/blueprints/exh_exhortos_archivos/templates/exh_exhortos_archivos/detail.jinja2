@@ -26,8 +26,8 @@
         {{ detail.label_value('Hash SHA-256', exh_exhorto_archivo.hash_sha256) }}
         {{ detail.label_value('Tipo', exh_exhorto_archivo.tipo_documento_nombre) }}
         {# detail.label_value('URL', exh_exhorto_archivo.url) #}
-        {{ detail.label_value('Tamaño', exh_exhorto_archivo.tamano / 1024) }}
-        {{ detail.label_value('Fecha y hora de recepción', exh_exhorto_archivo.fecha_hora_recepcion) }}
+        {{ detail.label_value('Tamaño', exh_exhorto_archivo.tamano) }}
+        {{ detail.label_value('Fecha y hora de recepción', moment(exh_exhorto_archivo.fecha_hora_recepcion).format('llll')) }}
         {{ detail.label_value_big('Estado', exh_exhorto_archivo.estado) }}
         <div class="row my-2">
             <div class="col-md-3 p-2">
