@@ -4,6 +4,7 @@ Exh Exhortos, vistas
 
 import uuid
 import json
+from datetime import datetime
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
@@ -77,6 +78,8 @@ def datatable_json():
                 "juzgado_origen": resultado.juzgado_origen_id,
                 "juzgado_nombre": resultado.juzgado_origen_nombre,
                 "numero_expediente_origen": resultado.numero_expediente_origen,
+                "estado_origen": resultado.municipio_origen.estado.nombre,
+                "remitente": resultado.remitente,
             }
         )
     # Entregar JSON
@@ -170,6 +173,7 @@ def new():
     form.distrito.data = "ND - NO DEFINIDO"
     form.autoridad.data = "ND - NO DEFINIDO"
     form.estado.data = "PENDIENTE"
+    form.fecha_origen.data = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     # Consultar el estado de origen por medio de la clave INEGI en las variables de entorno ESTADO_CLAVE
     estado_origen_id = Estado.query.filter_by(clave=current_app.config["ESTADO_CLAVE"]).first().id
     # Entregar

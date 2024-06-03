@@ -85,7 +85,7 @@ def datatable_json():
                 "tipo_documento_nombre": resultado.tipo_documento_nombre,
                 "estado": resultado.estado,
                 "fecha_hora_recepcion": resultado.fecha_hora_recepcion.strftime("%Y-%m-%d %H:%M:%S"),
-                "tamano": f"{resultado.tamano / 1024} MB",
+                "tamano": f"{round((resultado.tamano / 1024), 2)} MB",
             }
         )
     # Entregar JSON

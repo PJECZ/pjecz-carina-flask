@@ -27,7 +27,7 @@
                     {% call f.form_group(form.fojas) %}{% endcall %}
                     {% call f.form_group(form.dias_responder) %}{% endcall %}
                     {% call f.form_group(form.tipo_diligenciacion_nombre) %}{% endcall %}
-                    {% call f.form_group(form.fecha_origen) %}{% endcall %}
+                    {% call f.form_group(form.fecha_origen, readonly=true) %}{% endcall %}
                     {% call f.form_group(form.observaciones) %}{% endcall %}
             </div>
                 <div class="col-md-6">
