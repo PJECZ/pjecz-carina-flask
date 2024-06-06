@@ -17,7 +17,6 @@ class ExhExhorto(database.Model, UniversalMixin):
         "RECIBIDO": "Recibido",
         "TRANSFIRIENDO": "Transfiriendo",
         "PROCESANDO": "Procesando",
-        "DEVUELTO": "Devuelto",
         "RECHAZADO": "Rechazado",
         "DILIGENCIADO": "Diligenciado",
         "CONTESTADO": "Contestado",
