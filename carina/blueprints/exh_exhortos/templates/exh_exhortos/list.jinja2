@@ -23,11 +23,11 @@
                 <tr>
                     <th>Creado</th>
                     <th>UUID</th>
-                    <th>Juzgado Origen ID</th>
                     <th>Estado Origen</th>
+                    <th>Juzgado Origen</th>
                     <th>Remitente</th>
-                    <th>Juzgado Origen Nombre</th>
-                    <th>No. Expediente Origen</th>
+                    <th>Estado</th>
+                    <th>No. Exp. Origen</th>
                 </tr>
             </thead>
         </table>
@@ -46,10 +46,10 @@
         configDTExhExhortos['columns'] = [
             { data: 'creado' },
             { data: 'detalle' },
-            { data: 'juzgado_origen' },
             { data: 'estado_origen' },
+            { data: 'juzgado_origen' },
             { data: 'remitente' },
-            { data: 'juzgado_nombre' },
+            { data: 'estado' },
             { data: 'numero_expediente_origen' }
         ];
         configDTExhExhortos['columnDefs'] = [
@@ -59,7 +59,38 @@
                 render: function(data, type, row, meta) {
                     return '<a href="' + data.url + '">' + data.uuid + '</a>';
                 }
-            }
+            },
+            {
+                targets: 3, // juzgado_origen
+                data: null,
+                render: function(data, type, row, meta) {
+                    return '<span title="' + data.nombre + '">' + data.clave + '</span>';
+                }
+            },
+            {
+                targets: 5, // estado
+                data: null,
+                render: function(data, type, row, meta) {
+                    let bgcolor = "bg-dark";
+                    switch (data)    {
+                        case "RECIBIDO":        bgcolor = 'bg-primary';             break;
+                        case "TRANSFIRIENDO":   bgcolor = 'bg-primary';             break;
+                        case "PROCESANDO":      bgcolor = 'bg-warning text-dark';   break;
+                        case "RECHAZADO":       bgcolor = "bg-danger";              break;
+                        case "DEVUELTO":        bgcolor = 'bg-warning text-dark';   break;
+                        case "DILIGENCIADO":    bgcolor = "bg-primary";             break;
+                        case "CONTESTADO":      bgcolor = "bg-success";             break;
+                        case "PENDIENTE":       bgcolor = 'bg-warning text-dark';   break;
+                        case "CANCELADO":       bgcolor = "bg-secondary";           break;
+                        case "POR ENVIAR":      bgcolor = 'bg-primary';             break;
+                        case "INTENTOS AGOTADOS": bgcolor = 'bg-danger';            break;
+                        case "RECIBIDO CON EXITO": bgcolor = 'bg-warning text-dark'; break;
+                        case "NO FUE RESPONDIDO": bgcolor = 'bg-danger';            break;
+                        case "RESPONDIDO":      bgcolor = 'bg-success';             break;
+                    }
+                    return '<span class="badge rounded-pill ' + bgcolor + '">' + data + '</span>';
+                }
+            },
         ];
         // Filtros exh_exhortos
         const filtrosExhExhortos = new FiltrosDataTable('#exh_exhortos_datatable', configDTExhExhortos);

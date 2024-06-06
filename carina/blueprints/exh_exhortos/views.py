@@ -75,11 +75,14 @@ def datatable_json():
                     "uuid": resultado.exhorto_origen_id,
                     "url": url_for("exh_exhortos.detail", exh_exhorto_id=resultado.id),
                 },
-                "juzgado_origen": resultado.juzgado_origen_id,
-                "juzgado_nombre": resultado.juzgado_origen_nombre,
+                "juzgado_origen": {
+                    "clave": resultado.juzgado_origen_id,
+                    "nombre": resultado.juzgado_origen_nombre,
+                },
                 "numero_expediente_origen": resultado.numero_expediente_origen,
                 "estado_origen": resultado.municipio_origen.estado.nombre,
                 "remitente": resultado.remitente,
+                "estado": resultado.estado,
             }
         )
     # Entregar JSON
