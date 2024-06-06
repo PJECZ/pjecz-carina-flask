@@ -72,22 +72,23 @@
                 data: null,
                 render: function(data, type, row, meta) {
                     let bgcolor = "bg-dark";
+                    let icon = "circle-small";
                     switch (data)    {
-                        case "RECIBIDO":        bgcolor = 'bg-primary';             break;
-                        case "TRANSFIRIENDO":   bgcolor = 'bg-primary';             break;
-                        case "PROCESANDO":      bgcolor = 'bg-warning text-dark';   break;
-                        case "RECHAZADO":       bgcolor = "bg-danger";              break;
-                        case "DILIGENCIADO":    bgcolor = "bg-primary";             break;
-                        case "CONTESTADO":      bgcolor = "bg-success";             break;
-                        case "PENDIENTE":       bgcolor = 'bg-warning text-dark';   break;
-                        case "CANCELADO":       bgcolor = "bg-secondary";           break;
-                        case "POR ENVIAR":      bgcolor = 'bg-primary';             break;
-                        case "INTENTOS AGOTADOS": bgcolor = 'bg-danger';            break;
-                        case "RECIBIDO CON EXITO": bgcolor = 'bg-warning text-dark'; break;
-                        case "NO FUE RESPONDIDO": bgcolor = 'bg-danger';            break;
-                        case "RESPONDIDO":      bgcolor = 'bg-success';             break;
+                        case "RECIBIDO":        bgcolor = 'bg-primary';             icon="inbox-arrow-down";    break;
+                        case "TRANSFIRIENDO":   bgcolor = 'bg-primary';             icon="email-arrow-right";   break;
+                        case "PROCESANDO":      bgcolor = 'bg-warning text-dark';   icon="sync";                break;
+                        case "RECHAZADO":       bgcolor = "bg-danger";              icon="hand-back-left";      break;
+                        case "DILIGENCIADO":    bgcolor = "bg-primary";             icon="truck-delivery";      break;
+                        case "CONTESTADO":      bgcolor = "bg-success";             icon="check-circle";        break;
+                        case "PENDIENTE":       bgcolor = 'bg-warning text-dark';   icon="note-edit";           break;
+                        case "CANCELADO":       bgcolor = "bg-secondary";           icon="close-circle";        break;
+                        case "POR ENVIAR":      bgcolor = 'bg-primary';             icon="package-up";          break;
+                        case "INTENTOS AGOTADOS": bgcolor = 'bg-danger';            icon="alert-decagram";      break;
+                        case "RECIBIDO CON EXITO": bgcolor = 'bg-warning text-dark';icon="briefcase-check";     break;
+                        case "NO FUE RESPONDIDO": bgcolor = 'bg-danger';            icon="cancel";              break;
+                        case "RESPONDIDO":      bgcolor = 'bg-success';             icon="crown-circle";        break;
                     }
-                    return '<span class="badge rounded-pill ' + bgcolor + '">' + data + '</span>';
+                    return '<span class="badge rounded-pill ' + bgcolor + '"><span class="iconify" data-icon="mdi:' + icon + '" style="font-size: 16px"></span> ' + data + '</span>';
                 }
             },
         ];
