@@ -60,7 +60,10 @@
                 {{ detail.label_value('Remitente', exh_exhorto.remitente) }}
                 {{ detail.label_value('Autoridad', exh_exhorto.autoridad.clave + ' - ' + exh_exhorto.autoridad.descripcion_corta, url_for("autoridades.detail", autoridad_id=exh_exhorto.autoridad.id )) }}
                 {{ detail.label_value('Número de Exhorto', exh_exhorto.numero_exhorto) }}
-                {{ detail.label_value_big('Estado', exh_exhorto.estado) }}
+                <div class="row">
+                    <div class="col-md-3 text-end">Estado</div>
+                    <div class="col-md-9" id="estado">{{ exh_exhorto.estado }}</div>
+                </div>
             </div>
         </div>
     {% endcall %}
@@ -199,4 +202,28 @@
         filtrosArchivos.precargar();
     </script>
     {{ detail.moment_js(moment) }}
+    <!-- Renderizar el campo estado con colores e iconos -->
+    <script>
+        const campo_estado = document.getElementById("estado")
+        const valor = "{{ exh_exhorto.estado }}";
+        let bgcolor = "bg-dark";
+        let icon = "circle-small";
+        switch (valor)    {
+            case "RECIBIDO":        bgcolor = 'bg-primary';             icon="inbox-arrow-down";    break;
+            case "TRANSFIRIENDO":   bgcolor = 'bg-primary';             icon="email-arrow-right";   break;
+            case "PROCESANDO":      bgcolor = 'bg-warning text-dark';   icon="sync";                break;
+            case "RECHAZADO":       bgcolor = "bg-danger";              icon="hand-back-left";      break;
+            case "DILIGENCIADO":    bgcolor = "bg-primary";             icon="truck-delivery";      break;
+            case "CONTESTADO":      bgcolor = "bg-success";             icon="check-circle";        break;
+            case "PENDIENTE":       bgcolor = 'bg-warning text-dark';   icon="note-edit";           break;
+            case "CANCELADO":       bgcolor = "bg-secondary";           icon="close-circle";        break;
+            case "POR ENVIAR":      bgcolor = 'bg-primary';             icon="package-up";          break;
+            case "INTENTOS AGOTADOS": bgcolor = 'bg-danger';            icon="alert-decagram";      break;
+            case "RECIBIDO CON EXITO": bgcolor = 'bg-warning text-dark';icon="briefcase-check";     break;
+            case "NO FUE RESPONDIDO": bgcolor = 'bg-danger';            icon="cancel";              break;
+            case "RESPONDIDO":      bgcolor = 'bg-success';             icon="crown-circle";        break;
+        }
+        html = '<h4><span class="badge rounded-pill ' + bgcolor + '"><span class="iconify" data-icon="mdi:' + icon + '"></span> ' + valor + '</span></h4>';
+        campo_estado.innerHTML = html;
+    </script>
 {% endblock %}
