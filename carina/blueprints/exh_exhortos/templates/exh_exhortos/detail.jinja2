@@ -66,6 +66,16 @@
                 </div>
             </div>
         </div>
+        {% if exh_exhorto.estado == 'PENDIENTE' %}
+        <div class="row text-center">
+            <div class="col-md-6 d-grid gap-2">
+                {{ modals.button_modal("Cancelar", url_for("exh_exhortos.cancel", exh_exhorto_id=exh_exhorto.id), "cancelar_btn", "", "¿Desea cancelar el exhorto?", "btn-danger") }}
+            </div>
+            <div class="col-md-6 d-grid gap-2">
+                {{ modals.button_modal("Enviar", url_for("exh_exhortos.enviar", exh_exhorto_id=exh_exhorto.id), "enviar_btn", "", "¿Desea envíar el exhorto?", "btn-primary") }}
+            </div>
+        </div>
+        {% endif %}
     {% endcall %}
     <!-- Tabla de Partes -->
     {% call detail.card("Partes") %}
@@ -226,4 +236,9 @@
         html = '<h4><span class="badge rounded-pill ' + bgcolor + '"><span class="iconify" data-icon="mdi:' + icon + '"></span> ' + valor + '</span></h4>';
         campo_estado.innerHTML = html;
     </script>
+    {% if exh_exhorto.estado == 'PENDIENTE' %}
+    <!-- Modales de botones en estado Pendiente -->
+        {{ modals.custom_javascript('Cancelar', '¿Desear cancelar el exhorto?', "cancelar_btn") }}
+        {{ modals.custom_javascript('Envíar', '¿Desear envíar el exhorto?', "enviar_btn") }}
+    {% endif %}
 {% endblock %}
