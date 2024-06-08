@@ -2,12 +2,15 @@
 Exh Exhortos Archivos, modelos
 """
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from datetime import datetime
+from typing import Optional
 
-from lib.universal_mixin import UniversalMixin
+from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql.functions import now
 
 from carina.extensions import database
+from lib.universal_mixin import UniversalMixin
 
 
 class ExhExhortoArchivo(database.Model, UniversalMixin):
@@ -28,38 +31,38 @@ class ExhExhortoArchivo(database.Model, UniversalMixin):
     __tablename__ = "exh_exhortos_archivos"
 
     # Clave primaria
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
     # Clave foránea
-    exh_exhorto_id = Column(Integer, ForeignKey("exh_exhortos.id"), index=True, nullable=False)
-    exh_exhorto = relationship("ExhExhorto", back_populates="exh_exhortos_archivos")
+    exh_exhorto_id: Mapped[int] = mapped_column(ForeignKey("exh_exhortos.id"))
+    exh_exhorto: Mapped["ExhExhorto"] = relationship(back_populates="exh_exhortos_archivos")
 
     # Nombre del archivo, como se enviará. Este debe incluir el la extensión del archivo.
-    nombre_archivo = Column(String(256), nullable=False)
+    nombre_archivo: Mapped[str] = mapped_column(String(256))
 
-    # Hash SHA1 en hexadecimal que corresponde al archivo a recibir. Esto para comprobar la integridad del archivo.
-    hash_sha1 = Column(String(256))
+    # Hash SHA1 en hexadecimal que corresponde al archivo a recibir. Esto para comprobar la integridad del archivo. Opcional.
+    hash_sha1: Mapped[Optional[str]] = mapped_column(String(256))
 
-    # Hash SHA256 en hexadecimal que corresponde al archivo a recibir. Esto para comprobar la integridad del archivo.
-    hash_sha256 = Column(String(256))
+    # Hash SHA256 en hexadecimal que corresponde al archivo a recibir. Esto para comprobar la integridad del archivo. Opcional.
+    hash_sha256: Mapped[Optional[str]] = mapped_column(String(256))
 
     # Identificador del tipo de documento que representa el archivo:
     # 1 = Oficio
     # 2 = Acuerdo
     # 3 = Anexo
-    tipo_documento = Column(Integer, nullable=False)
-
-    # URL del archivo en Google Storage
-    url = Column(String(512), nullable=False, default="", server_default="")
+    tipo_documento: Mapped[int]
 
     # Estado de recepción del documento
-    estado = Column(Enum(*ESTADOS, name="exh_exhortos_archivos_estados", native_enum=False), nullable=True)
+    estado: Mapped[str] = mapped_column(Enum(*ESTADOS, name="exh_exhortos_archivos_estados", native_enum=False), index=True)
+
+    # URL del archivo en Google Storage. Opcional para guardar, obtener el ID, y crear la ruta con ese ID hasheado.
+    url: Mapped[Optional[str]] = mapped_column(String(512))
 
     # Tamaño del archivo recibido en bytes
-    tamano = Column(Integer, nullable=False)
+    tamano: Mapped[Optional[int]]
 
     # Fecha y hora de recepción del documento
-    fecha_hora_recepcion = Column(DateTime, nullable=False)
+    fecha_hora_recepcion: Mapped[datetime] = mapped_column(DateTime, default=now())
 
     @property
     def tipo_documento_nombre(self):

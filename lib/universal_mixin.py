@@ -2,12 +2,15 @@
 Universal Mixin
 """
 
-from hashids import Hashids
-from sqlalchemy import Column, DateTime, String
-from sqlalchemy.sql import func
+from datetime import datetime
 
-from config.settings import get_settings
+from hashids import Hashids
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.sql.functions import now
+from sqlalchemy.types import CHAR
+
 from carina.extensions import database
+from config.settings import get_settings
 
 settings = get_settings()
 hashids = Hashids(salt=settings.SALT, min_length=8)
@@ -16,9 +19,9 @@ hashids = Hashids(salt=settings.SALT, min_length=8)
 class UniversalMixin:
     """Columnas y metodos universales"""
 
-    creado = Column(DateTime, default=func.now(), nullable=False)
-    modificado = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
-    estatus = Column(String(1), default="A", nullable=False)
+    creado: Mapped[datetime] = mapped_column(default=now())
+    modificado: Mapped[datetime] = mapped_column(default=now(), onupdate=now())
+    estatus: Mapped[str] = mapped_column(CHAR, server_default="A", default="A")
 
     def delete(self):
         """Eliminar registro"""

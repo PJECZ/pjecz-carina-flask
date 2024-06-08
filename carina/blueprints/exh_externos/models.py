@@ -2,12 +2,13 @@
 Exh Externos, modelos
 """
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from typing import List
 
-from lib.universal_mixin import UniversalMixin
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from carina.extensions import database
+from lib.universal_mixin import UniversalMixin
 
 
 class ExhExterno(database.Model, UniversalMixin):
@@ -17,7 +18,7 @@ class ExhExterno(database.Model, UniversalMixin):
     __tablename__ = "exh_externos"
 
     # Clave primaria
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
     # Columnas
     clave = Column(String(16), unique=True, nullable=False)
