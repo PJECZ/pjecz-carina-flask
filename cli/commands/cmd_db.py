@@ -12,10 +12,12 @@ from carina.app import create_app
 from carina.extensions import database
 from cli.commands.alimentar_autoridades import alimentar_autoridades
 from cli.commands.alimentar_distritos import alimentar_distritos, eliminar_distritos_sin_autoridades
+from cli.commands.alimentar_domicilios import alimentar_domicilios
 from cli.commands.alimentar_estados import alimentar_estados
 from cli.commands.alimentar_materias import alimentar_materias
 from cli.commands.alimentar_modulos import alimentar_modulos
 from cli.commands.alimentar_municipios import alimentar_municipios
+from cli.commands.alimentar_oficinas import alimentar_oficinas
 from cli.commands.alimentar_permisos import alimentar_permisos
 from cli.commands.alimentar_roles import alimentar_roles
 from cli.commands.alimentar_usuarios import alimentar_usuarios
@@ -23,10 +25,12 @@ from cli.commands.alimentar_usuarios_roles import alimentar_usuarios_roles
 from cli.commands.copiar import copiar_tabla
 from cli.commands.respaldar_autoridades import respaldar_autoridades
 from cli.commands.respaldar_distritos import respaldar_distritos
+from cli.commands.respaldar_domicilios import respaldar_domicilios
 from cli.commands.respaldar_estados import respaldar_estados
 from cli.commands.respaldar_materias import respaldar_materias
 from cli.commands.respaldar_modulos import respaldar_modulos
 from cli.commands.respaldar_municipios import respaldar_municipios
+from cli.commands.respaldar_oficinas import respaldar_oficinas
 from cli.commands.respaldar_roles_permisos import respaldar_roles_permisos
 from cli.commands.respaldar_usuarios_roles import respaldar_usuarios_roles
 
@@ -70,6 +74,8 @@ def alimentar():
     alimentar_distritos()
     alimentar_autoridades()
     eliminar_distritos_sin_autoridades()
+    alimentar_domicilios()
+    alimentar_oficinas()
     alimentar_usuarios()
     alimentar_usuarios_roles()
     click.echo("Termina alimentar.")
@@ -88,10 +94,12 @@ def respaldar():
     """Respaldar"""
     respaldar_autoridades()
     respaldar_distritos()
+    respaldar_domicilios()
     respaldar_estados()
     respaldar_materias()
     respaldar_modulos()
     respaldar_municipios()
+    respaldar_oficinas()
     respaldar_roles_permisos()
     respaldar_usuarios_roles()
     click.echo("Termina respaldar.")
@@ -99,7 +107,7 @@ def respaldar():
 
 @click.command()
 def copiar():
-    """Copiar los registros de varias tablas desde la BD de origen a la BD de destino"""
+    """Copiar registros desde BD Origen a la BD Destino"""
     click.echo("Termina copiar.")
 
 

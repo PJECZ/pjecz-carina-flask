@@ -49,7 +49,7 @@ class ExhExhorto(database.Model, UniversalMixin):
 
     # Clave foránea: Área de recepción
     exh_area_id: Mapped[int] = mapped_column(ForeignKey("exh_areas.id"))
-    exh_area: Mapped["ExhArea"] = relationship(back_populates="exh_areas")
+    exh_area: Mapped["ExhArea"] = relationship(back_populates="exh_exhortos")
 
     # Clave foránea: Materia (el que se obtuvo en la consulta de materias del PJ exhortado) al que el Exhorto hace referencia
     materia_id: Mapped[int] = mapped_column(ForeignKey("materias.id"))

@@ -6,10 +6,10 @@ import rq
 from flask import Flask
 from redis import Redis
 
-from config.settings import Settings
 from carina.blueprints.autoridades.views import autoridades
 from carina.blueprints.bitacoras.views import bitacoras
 from carina.blueprints.distritos.views import distritos
+from carina.blueprints.domicilios.views import domicilios
 from carina.blueprints.entradas_salidas.views import entradas_salidas
 from carina.blueprints.estados.views import estados
 from carina.blueprints.exh_areas.views import exh_areas
@@ -20,6 +20,7 @@ from carina.blueprints.exh_externos.views import exh_externos
 from carina.blueprints.materias.views import materias
 from carina.blueprints.modulos.views import modulos
 from carina.blueprints.municipios.views import municipios
+from carina.blueprints.oficinas.views import oficinas
 from carina.blueprints.permisos.views import permisos
 from carina.blueprints.roles.views import roles
 from carina.blueprints.sistemas.views import sistemas
@@ -27,6 +28,7 @@ from carina.blueprints.usuarios.models import Usuario
 from carina.blueprints.usuarios.views import usuarios
 from carina.blueprints.usuarios_roles.views import usuarios_roles
 from carina.extensions import csrf, database, login_manager, moment
+from config.settings import Settings
 
 
 def create_app():
@@ -45,6 +47,7 @@ def create_app():
     app.register_blueprint(autoridades)
     app.register_blueprint(bitacoras)
     app.register_blueprint(distritos)
+    app.register_blueprint(domicilios)
     app.register_blueprint(entradas_salidas)
     app.register_blueprint(estados)
     app.register_blueprint(exh_areas)
@@ -55,6 +58,7 @@ def create_app():
     app.register_blueprint(materias)
     app.register_blueprint(modulos)
     app.register_blueprint(municipios)
+    app.register_blueprint(oficinas)
     app.register_blueprint(permisos)
     app.register_blueprint(roles)
     app.register_blueprint(sistemas)

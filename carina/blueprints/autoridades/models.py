@@ -71,6 +71,7 @@ class Autoridad(database.Model, UniversalMixin):
     limite_dias_listas_de_acuerdos: Mapped[int] = mapped_column(default=0)
 
     # Hijos
+    exh_exhortos: Mapped[List["ExhExhorto"]] = relationship(back_populates="autoridad")
     usuarios: Mapped[List["Usuario"]] = relationship(back_populates="autoridad")
 
     def __repr__(self):
