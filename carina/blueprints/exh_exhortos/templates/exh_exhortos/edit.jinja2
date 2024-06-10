@@ -5,7 +5,7 @@
 {% block title %}Editar Exhorto {{ exh_exhorto.exhorto_origen_id }}{% endblock %}
 
 {% block topbar_actions %}
-    {% call topbar.page_buttons('Editar ' + exh_exhorto.exhorto_origen_id) %}
+    {% call topbar.page_buttons('Editar ' + exh_exhorto.exhorto_origen_id | string) %}
         {{ topbar.button_cancel() }}
     {% endcall %}
 {% endblock %}

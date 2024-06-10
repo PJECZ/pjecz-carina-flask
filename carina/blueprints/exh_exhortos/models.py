@@ -122,6 +122,13 @@ class ExhExhorto(database.Model, UniversalMixin):
     # que se van a recibir el Poder Judicial exhortado en el envío del Exhorto.
     exh_exhortos_archivos: Mapped[List["ExhExhortoArchivo"]] = relationship("ExhExhortoArchivo", back_populates="exh_exhorto")
 
+    # Cuando el exhorto esta en estado POR ENVIAR
+    # Puede tener un tiempo con su anterior intento, si es nulo es que no ha sido enviado aun
+    por_enviar_tiempo_anterior: Mapped[Optional[datetime]] = mapped_column(DateTime)
+
+    # Y se lleva un contador de intentos
+    por_enviar_intentos: Mapped[int] = mapped_column(Integer, default=0)
+
     def __repr__(self):
         """Representación"""
         return f"<ExhExhorto {self.id}>"

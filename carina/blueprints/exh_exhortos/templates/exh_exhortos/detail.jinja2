@@ -6,7 +6,7 @@
 {% block title %}Exhorto{% endblock %}
 
 {% block topbar_actions %}
-    {% call topbar.page_buttons('Exhorto ' + exh_exhorto.exhorto_origen_id) %}
+    {% call topbar.page_buttons('Exhorto ' + exh_exhorto.exhorto_origen_id | string) %}
         {{ topbar.button_previous('Exhortos', url_for('exh_exhortos.list_active')) }}
         {% if current_user.can_edit('EXH EXHORTOS') %}
             {{ topbar.button_edit('Editar', url_for('exh_exhortos.edit', exh_exhorto_id=exh_exhorto.id)) }}
@@ -66,15 +66,16 @@
                 </div>
             </div>
         </div>
+        <!-- Botones de acción en estado Pendiente -->
         {% if exh_exhorto.estado == 'PENDIENTE' %}
-        <div class="row text-center">
-            <div class="col-md-6 d-grid gap-2">
-                {{ modals.button_modal("Cancelar", url_for("exh_exhortos.cancel", exh_exhorto_id=exh_exhorto.id), "cancelar_btn", "", "¿Desea cancelar el exhorto?", "btn-danger") }}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                    {{ modals.button_modal("Cancelar", url_for("exh_exhortos.cancel", exh_exhorto_id=exh_exhorto.id), "cancelar_btn", "", "¿Desea cancelar el exhorto?", "btn-danger") }}
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    {{ modals.button_modal("Enviar", url_for("exh_exhortos.enviar", exh_exhorto_id=exh_exhorto.id), "enviar_btn", "", "¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.", "btn-primary") }}
+                </div>
             </div>
-            <div class="col-md-6 d-grid gap-2">
-                {{ modals.button_modal("Enviar", url_for("exh_exhortos.enviar", exh_exhorto_id=exh_exhorto.id), "enviar_btn", "", "¿Desea envíar el exhorto?", "btn-primary") }}
-            </div>
-        </div>
         {% endif %}
     {% endcall %}
     <!-- Tabla de Partes -->
@@ -119,8 +120,8 @@
 
 {% block custom_javascript %}
     {% if current_user.can_admin('EXH EXHORTOS') %}
-        {% if exh_exhorto.estatus == 'A' %}{{ modals.custom_javascript_delete('Eliminar', '¿Eliminar el exhorto <strong>' + exh_exhorto.exhorto_origen_id + '</strong>?') }}{% endif %}
-        {% if exh_exhorto.estatus == 'B' %}{{ modals.custom_javascript_recover('Recuperar', '¿Recuperar el exhorto <strong>' + exh_exhorto.exhorto_origen_id + '</strong>?') }}{% endif %}
+        {% if exh_exhorto.estatus == 'A' %}{{ modals.custom_javascript_delete('Eliminar', '¿Eliminar este exhorto?') }}{% endif %}
+        {% if exh_exhorto.estatus == 'B' %}{{ modals.custom_javascript_recover('Recuperar', '¿Recuperar este exhorto?') }}{% endif %}
     {% endif %}
     <script src="/static/js/datatables-constructor.js"></script>
     <script src="/static/js/datatables-filtros.js"></script>
@@ -236,9 +237,9 @@
         html = '<h4><span class="badge rounded-pill ' + bgcolor + '"><span class="iconify" data-icon="mdi:' + icon + '"></span> ' + valor + '</span></h4>';
         campo_estado.innerHTML = html;
     </script>
+    <!-- Botones de acción en estado Pendiente -->
     {% if exh_exhorto.estado == 'PENDIENTE' %}
-    <!-- Modales de botones en estado Pendiente -->
         {{ modals.custom_javascript('Cancelar', '¿Desear cancelar el exhorto?', "cancelar_btn") }}
-        {{ modals.custom_javascript('Envíar', '¿Desear envíar el exhorto?', "enviar_btn") }}
+        {{ modals.custom_javascript('Enviar', '¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.', "enviar_btn") }}
     {% endif %}
 {% endblock %}
