@@ -3,18 +3,18 @@ Exh Externos, vistas
 """
 
 import json
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_clave, safe_string, safe_message, safe_url
-
 from carina.blueprints.bitacoras.models import Bitacora
+from carina.blueprints.exh_externos.forms import ExhExternoForm
+from carina.blueprints.exh_externos.models import ExhExterno
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
-from carina.blueprints.exh_externos.models import ExhExterno
-from carina.blueprints.exh_externos.forms import ExhExternoForm
+from lib.datatables import get_datatable_parameters, output_datatable_json
+from lib.safe_string import safe_clave, safe_message, safe_string, safe_url
 
 MODULO = "EXH EXTERNOS"
 
@@ -115,7 +115,7 @@ def new():
         exh_externo = ExhExterno(
             clave=clave,
             descripcion=safe_string(form.descripcion.data, save_enie=True),
-            api_key=safe_string(form.api_key.data, to_uppercase=False),
+            api_key=form.api_key.data.strip(),
             endpoint_consultar_materias=safe_url(form.endpoint_consultar_materias.data),
             endpoint_recibir_exhorto=safe_url(form.endpoint_recibir_exhorto.data),
             endpoint_recibir_exhorto_archivo=safe_url(form.endpoint_recibir_exhorto_archivo.data),
@@ -158,7 +158,7 @@ def edit(exh_externo_id):
         if es_valido:
             exh_externo.clave = clave
             exh_externo.descripcion = safe_string(form.descripcion.data, save_enie=True)
-            exh_externo.api_key = safe_string(form.api_key.data, to_uppercase=False)
+            exh_externo.api_key = form.api_key.data.strip()
             exh_externo.endpoint_consultar_materias = safe_url(form.endpoint_consultar_materias.data)
             exh_externo.endpoint_recibir_exhorto = safe_url(form.endpoint_recibir_exhorto.data)
             exh_externo.endpoint_recibir_exhorto_archivo = safe_url(form.endpoint_recibir_exhorto_archivo.data)

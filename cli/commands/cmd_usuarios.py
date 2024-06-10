@@ -7,10 +7,10 @@ from datetime import datetime, timedelta
 
 import click
 
-from lib.pwgen import generar_api_key
 from carina.app import create_app
 from carina.blueprints.usuarios.models import Usuario
 from carina.extensions import database, pwd_context
+from lib.pwgen import generar_api_key
 
 app = create_app()
 app.app_context().push()
@@ -73,6 +73,6 @@ def nueva_contrasena(email):
     click.echo(f"Se ha cambiado la contraseña de {email} en usuarios")
 
 
-cli.add_command(nueva_api_key)
 cli.add_command(mostrar_api_key)
+cli.add_command(nueva_api_key)
 cli.add_command(nueva_contrasena)

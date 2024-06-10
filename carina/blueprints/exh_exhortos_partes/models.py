@@ -2,12 +2,13 @@
 Exh Exhortos Partes, modelos
 """
 
-from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from typing import Optional
 
-from lib.universal_mixin import UniversalMixin
+from sqlalchemy import Boolean, Enum, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from carina.extensions import database
+from lib.universal_mixin import UniversalMixin
 
 
 class ExhExhortoParte(database.Model, UniversalMixin):
@@ -22,37 +23,37 @@ class ExhExhortoParte(database.Model, UniversalMixin):
     __tablename__ = "exh_exhortos_partes"
 
     # Clave primaria
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
     # Clave foránea
-    exh_exhorto_id = Column(Integer, ForeignKey("exh_exhortos.id"), index=True, nullable=False)
-    exh_exhorto = relationship("ExhExhorto", back_populates="exh_exhortos_partes")
+    exh_exhorto_id: Mapped[int] = mapped_column(ForeignKey("exh_exhortos.id"))
+    exh_exhorto: Mapped["ExhExhorto"] = relationship(back_populates="exh_exhortos_partes")
 
     # Nombre de la parte, en el caso de persona moral, solo en nombre de la empresa o razón social.
-    nombre = Column(String(256), nullable=False)
+    nombre: Mapped[str] = mapped_column(String(256))
 
-    # Apellido paterno de la parte. Solo cuando no sea persona moral.
-    apellido_paterno = Column(String(256))
+    # Apellido paterno de la parte. Solo cuando no sea persona moral. Opcional.
+    apellido_paterno: Mapped[Optional[str]] = mapped_column(String(256))
 
-    # Apellido materno de la parte, si es que aplica para la persona. Solo cuando no sea persona moral.
-    apellido_materno = Column(String(256))
+    # Apellido materno de la parte, si es que aplica para la persona. Solo cuando no sea persona moral. Opcional.
+    apellido_materno: Mapped[Optional[str]] = mapped_column(String(256))
 
     # 'M' = Masculino,
     # 'F' = Femenino.
     # Solo cuando aplique y se quiera especificar (que se tenga el dato). NO aplica para persona moral.
-    genero = Column(Enum(*GENEROS, name="exh_exhortos_partes_generos", native_enum=False), nullable=True)
+    genero: Mapped[str] = mapped_column(Enum(*GENEROS, name="exh_exhortos_partes_generos", native_enum=False))
 
     # Valor que indica si la parte es una persona moral.
-    es_persona_moral = Column(Boolean, nullable=False)
+    es_persona_moral: Mapped[bool] = mapped_column(Boolean)
 
     # Indica el tipo de parte:
     # 1 = Actor, Promovente, Ofendido;
     # 2 = Demandado, Inculpado, Imputado;
     # 0 = No definido o se especifica en tipoParteNombre
-    tipo_parte = Column(Integer, nullable=False, default=0)
+    tipo_parte: Mapped[int]
 
-    # Aquí se puede especificar el nombre del tipo de parte.
-    tipo_parte_nombre = Column(String(256))
+    # Aquí se puede especificar el nombre del tipo de parte. Opcional.
+    tipo_parte_nombre: Mapped[Optional[str]] = mapped_column(String(256))
 
     @property
     def nombre_completo(self):

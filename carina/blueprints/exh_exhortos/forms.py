@@ -3,11 +3,11 @@ Exh Exhortos, formularios
 """
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, IntegerField, TextAreaField, SelectField, RadioField
+from wtforms import IntegerField, RadioField, SelectField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Length, Optional
 
-from carina.blueprints.materias.models import Materia
 from carina.blueprints.exh_areas.models import ExhArea
+from carina.blueprints.materias.models import Materia
 
 REMITENTES = [
     ("INTERNO", "INTERNO"),
@@ -58,7 +58,7 @@ class ExhExhortoNewForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         """Inicializar y cargar opciones para materia"""
         super().__init__(*args, **kwargs)
-        self.materia.choices = [(m.id, m.nombre) for m in Materia.query.filter_by(estatus="A").order_by(Materia.clave).all()]
+        self.materia.choices = [(m.id, m.nombre) for m in Materia.query.filter_by(estatus="A").order_by(Materia.nombre).all()]
 
 
 class ExhExhortoEditForm(FlaskForm):
@@ -103,7 +103,7 @@ class ExhExhortoEditForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         """Inicializar y cargar opciones para materia y exh_area"""
         super().__init__(*args, **kwargs)
-        self.materia.choices = [(m.id, m.nombre) for m in Materia.query.filter_by(estatus="A").order_by(Materia.clave).all()]
+        self.materia.choices = [(m.id, m.nombre) for m in Materia.query.filter_by(estatus="A").order_by(Materia.nombre).all()]
         self.exh_area.choices = [
             (m.id, m.clave + " - " + m.nombre) for m in ExhArea.query.filter_by(estatus="A").order_by(ExhArea.clave).all()
         ]
