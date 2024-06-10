@@ -108,6 +108,7 @@ def respaldar():
 @click.command()
 def copiar():
     """Copiar registros desde BD Origen a la BD Destino"""
+    copiar_tabla("exh_externos")
     click.echo("Termina copiar.")
 
 
