@@ -36,11 +36,11 @@
                     {% call f.form_group(form.materia) %}{% endcall %}
                     {% call f.form_group(form.estado_destino) %}{% endcall %}
                     {% call f.form_group(form.municipio_destino) %}{% endcall %}
-                    {% call f.form_group(form.exh_area) %}{% endcall %}
-                    {% call f.form_group(form.remitente) %}{% endcall %}
-                    {% call f.form_group(form.distrito) %}{% endcall %}
-                    {% call f.form_group(form.autoridad) %}{% endcall %}
-                    {% call f.form_group(form.numero_exhorto) %}{% endcall %}
+                    {% call f.form_group(form.exh_area, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.remitente, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.distrito, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.autoridad, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.numero_exhorto, readonly=true) %}{% endcall %}
                     {% call f.form_group(form.estado, readonly=true) %}{% endcall %}
                 </div>
             </div>
