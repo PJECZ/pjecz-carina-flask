@@ -152,7 +152,6 @@ def new():
             fecha_origen=form.fecha_origen.data,
             observaciones=safe_message(form.observaciones.data, default_output_str=None),
             # Datos por defecto
-            folio_seguimiento=str(uuid.uuid4()),
             exh_area_id=1,  # valor: NO DEFINIDO
             autoridad_id=342,  # valor por defecto: ND - NO DEFINIDO
             numero_exhorto="",
@@ -171,10 +170,6 @@ def new():
         return redirect(bitacora.url)
     form.exhorto_origen_id.data = str(uuid.uuid4())  # Elaborar un UUID para mostrar READ ONLY
     form.estado_origen.data = "COAHUILA DE ZARAGOZA"
-    form.exh_area.data = "ND - NO DEFINIDO"
-    form.remitente.data = "INTERNO"
-    form.distrito.data = "ND - NO DEFINIDO"
-    form.autoridad.data = "ND - NO DEFINIDO"
     form.estado.data = "PENDIENTE"
     form.fecha_origen.data = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     # Consultar el estado de origen por medio de la clave INEGI en las variables de entorno ESTADO_CLAVE
@@ -204,10 +199,6 @@ def edit(exh_exhorto_id):
         exh_exhorto.tipo_diligenciacion_nombre = safe_string(form.tipo_diligenciacion_nombre.data)
         exh_exhorto.fecha_origen = form.fecha_origen.data
         exh_exhorto.observaciones = safe_message(form.observaciones.data, default_output_str=None)
-        exh_exhorto.remitente = form.remitente.data
-        exh_exhorto.exh_area_id = form.exh_area.data
-        exh_exhorto.autoridad_id = form.autoridad.data
-        exh_exhorto.numero_exhorto = safe_string(form.numero_exhorto.data)
         exh_exhorto.save()
         bitacora = Bitacora(
             modulo=Modulo.query.filter_by(nombre=MODULO).first(),
