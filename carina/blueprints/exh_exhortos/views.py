@@ -44,24 +44,21 @@ def datatable_json():
         consulta = consulta.filter_by(estatus=request.form["estatus"])
     else:
         consulta = consulta.filter_by(estatus="A")
-    # if "columna_id" in request.form:
-    #     consulta = consulta.filter_by(columna_id=request.form["columna_id"])
-    # if "columna_clave" in request.form:
-    #     try:
-    #         columna_clave = safe_clave(request.form["columna_clave"])
-    #         if clave != "":
-    #             consulta = consulta.filter(ExhExhorto.clave.contains(columna_clave))
-    #     except ValueError:
-    #         pass
-    # if "columna_descripcion" in request.form:
-    #     columna_descripcion = safe_string(request.form["columna_descripcion"], save_enie=True)
-    #     if columna_descripcion != "":
-    #         consulta = consulta.filter(ExhExhorto.descripcion.contains(columna_descripcion))
-    # Luego filtrar por columnas de otras tablas
-    # if "otra_columna_descripcion" in request.form:
-    #     otra_columna_descripcion = safe_string(request.form["otra_columna_descripcion"], save_enie=True)
-    #     consulta = consulta.join(OtroModelo)
-    #     consulta = consulta.filter(OtroModelo.rfc.contains(otra_columna_descripcion))
+    if "uuid" in request.form:
+        try:
+            uuid = safe_message(request.form["uuid"])
+            if uuid != "":
+                consulta = consulta.filter(ExhExhorto.exhorto_origen_id.contains(uuid))  # BUG: No funciona
+        except ValueError:
+            pass
+    if "estado" in request.form:
+        consulta = consulta.filter_by(estado=request.form["estado"])
+    # Buscar en otras tablas
+    if "estado_origen" in request.form:
+        estado_origen = safe_string(request.form["estado_origen"], save_enie=True)
+        if estado_origen != "":
+            consulta = consulta.join(Municipio).join(Estado)
+            consulta = consulta.filter(Estado.nombre.contains(estado_origen))
     # Ordenar y paginar
     registros = consulta.order_by(ExhExhorto.id.desc()).offset(start).limit(rows_per_page).all()
     total = consulta.count()
@@ -97,6 +94,7 @@ def list_active():
         filtros=json.dumps({"estatus": "A"}),
         titulo="Exhortos",
         estatus="A",
+        estados=ExhExhorto.ESTADOS,
     )
 
 
@@ -109,6 +107,7 @@ def list_inactive():
         filtros=json.dumps({"estatus": "B"}),
         titulo="Exhortos inactivos",
         estatus="B",
+        estados=ExhExhorto.ESTADOS,
     )
 
 
