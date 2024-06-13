@@ -59,8 +59,8 @@ class ExhExhorto(database.Model, UniversalMixin):
     municipio_origen_id: Mapped[int] = mapped_column(ForeignKey("municipios.id"))
     municipio_origen: Mapped["Municipio"] = relationship(back_populates="exh_exhortos_origenes")
 
-    # GUID/UUID... que sea único
-    folio_seguimiento: Mapped[str] = mapped_column(Uuid, unique=True)
+    # GUID/UUID... que sea único. Pero es opcional para nosotros cuando el estado es PENDIENTE
+    folio_seguimiento: Mapped[Optional[str]] = mapped_column(Uuid)
 
     # UUID identificador con el que el PJ exhortante identifica el exhorto que envía
     exhorto_origen_id: Mapped[str] = mapped_column(Uuid)
