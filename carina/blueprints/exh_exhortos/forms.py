@@ -7,12 +7,8 @@ from wtforms import IntegerField, RadioField, SelectField, StringField, SubmitFi
 from wtforms.validators import DataRequired, Length, Optional
 
 from carina.blueprints.exh_areas.models import ExhArea
+from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.materias.models import Materia
-
-REMITENTES = [
-    ("INTERNO", "INTERNO"),
-    ("EXTERNO", "EXTERNO"),
-]
 
 
 def materias_opciones():
@@ -92,7 +88,7 @@ class ExhExhortoEditForm(FlaskForm):
         "Autoridad", choices=None, validate_choice=False, validators=[DataRequired()]
     )  # Las opciones se agregan con JS
     numero_exhorto = StringField("Número de Exhorto", validators=[Optional(), Length(max=256)])
-    estado = StringField("Estado")
+    estado = StringField("Estado")  # Read only
     guardar = SubmitField("Guardar")
 
     def __init__(self, *args, **kwargs):
