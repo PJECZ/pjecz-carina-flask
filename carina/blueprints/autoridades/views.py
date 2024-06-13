@@ -309,3 +309,27 @@ def recover(autoridad_id):
         bitacora.save()
         flash(bitacora.descripcion, "success")
     return redirect(url_for("autoridades.detail", autoridad_id=autoridad.id))
+
+
+@autoridades.route("/autoridades/juzgados_json", methods=["POST"])
+def query_juzgados_json():
+    """Proporcionar el JSON de autoridades para elegir Juzgados con un Select2"""
+    consulta = Autoridad.query.filter(Autoridad.estatus == "A")
+    if "es_jurisdiccional" in request.form:
+        consulta = consulta.filter_by(es_jurisdiccional=request.form["es_jurisdiccional"] == "true")
+        # Solo Juzgados de Primera Instancia
+        consulta = consulta.filter(
+            Autoridad.organo_jurisdiccional.between("JUZGADO DE PRIMERA INSTANCIA", "JUZGADO DE PRIMERA INSTANCIA ORAL")
+        )
+    if "clave" in request.form:
+        texto = safe_string(request.form["clave"]).upper()
+        consulta = consulta.filter(Autoridad.clave.contains(texto))
+    results = []
+    for autoridad in consulta.order_by(Autoridad.id).limit(15).all():
+        results.append(
+            {
+                "id": autoridad.id,
+                "text": autoridad.clave + "  : " + autoridad.descripcion_corta,
+            }
+        )
+    return {"results": results, "pagination": {"more": False}}
