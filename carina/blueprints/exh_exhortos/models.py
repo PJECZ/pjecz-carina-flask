@@ -109,7 +109,7 @@ class ExhExhorto(database.Model, UniversalMixin):
     estado: Mapped[str] = mapped_column(Enum(*ESTADOS, name="exh_exhortos_estados", native_enum=False), index=True)
 
     # Campo para saber si es un proceso interno o extorno
-    remitente: Mapped[str] = mapped_column(Enum(*REMITENTES, name="exh_exhortos_remitentes", native_enum=False), nullable=True)
+    remitente: Mapped[str] = mapped_column(Enum(*REMITENTES, name="exh_exhortos_remitentes", native_enum=False), index=True)
 
     # Número de Exhorto con el que se radica en el Juzgado/Área que se turnó el exhorto.
     # Este número sirve para que el usuario pueda indentificar su exhorto dentro del Juzgado/Área donde se turnó, opcional

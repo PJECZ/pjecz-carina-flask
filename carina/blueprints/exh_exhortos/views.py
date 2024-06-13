@@ -2,23 +2,23 @@
 Exh Exhortos, vistas
 """
 
-import uuid
 import json
+import uuid
 from datetime import datetime
+
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from carina.blueprints.estados.models import Estado
-from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_string, safe_message
-
 from carina.blueprints.bitacoras.models import Bitacora
+from carina.blueprints.estados.models import Estado
+from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
+from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
-from carina.blueprints.exh_exhortos.models import ExhExhorto
-from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
+from lib.datatables import get_datatable_parameters, output_datatable_json
+from lib.safe_string import safe_message, safe_string
 
 MODULO = "EXH EXHORTOS"
 
@@ -226,7 +226,7 @@ def edit(exh_exhorto_id):
     form.exh_area.data = exh_exhorto.exh_area.id
     form.folio_seguimiento.data = exh_exhorto.folio_seguimiento
     form.numero_exhorto.data = exh_exhorto.numero_exhorto
-    form.estado.data = exh_exhorto.estado
+    form.estado.data = exh_exhorto.estado  # Read only
     municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
     # Entregar
     return render_template("exh_exhortos/edit.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino)
