@@ -24,8 +24,8 @@
                 <form class="row g-1 mb-3" id="filtradorForm" onsubmit="filtrosExhExhortos.buscar(); return false;">
                     <div class="col-4">
                         <div class="form-floating">
-                            <input id="filtroUUID" type="text" class="form-control" aria-label="UUID">
-                            <label for="filtroUUID">UUID</label>
+                            <input id="filtroJuzgadoClave" type="text" class="form-control" aria-label="Juzgado Origen">
+                            <label for="filtroJuzgadoClave">Juzgado Origen</label>
                         </div>
                     </div>
                     <div class="col-3">
@@ -57,7 +57,7 @@
             <thead>
                 <tr>
                     <th>Creado</th>
-                    <th>UUID</th>
+                    <th>ID</th>
                     <th>Estado Origen</th>
                     <th>Juzgado Origen</th>
                     <th>Remitente</th>
@@ -92,7 +92,7 @@
                 targets: 1, // detalle
                 data: null,
                 render: function(data, type, row, meta) {
-                    return '<a href="' + data.url + '">' + data.uuid + '</a>';
+                    return '<a href="' + data.url + '">' + data.id + '</a>';
                 }
             },
             {
@@ -129,7 +129,7 @@
         ];
         // Filtros exh_exhortos
         const filtrosExhExhortos = new FiltrosDataTable('#exh_exhortos_datatable', configDTExhExhortos);
-        filtrosExhExhortos.agregarInput('filtroUUID', 'uuid');
+        filtrosExhExhortos.agregarInput('filtroJuzgadoClave', 'juzgado_origen_clave');
         filtrosExhExhortos.agregarInput('filtroEstadoOrigen', 'estado_origen');
         filtrosExhExhortos.agregarInput('filtroEstado', 'estado');
         filtrosExhExhortos.precargar();

@@ -10,7 +10,7 @@ from flask_login import current_user, login_required
 
 from carina.blueprints.estados.models import Estado
 from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_string, safe_message
+from lib.safe_string import safe_string, safe_message, safe_clave
 
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.modulos.models import Modulo
@@ -19,6 +19,7 @@ from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
+from carina.blueprints.autoridades.models import Autoridad
 
 MODULO = "EXH EXHORTOS"
 
@@ -44,15 +45,12 @@ def datatable_json():
         consulta = consulta.filter_by(estatus=request.form["estatus"])
     else:
         consulta = consulta.filter_by(estatus="A")
-    if "uuid" in request.form:
-        try:
-            uuid = safe_message(request.form["uuid"])
-            if uuid != "":
-                consulta = consulta.filter(ExhExhorto.exhorto_origen_id.contains(uuid))  # BUG: No funciona
-        except ValueError:
-            pass
     if "estado" in request.form:
         consulta = consulta.filter_by(estado=request.form["estado"])
+    if "juzgado_origen_clave" in request.form:
+        juzgado_origen_clave = safe_clave(request.form["juzgado_origen_clave"])
+        if juzgado_origen_clave != "":
+            consulta = consulta.filter(ExhExhorto.juzgado_origen_id.contains(juzgado_origen_clave))
     # Buscar en otras tablas
     if "estado_origen" in request.form:
         estado_origen = safe_string(request.form["estado_origen"], save_enie=True)
@@ -69,7 +67,7 @@ def datatable_json():
             {
                 "creado": resultado.creado.strftime("%Y-%m-%d %H:%M:%S"),
                 "detalle": {
-                    "uuid": resultado.exhorto_origen_id,
+                    "id": resultado.id,
                     "url": url_for("exh_exhortos.detail", exh_exhorto_id=resultado.id),
                 },
                 "juzgado_origen": {
@@ -288,7 +286,7 @@ def cancel(exh_exhorto_id):
 
 @exh_exhortos.route("/exh_exhortos/enviar/<int:exh_exhorto_id>")
 @permission_required(MODULO, Permiso.MODIFICAR)
-def enviar(exh_exhorto_id):
+def send(exh_exhorto_id):
     """Envíar Exhorto"""
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
     if exh_exhorto.estado == "PENDIENTE":
