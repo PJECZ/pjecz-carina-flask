@@ -40,6 +40,10 @@ def datatable_json():
         consulta = consulta.filter_by(estatus=request.form["estatus"])
     else:
         consulta = consulta.filter_by(estatus="A")
+    if "clave" in request.form:
+        clave = safe_clave(request.form["clave"])
+        if clave != "":
+            consulta = consulta.filter(ExhExterno.clave.contains(clave))
     # Ordenar y paginar
     registros = consulta.order_by(ExhExterno.clave).offset(start).limit(rows_per_page).all()
     total = consulta.count()

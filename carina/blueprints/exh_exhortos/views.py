@@ -9,16 +9,19 @@ from datetime import datetime
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
+from carina.blueprints.estados.models import Estado
+from lib.datatables import get_datatable_parameters, output_datatable_json
+from lib.safe_string import safe_string, safe_message, safe_clave
+
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.estados.models import Estado
-from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
-from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
-from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_message, safe_string
+from carina.blueprints.exh_exhortos.models import ExhExhorto
+from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
+from carina.blueprints.autoridades.models import Autoridad
 
 MODULO = "EXH EXHORTOS"
 
@@ -44,24 +47,18 @@ def datatable_json():
         consulta = consulta.filter_by(estatus=request.form["estatus"])
     else:
         consulta = consulta.filter_by(estatus="A")
-    # if "columna_id" in request.form:
-    #     consulta = consulta.filter_by(columna_id=request.form["columna_id"])
-    # if "columna_clave" in request.form:
-    #     try:
-    #         columna_clave = safe_clave(request.form["columna_clave"])
-    #         if clave != "":
-    #             consulta = consulta.filter(ExhExhorto.clave.contains(columna_clave))
-    #     except ValueError:
-    #         pass
-    # if "columna_descripcion" in request.form:
-    #     columna_descripcion = safe_string(request.form["columna_descripcion"], save_enie=True)
-    #     if columna_descripcion != "":
-    #         consulta = consulta.filter(ExhExhorto.descripcion.contains(columna_descripcion))
-    # Luego filtrar por columnas de otras tablas
-    # if "otra_columna_descripcion" in request.form:
-    #     otra_columna_descripcion = safe_string(request.form["otra_columna_descripcion"], save_enie=True)
-    #     consulta = consulta.join(OtroModelo)
-    #     consulta = consulta.filter(OtroModelo.rfc.contains(otra_columna_descripcion))
+    if "estado" in request.form:
+        consulta = consulta.filter_by(estado=request.form["estado"])
+    if "juzgado_origen_clave" in request.form:
+        juzgado_origen_clave = safe_clave(request.form["juzgado_origen_clave"])
+        if juzgado_origen_clave != "":
+            consulta = consulta.filter(ExhExhorto.juzgado_origen_id.contains(juzgado_origen_clave))
+    # Buscar en otras tablas
+    if "estado_origen" in request.form:
+        estado_origen = safe_string(request.form["estado_origen"], save_enie=True)
+        if estado_origen != "":
+            consulta = consulta.join(Municipio).join(Estado)
+            consulta = consulta.filter(Estado.nombre.contains(estado_origen))
     # Ordenar y paginar
     registros = consulta.order_by(ExhExhorto.id.desc()).offset(start).limit(rows_per_page).all()
     total = consulta.count()
@@ -72,7 +69,7 @@ def datatable_json():
             {
                 "creado": resultado.creado.strftime("%Y-%m-%d %H:%M:%S"),
                 "detalle": {
-                    "uuid": resultado.exhorto_origen_id,
+                    "id": resultado.id,
                     "url": url_for("exh_exhortos.detail", exh_exhorto_id=resultado.id),
                 },
                 "juzgado_origen": {
@@ -97,6 +94,7 @@ def list_active():
         filtros=json.dumps({"estatus": "A"}),
         titulo="Exhortos",
         estatus="A",
+        estados=ExhExhorto.ESTADOS,
     )
 
 
@@ -109,6 +107,7 @@ def list_inactive():
         filtros=json.dumps({"estatus": "B"}),
         titulo="Exhortos inactivos",
         estatus="B",
+        estados=ExhExhorto.ESTADOS,
     )
 
 
@@ -135,39 +134,43 @@ def new():
     """Nuevo Exhorto"""
     form = ExhExhortoNewForm()
     if form.validate_on_submit():
-        exh_exhorto = ExhExhorto(
-            exhorto_origen_id=form.exhorto_origen_id.data,
-            municipio_destino_id=form.municipio_destino.data,
-            materia_id=form.materia.data,
-            municipio_origen_id=form.municipio_origen.data,
-            juzgado_origen_id=safe_string(form.juzgado_origen_id.data),
-            juzgado_origen_nombre=safe_string(form.juzgado_origen_nombre.data),
-            numero_expediente_origen=safe_string(form.numero_expediente_origen.data),
-            numero_oficio_origen=safe_string(form.numero_oficio_origen.data),
-            tipo_juicio_asunto_delitos=safe_string(form.tipo_juicio_asunto_delitos.data),
-            juez_exhortante=safe_string(form.juez_exhortante.data),
-            fojas=form.fojas.data,
-            dias_responder=form.dias_responder.data,
-            tipo_diligenciacion_nombre=form.tipo_diligenciacion_nombre.data,
-            fecha_origen=form.fecha_origen.data,
-            observaciones=safe_message(form.observaciones.data, default_output_str=None),
-            # Datos por defecto
-            exh_area_id=1,  # valor: NO DEFINIDO
-            autoridad_id=342,  # valor por defecto: ND - NO DEFINIDO
-            numero_exhorto="",
-            remitente="INTERNO",
-            estado="PENDIENTE",
-        )
-        exh_exhorto.save()
-        bitacora = Bitacora(
-            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
-            usuario=current_user,
-            descripcion=safe_message(f"Nuevo Exhorto {exh_exhorto.exhorto_origen_id}"),
-            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
-        )
-        bitacora.save()
-        flash(bitacora.descripcion, "success")
-        return redirect(bitacora.url)
+        juzgado_origen = Autoridad.query.filter_by(id=form.juzgado_origen.data).filter_by(estatus="A").first()
+        if juzgado_origen is None:
+            flash("El juzgado de origen no es válido", "warning")
+        else:
+            exh_exhorto = ExhExhorto(
+                exhorto_origen_id=form.exhorto_origen_id.data,
+                municipio_destino_id=form.municipio_destino.data,
+                materia_id=form.materia.data,
+                municipio_origen_id=form.municipio_origen.data,
+                juzgado_origen_id=juzgado_origen.clave,
+                juzgado_origen_nombre=juzgado_origen.descripcion,
+                numero_expediente_origen=safe_string(form.numero_expediente_origen.data),
+                numero_oficio_origen=safe_string(form.numero_oficio_origen.data),
+                tipo_juicio_asunto_delitos=safe_string(form.tipo_juicio_asunto_delitos.data),
+                juez_exhortante=safe_string(form.juez_exhortante.data),
+                fojas=form.fojas.data,
+                dias_responder=form.dias_responder.data,
+                tipo_diligenciacion_nombre=form.tipo_diligenciacion_nombre.data,
+                fecha_origen=form.fecha_origen.data,
+                observaciones=safe_message(form.observaciones.data, default_output_str=None),
+                # Datos por defecto
+                exh_area_id=1,  # valor: NO DEFINIDO
+                autoridad_id=342,  # valor por defecto: ND - NO DEFINIDO
+                numero_exhorto="",
+                remitente="INTERNO",
+                estado="PENDIENTE",
+            )
+            exh_exhorto.save()
+            bitacora = Bitacora(
+                modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+                usuario=current_user,
+                descripcion=safe_message(f"Nuevo Exhorto {exh_exhorto.exhorto_origen_id}"),
+                url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+            )
+            bitacora.save()
+            flash(bitacora.descripcion, "success")
+            return redirect(bitacora.url)
     form.exhorto_origen_id.data = str(uuid.uuid4())  # Elaborar un UUID para mostrar READ ONLY
     form.estado_origen.data = "COAHUILA DE ZARAGOZA"
     form.estado.data = "PENDIENTE"
@@ -185,34 +188,40 @@ def edit(exh_exhorto_id):
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
     form = ExhExhortoEditForm()
     if form.validate_on_submit():
-        exh_exhorto.municipio_destino_id = form.municipio_destino.data
-        exh_exhorto.materia_id = form.materia.data
-        exh_exhorto.municipio_origen_id = form.municipio_origen.data
-        exh_exhorto.juzgado_origen_id = safe_string(form.juzgado_origen_id.data)
-        exh_exhorto.juzgado_origen_nombre = safe_string(form.juzgado_origen_nombre.data)
-        exh_exhorto.numero_expediente_origen = safe_string(form.numero_expediente_origen.data)
-        exh_exhorto.numero_oficio_origen = safe_string(form.numero_oficio_origen.data)
-        exh_exhorto.tipo_juicio_asunto_delitos = safe_string(form.tipo_juicio_asunto_delitos.data)
-        exh_exhorto.juez_exhortante = safe_string(form.juez_exhortante.data)
-        exh_exhorto.fojas = form.fojas.data
-        exh_exhorto.dias_responder = form.dias_responder.data
-        exh_exhorto.tipo_diligenciacion_nombre = safe_string(form.tipo_diligenciacion_nombre.data)
-        exh_exhorto.fecha_origen = form.fecha_origen.data
-        exh_exhorto.observaciones = safe_message(form.observaciones.data, default_output_str=None)
-        exh_exhorto.save()
-        bitacora = Bitacora(
-            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
-            usuario=current_user,
-            descripcion=safe_message(f"Editado Exhorto {exh_exhorto.exhorto_origen_id}"),
-            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
-        )
-        bitacora.save()
-        flash(bitacora.descripcion, "success")
-        return redirect(bitacora.url)
+        juzgado_origen = Autoridad.query.filter_by(id=form.juzgado_origen.data).filter_by(estatus="A").first()
+        if juzgado_origen is None:
+            flash("El juzgado de origen no es válido", "warning")
+        else:
+            exh_exhorto.municipio_destino_id = form.municipio_destino.data
+            exh_exhorto.materia_id = form.materia.data
+            exh_exhorto.municipio_origen_id = form.municipio_origen.data
+            exh_exhorto.juzgado_origen_id = juzgado_origen.clave
+            exh_exhorto.juzgado_origen_nombre = juzgado_origen.descripcion
+            exh_exhorto.numero_expediente_origen = safe_string(form.numero_expediente_origen.data)
+            exh_exhorto.numero_oficio_origen = safe_string(form.numero_oficio_origen.data)
+            exh_exhorto.tipo_juicio_asunto_delitos = safe_string(form.tipo_juicio_asunto_delitos.data)
+            exh_exhorto.juez_exhortante = safe_string(form.juez_exhortante.data)
+            exh_exhorto.fojas = form.fojas.data
+            exh_exhorto.dias_responder = form.dias_responder.data
+            exh_exhorto.tipo_diligenciacion_nombre = safe_string(form.tipo_diligenciacion_nombre.data)
+            exh_exhorto.fecha_origen = form.fecha_origen.data
+            exh_exhorto.observaciones = safe_message(form.observaciones.data, default_output_str=None)
+            exh_exhorto.save()
+            bitacora = Bitacora(
+                modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+                usuario=current_user,
+                descripcion=safe_message(f"Editado Exhorto {exh_exhorto.exhorto_origen_id}"),
+                url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+            )
+            bitacora.save()
+            flash(bitacora.descripcion, "success")
+            return redirect(bitacora.url)
+    # Buscar el juzgado origen en Autoridades
+    juzgado_origen = Autoridad.query.filter_by(clave=exh_exhorto.juzgado_origen_id).filter_by(estatus="A").first()
+    # Cargar los valores gardados en el formulario
     form.exhorto_origen_id.data = exh_exhorto.exhorto_origen_id
     form.materia.data = exh_exhorto.materia.id
-    form.juzgado_origen_id.data = exh_exhorto.juzgado_origen_id
-    form.juzgado_origen_nombre.data = exh_exhorto.juzgado_origen_nombre
+    form.juzgado_origen.data = juzgado_origen.id
     form.numero_expediente_origen.data = exh_exhorto.numero_expediente_origen
     form.numero_oficio_origen.data = exh_exhorto.numero_oficio_origen
     form.tipo_juicio_asunto_delitos.data = exh_exhorto.tipo_juicio_asunto_delitos
@@ -289,7 +298,7 @@ def cancel(exh_exhorto_id):
 
 @exh_exhortos.route("/exh_exhortos/enviar/<int:exh_exhorto_id>")
 @permission_required(MODULO, Permiso.MODIFICAR)
-def enviar(exh_exhorto_id):
+def send(exh_exhorto_id):
     """Envíar Exhorto"""
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
     if exh_exhorto.estado == "PENDIENTE":

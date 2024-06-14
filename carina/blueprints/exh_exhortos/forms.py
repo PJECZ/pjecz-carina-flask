@@ -31,8 +31,7 @@ class ExhExhortoNewForm(FlaskForm):
     municipio_origen = SelectField(
         "Municipio Origen", choices=None, validate_choice=False, validators=[DataRequired()]
     )  # Las opciones se agregan con JS
-    juzgado_origen_id = StringField("Juzgado Origen Clave", validators=[Optional(), Length(max=64)])
-    juzgado_origen_nombre = StringField("Juzgado Origen Nombre", validators=[DataRequired(), Length(max=256)])
+    juzgado_origen = SelectField("Juzgado Origen", coerce=int, validate_choice=False, validators=[DataRequired()])
     numero_expediente_origen = StringField("Número de Expediente Origen", validators=[DataRequired(), Length(max=256)])
     numero_oficio_origen = StringField("Número de Oficio Origen", validators=[Optional(), Length(max=256)])
     tipo_juicio_asunto_delitos = StringField("Tipo de Juicio Asunto Delitos", validators=[DataRequired(), Length(max=256)])
@@ -69,8 +68,7 @@ class ExhExhortoEditForm(FlaskForm):
     municipio_origen = SelectField(
         "Municipio Origen", choices=None, validate_choice=False, validators=[DataRequired()]
     )  # Las opciones se agregan con JS
-    juzgado_origen_id = StringField("Juzgado Origen Clave", validators=[Optional(), Length(max=64)])
-    juzgado_origen_nombre = StringField("Juzgado Origen Nombre", validators=[DataRequired(), Length(max=256)])
+    juzgado_origen = SelectField("Juzgado Origen", coerce=int, validate_choice=False, validators=[DataRequired()])
     numero_expediente_origen = StringField("Número de Expediente Origen", validators=[DataRequired(), Length(max=256)])
     numero_oficio_origen = StringField("Número de Oficio Origen", validators=[Optional(), Length(max=256)])
     tipo_juicio_asunto_delitos = StringField("Tipo de Juicio Asunto Delitos", validators=[DataRequired(), Length(max=256)])

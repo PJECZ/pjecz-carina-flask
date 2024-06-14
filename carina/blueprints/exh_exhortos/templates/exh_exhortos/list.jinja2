@@ -18,11 +18,46 @@
 
 {% block content %}
     {% call list.card() %}
+    <!-- Filtros exh exhortos -->
+        <div class="row">
+            <div class="col">
+                <form class="row g-1 mb-3" id="filtradorForm" onsubmit="filtrosExhExhortos.buscar(); return false;">
+                    <div class="col-4">
+                        <div class="form-floating">
+                            <input id="filtroJuzgadoClave" type="text" class="form-control" aria-label="Juzgado Origen Clave">
+                            <label for="filtroJuzgadoClave">Juzgado Origen Clave</label>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-floating">
+                            <input id="filtroEstadoOrigen" type="text" class="form-control" aria-label="Estado de Origen" style="text-transform: uppercase;">
+                            <label for="filtroEstadoOrigen">Estado de Origen</label>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="form-floating">
+                            <select class="form-select" id="filtroEstado" aria-label="Estado"  onchange="filtrosExhExhortos.buscar(); return false;">
+                                <option selected value=""></option>
+                            {% for estado in estados %}
+                                <option value="{{ estado }}">{{ estado }}</option>
+                            {% endfor %}
+                            </select>
+                            <label for="filtroEstado">Estado</label>
+                        </div>
+                    </div>
+                    <div class="col-2 text-end">
+                        <button title="Buscar" class="btn btn-primary btn-lg" onclick="filtrosExhExhortos.buscar(); return false;" id="button-buscar"><span class="iconify" data-icon="mdi:magnify"></span></button>
+                        <button title="Limpiar" class="btn btn-warning btn-lg" type="reset" onclick="filtrosExhExhortos.limpiar();" id="button-limpiar"><span class="iconify" data-icon="mdi:broom"></span></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- DataTable exh exhortos -->
         <table id="exh_exhortos_datatable" class="table display nowrap" style="width:100%">
             <thead>
                 <tr>
                     <th>Creado</th>
-                    <th>UUID</th>
+                    <th>ID</th>
                     <th>Estado Origen</th>
                     <th>Juzgado Origen</th>
                     <th>Remitente</th>
@@ -57,7 +92,7 @@
                 targets: 1, // detalle
                 data: null,
                 render: function(data, type, row, meta) {
-                    return '<a href="' + data.url + '">' + data.uuid + '</a>';
+                    return '<a href="' + data.url + '">' + data.id + '</a>';
                 }
             },
             {
@@ -94,6 +129,9 @@
         ];
         // Filtros exh_exhortos
         const filtrosExhExhortos = new FiltrosDataTable('#exh_exhortos_datatable', configDTExhExhortos);
+        filtrosExhExhortos.agregarInput('filtroJuzgadoClave', 'juzgado_origen_clave');
+        filtrosExhExhortos.agregarInput('filtroEstadoOrigen', 'estado_origen');
+        filtrosExhExhortos.agregarInput('filtroEstado', 'estado');
         filtrosExhExhortos.precargar();
     </script>
 {% endblock %}

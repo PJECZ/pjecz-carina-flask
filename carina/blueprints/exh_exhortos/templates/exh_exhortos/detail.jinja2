@@ -73,7 +73,7 @@
                     {{ modals.button_modal("Cancelar", url_for("exh_exhortos.cancel", exh_exhorto_id=exh_exhorto.id), "cancelar_btn", "", "¿Desea cancelar el exhorto?", "btn-danger") }}
                 </div>
                 <div class="col-md-6 d-grid gap-2">
-                    {{ modals.button_modal("Enviar", url_for("exh_exhortos.enviar", exh_exhorto_id=exh_exhorto.id), "enviar_btn", "", "¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.", "btn-primary") }}
+                    {{ modals.button_modal("Enviar", url_for("exh_exhortos.send", exh_exhorto_id=exh_exhorto.id), "enviar_btn", "", "¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.", "btn-primary") }}
                 </div>
             </div>
         {% endif %}

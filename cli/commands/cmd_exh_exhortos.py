@@ -29,9 +29,59 @@ def cli():
 
 
 @click.command()
-def consultar():
+@click.option("--folio_seguimiento", type=str, help="folio de seguimiento de un exhorto")
+def consultar(folio_seguimiento: str):
     """Consultar un exhorto o todos los exhortos con estado RECIBIDO CON EXITO"""
     click.echo("Consultando exhortos...")
+
+    # Inicializar el listado de exhortos a consultar
+    exh_exhortos = []
+
+    # Si NO viene folio_seguimiento
+    if folio_seguimiento is None:
+        # Consultar todos los exhortos con estado RECIBIDO CON EXITO
+        exh_exhortos = ExhExhorto.query.filter_by(estado="RECIBIDO CON EXITO").filter_by(estatus="A").all()
+    else:
+        # Consultar el exhorto con folio_seguimiento
+        exh_exhorto = ExhExhorto.query.filter_by(folio_seguimiento=folio_seguimiento).filter_by(estatus="A").first()
+        if exh_exhorto is None:
+            click.echo(f"ERROR: No existe el exhorto con folio de seguimiento {folio_seguimiento}")
+            sys.exit(1)
+        exh_exhortos.append(exh_exhorto)
+
+    # Validar que haya exhortos
+    if len(exh_exhortos) == 0:
+        click.echo("No hay exhortos para consultar")
+        sys.exit(1)
+
+    # Bucle de exhortos RECIBIDO CON EXITO
+    contador_respondidos = 0
+    for exh_exhorto in exh_exhortos:
+        # Si por_consultar_tiempo_anterior mas SEGUNDOS_ESPERA_ENTRE_INTENTOS es mayor al tiempo actual, entonces continuar
+
+        # Intentar consultar el exhorto
+        click.echo(f"  Consultando el exhorto {exh_exhorto.folio_seguimiento}")
+
+        # Si el exhorto se consulta con éxito, entonces cambiar el estado a RESPONDIDO
+
+        # Actualizar el consultar_tiempo_anterior
+        # exh_exhorto.consultar_tiempo_anterior = datetime.now()
+
+        # Incrementar consultar_intentos
+        # exh_exhorto.consultar_intentos += 1
+
+        # Si el exhorto excede CANTIDAD_MAXIMA_INTENTOS, entonces cambiar el estado a NO FUE RESPONDIDO
+        # if exh_exhorto.consultar_intentos > CANTIDAD_MAXIMA_INTENTOS:
+        #     exh_exhorto.estado = "NO FUE RESPONDIDO"
+
+        # Guardar los cambios
+        # exh_exhorto.save()
+
+        # Pausa de 2 segundos
+        time.sleep(2)
+
+    # Mensaje final
+    click.echo(f"Se consultaron {contador_respondidos} con éxito.")
 
 
 @click.command()
