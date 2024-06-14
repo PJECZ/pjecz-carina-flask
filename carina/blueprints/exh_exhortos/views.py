@@ -15,8 +15,6 @@ from lib.safe_string import safe_string, safe_message, safe_clave
 
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.estados.models import Estado
-from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
-from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
