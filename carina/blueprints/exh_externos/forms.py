@@ -3,10 +3,11 @@ Exh Externos, formularios
 """
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length, Optional, Regexp
 
 from lib.safe_string import URL_REGEXP
+from carina.blueprints.estados.models import Estado
 
 
 class ExhExternoForm(FlaskForm):
@@ -14,6 +15,7 @@ class ExhExternoForm(FlaskForm):
 
     clave = StringField("Clave", validators=[DataRequired(), Length(max=16)])
     descripcion = StringField("Descripción", validators=[DataRequired(), Length(max=256)])
+    estado = SelectField("Estado", coerce=int, validators=[DataRequired()])
     api_key = StringField("API Key", validators=[Optional(), Length(max=128)])
     endpoint_consultar_materias = StringField("Materias", validators=[Optional(), Regexp(URL_REGEXP)])
     endpoint_recibir_exhorto = StringField("Recibir Exhorto", validators=[Optional(), Regexp(URL_REGEXP)])
@@ -27,3 +29,8 @@ class ExhExternoForm(FlaskForm):
     endpoint_recibir_promocion = StringField("Recibir Promoción", validators=[Optional(), Regexp(URL_REGEXP)])
     endpoint_recibir_promocion_archivo = StringField("Recibir Promoción Archivo", validators=[Optional(), Regexp(URL_REGEXP)])
     guardar = SubmitField("Guardar")
+
+    def __init__(self, *args, **kwargs):
+        """Inicializar y cargar opciones de estados"""
+        super().__init__(*args, **kwargs)
+        self.estado.choices = [(d.id, d.nombre) for d in Estado.query.filter_by(estatus="A").order_by(Estado.nombre).all()]

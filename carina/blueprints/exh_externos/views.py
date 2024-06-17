@@ -115,10 +115,16 @@ def new():
         if ExhExterno.query.filter_by(clave=clave).first():
             flash("La clave ya está en uso. Debe de ser única.", "warning")
             return render_template("exh_externos/new.jinja2", form=form)
+        # Validar que el estado no se repita
+        estado_id = form.estado.data
+        if ExhExterno.query.filter_by(estado_id=estado_id).first():
+            flash("El estado ya se encuentra ocupado por otro externo. Debe de ser único.", "warning")
+            return render_template("exh_externos/new.jinja2", form=form)
         # Guardar
         exh_externo = ExhExterno(
             clave=clave,
             descripcion=safe_string(form.descripcion.data, save_enie=True),
+            estado_id=estado_id,
             api_key=form.api_key.data.strip(),
             endpoint_consultar_materias=safe_url(form.endpoint_consultar_materias.data),
             endpoint_recibir_exhorto=safe_url(form.endpoint_recibir_exhorto.data),
@@ -158,10 +164,17 @@ def edit(exh_externo_id):
             if exh_externo_existente and exh_externo_existente.id != exh_externo_id:
                 es_valido = False
                 flash("La clave ya está en uso. Debe de ser única.", "warning")
+        # Si cambia de estado verificar que no este en uso
+        estado_id = form.estado.data
+        exh_externo_estado_existente = ExhExterno.query.filter_by(estado_id=estado_id).first()
+        if exh_externo_estado_existente and exh_externo_estado_existente.id != exh_externo_id:
+            es_valido = False
+            flash("El estado ya se encuentra ocupado por otro externo. Debe de ser único.", "warning")
         # Si es valido actualizar
         if es_valido:
             exh_externo.clave = clave
             exh_externo.descripcion = safe_string(form.descripcion.data, save_enie=True)
+            exh_externo.estado_id = estado_id
             exh_externo.api_key = form.api_key.data.strip()
             exh_externo.endpoint_consultar_materias = safe_url(form.endpoint_consultar_materias.data)
             exh_externo.endpoint_recibir_exhorto = safe_url(form.endpoint_recibir_exhorto.data)
@@ -187,6 +200,7 @@ def edit(exh_externo_id):
     # Cargar valores en el formulario
     form.clave.data = exh_externo.clave
     form.descripcion.data = exh_externo.descripcion
+    form.estado.data = exh_externo.estado_id
     form.api_key.data = exh_externo.api_key
     form.endpoint_consultar_materias.data = exh_externo.endpoint_consultar_materias
     form.endpoint_recibir_exhorto.data = exh_externo.endpoint_recibir_exhorto
