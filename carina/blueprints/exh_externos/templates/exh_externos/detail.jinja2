@@ -22,6 +22,7 @@
     {% call detail.card(estatus=exh_externo.estatus) %}
         {{ detail.label_value_big('Clave', exh_externo.clave) }}
         {{ detail.label_value('Descripción', exh_externo.descripcion) }}
+        {{ detail.label_value('Estado', exh_externo.estado.nombre) }}
         {{ detail.label_value('Api-Key', exh_externo.api_key) }}
         <hr />
         {{ detail.label_value('Consultar Materias', exh_externo.endpoint_consultar_materias) }}

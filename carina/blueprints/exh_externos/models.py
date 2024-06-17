@@ -4,8 +4,8 @@ Exh Externos, modelos
 
 from typing import Optional
 
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import String, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from carina.extensions import database
 from lib.universal_mixin import UniversalMixin
@@ -19,6 +19,10 @@ class ExhExterno(database.Model, UniversalMixin):
 
     # Clave primaria
     id: Mapped[int] = mapped_column(primary_key=True)
+
+    # Clave foránea
+    estado_id: Mapped[int] = mapped_column(ForeignKey("estados.id"))
+    estado: Mapped["Estado"] = relationship(back_populates="exh_externos")
 
     # Columnas
     clave: Mapped[str] = mapped_column(String(16), unique=True)
