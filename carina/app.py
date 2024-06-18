@@ -24,6 +24,7 @@ from carina.blueprints.oficinas.views import oficinas
 from carina.blueprints.permisos.views import permisos
 from carina.blueprints.roles.views import roles
 from carina.blueprints.sistemas.views import sistemas
+from carina.blueprints.tareas.views import tareas
 from carina.blueprints.usuarios.models import Usuario
 from carina.blueprints.usuarios.views import usuarios
 from carina.blueprints.usuarios_roles.views import usuarios_roles
@@ -62,6 +63,7 @@ def create_app():
     app.register_blueprint(permisos)
     app.register_blueprint(roles)
     app.register_blueprint(sistemas)
+    app.register_blueprint(tareas)
     app.register_blueprint(usuarios)
     app.register_blueprint(usuarios_roles)
 

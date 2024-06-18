@@ -12,6 +12,8 @@
             {{ topbar.button_edit('Editar', url_for('exh_exhortos.edit', exh_exhorto_id=exh_exhorto.id)) }}
         {% endif %}
         {% if current_user.can_admin('EXH EXHORTOS') %}
+            {{ modals.button_modal('Consultar', url_for('exh_exhortos.get_from_externo', exh_exhorto_id=exh_exhorto.id), 'GetFromExterno', 'mdi:download', "¿Quiere consultar desde el PJ?") }}
+            {{ modals.button_modal('Enviar', url_for('exh_exhortos.send', exh_exhorto_id=exh_exhorto.id), 'SendToExterno', 'mdi:send', "¿Quiere enviar al PJ?") }}
             {% if exh_exhorto.estatus == 'A' %}{{ topbar.button_delete('Eliminar', url_for('exh_exhortos.delete', exh_exhorto_id=exh_exhorto.id)) }}{% endif %}
             {% if exh_exhorto.estatus == 'B' %}{{ topbar.button_recover('Recuperar', url_for('exh_exhortos.recover', exh_exhorto_id=exh_exhorto.id)) }}{% endif %}
         {% endif %}
@@ -120,6 +122,8 @@
 
 {% block custom_javascript %}
     {% if current_user.can_admin('EXH EXHORTOS') %}
+        {{ modals.custom_javascript('Consultar', '', 'GetFromExterno') }}
+        {{ modals.custom_javascript('Enviar', '', 'SendToExterno') }}
         {% if exh_exhorto.estatus == 'A' %}{{ modals.custom_javascript_delete('Eliminar', '¿Eliminar este exhorto?') }}{% endif %}
         {% if exh_exhorto.estatus == 'B' %}{{ modals.custom_javascript_recover('Recuperar', '¿Recuperar este exhorto?') }}{% endif %}
     {% endif %}
