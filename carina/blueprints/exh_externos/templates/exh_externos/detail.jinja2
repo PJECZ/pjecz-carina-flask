@@ -12,6 +12,9 @@
             {{ topbar.button_edit('Editar', url_for('exh_externos.edit', exh_externo_id=exh_externo.id)) }}
         {% endif %}
         {% if current_user.can_admin('EXH EXTERNOS') %}
+            {% if exh_externo.api_key %}
+                {{ modals.button_modal('Probar', url_for('exh_externos.test_endpoints', exh_externo_id=exh_externo.id), 'TestEndpoints', 'mdi:test-tube', "¿Quiere probar los endpoints?") }}
+            {% endif %}
             {% if exh_externo.estatus == 'A' %}{{ topbar.button_delete('Eliminar', url_for('exh_externos.delete', exh_externo_id=exh_externo.id)) }}{% endif %}
             {% if exh_externo.estatus == 'B' %}{{ topbar.button_recover('Recuperar', url_for('exh_externos.recover', exh_externo_id=exh_externo.id)) }}{% endif %}
         {% endif %}
@@ -40,6 +43,9 @@
 
 {% block custom_javascript %}
     {% if current_user.can_admin('EXH EXTERNOS') %}
+        {% if exh_externo.api_key %}
+            {{ modals.custom_javascript('Probar', '', 'TestEndpoints') }}
+        {% endif %}
         {% if exh_externo.estatus == 'A' %}{{ modals.custom_javascript_delete('Eliminar', '¿Eliminar a ' + exh_externo.clave + '?') }}{% endif %}
         {% if exh_externo.estatus == 'B' %}{{ modals.custom_javascript_recover('Recuperar', '¿Recuperar a ' + exh_externo.clave + '?') }}{% endif %}
     {% endif %}

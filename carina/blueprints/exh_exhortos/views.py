@@ -9,19 +9,17 @@ from datetime import datetime
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from carina.blueprints.estados.models import Estado
-from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_string, safe_message, safe_clave
-
+from carina.blueprints.autoridades.models import Autoridad
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.estados.models import Estado
+from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
+from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
-from carina.blueprints.exh_exhortos.models import ExhExhorto
-from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
-from carina.blueprints.autoridades.models import Autoridad
+from lib.datatables import get_datatable_parameters, output_datatable_json
+from lib.safe_string import safe_clave, safe_message, safe_string
 
 MODULO = "EXH EXHORTOS"
 
@@ -296,12 +294,31 @@ def cancel(exh_exhorto_id):
     return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
 
 
+@exh_exhortos.route("/exh_exhortos/consultar/<int:exh_exhorto_id>")
+@permission_required(MODULO, Permiso.MODIFICAR)
+def get_from_externo(exh_exhorto_id):
+    """Lanzar tarea en el fondo para consultar Exhorto al PJ Externo"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    tarea = current_user.launch_task(
+        comando="exh_exhortos.tasks.lanzar_consultar",
+        mensaje="Consultando exhorto desde externo",
+        exh_exhorto_id=exh_exhorto.id,
+    )
+    flash("Se ha lanzado la tarea en el fondo. Esta página se va a recargar en 10 segundos...", "info")
+    return redirect(url_for("tareas.detail", tarea_id=tarea.id))
+
+
 @exh_exhortos.route("/exh_exhortos/enviar/<int:exh_exhorto_id>")
 @permission_required(MODULO, Permiso.MODIFICAR)
 def send(exh_exhorto_id):
-    """Envíar Exhorto"""
+    """Lanzar tarea en el fondo para envíar Exhorto al PJ Externo"""
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
     if exh_exhorto.estado == "PENDIENTE":
+        tarea = current_user.launch_task(
+            comando="exh_exhortos.tasks.lanzar_consultar",
+            mensaje="Enviando exhorto al externo",
+            exh_exhorto_id=exh_exhorto.id,
+        )
         exh_exhorto.estado = "POR ENVIAR"
         exh_exhorto.save()
         bitacora = Bitacora(

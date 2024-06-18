@@ -140,7 +140,7 @@ class Usuario(database.Model, UserMixin, UniversalMixin):
 
     def launch_task(self, comando, mensaje, *args, **kwargs):
         """Lanzar tarea en el fondo"""
-        rq_job = current_app.task_queue.enqueue(f"perseo.blueprints.{comando}", *args, **kwargs)
+        rq_job = current_app.task_queue.enqueue(f"carina.blueprints.{comando}", *args, **kwargs)
         tarea = Tarea(id=rq_job.get_id(), comando=comando, mensaje=mensaje, usuario=self)
         tarea.save()
         return tarea

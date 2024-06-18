@@ -249,3 +249,17 @@ def recover(exh_externo_id):
         bitacora.save()
         flash(bitacora.descripcion, "success")
     return redirect(url_for("exh_externos.detail", exh_externo_id=exh_externo.id))
+
+
+@exh_externos.route("/exh_externos/probar_endpoints/<int:exh_externo_id>")
+@permission_required(MODULO, Permiso.ADMINISTRAR)
+def test_endpoints(exh_externo_id):
+    """Lanzar tarea en el fondo para probar los endpoints"""
+    exh_externo = ExhExterno.query.get_or_404(exh_externo_id)
+    tarea = current_user.launch_task(
+        comando="exh_externos.tasks.lanzar_probar_endpoints",
+        mensaje="Probando endpoints",
+        exh_externo_id=exh_externo.id,
+    )
+    flash("Se ha lanzado la tarea en el fondo. Esta página se va a recargar en 10 segundos...", "info")
+    return redirect(url_for("tareas.detail", tarea_id=tarea.id))
