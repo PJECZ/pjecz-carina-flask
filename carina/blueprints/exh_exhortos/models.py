@@ -65,7 +65,7 @@ class ExhExhorto(database.Model, UniversalMixin):
     # UUID identificador con el que el PJ exhortante identifica el exhorto que envía
     exhorto_origen_id: Mapped[str] = mapped_column(Uuid)
 
-    # Identificador INEGI del Municipio del Estado del PJ exhortado al que se quiere enviar el Exhorto
+    # ID de la tabla Municipios: Para el payload es el Identificador INEGI del Municipio del Estado del PJ exhortado al que se quiere enviar el Exhorto
     municipio_destino_id: Mapped[int]
 
     # Identificador propio del Juzgado/Área que envía el Exhorto, opcional
