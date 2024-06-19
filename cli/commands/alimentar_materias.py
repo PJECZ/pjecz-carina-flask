@@ -9,7 +9,7 @@ from pathlib import Path
 import click
 
 from carina.blueprints.materias.models import Materia
-from lib.safe_string import safe_string
+from lib.safe_string import safe_clave, safe_string
 
 MATERIAS_CSV = "seed/materias.csv"
 
@@ -29,6 +29,7 @@ def alimentar_materias():
         rows = csv.DictReader(puntero)
         for row in rows:
             materia_id = int(row["materia_id"])
+            clave = safe_clave(row["clave"], max_len=16)
             nombre = safe_string(row["nombre"], save_enie=True)
             descripcion = safe_string(row["descripcion"], max_len=1024, do_unidecode=False, save_enie=True)
             en_sentencias = row["en_sentencias"] == "1"
@@ -38,6 +39,7 @@ def alimentar_materias():
                 sys.exit(1)
             Materia(
                 nombre=nombre,
+                clave=clave,
                 descripcion=descripcion,
                 en_sentencias=en_sentencias,
                 estatus=estatus,
