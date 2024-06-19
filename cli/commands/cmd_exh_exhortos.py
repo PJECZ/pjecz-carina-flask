@@ -5,7 +5,7 @@ CLI Exh Exhortos
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import click
 import requests
@@ -182,14 +182,45 @@ def enviar(exhorto_origen_id: str):
     contador_recibidos_con_exito = 0
     for exh_exhorto in exh_exhortos:
         # Si por_enviar_tiempo_anterior mas SEGUNDOS_ESPERA_ENTRE_INTENTOS es mayor al tiempo actual, entonces se omite
-        if (
-            exh_exhorto.por_enviar_tiempo_anterior is not None
-            and tiempo_actual < exh_exhorto.por_enviar_tiempo_anterior + SEGUNDOS_ESPERA_ENTRE_INTENTOS
-        ):
-            continue
+        # if (
+        #     exh_exhorto.por_enviar_tiempo_anterior is not None
+        #     and tiempo_actual < exh_exhorto.por_enviar_tiempo_anterior + timedelta(seconds=SEGUNDOS_ESPERA_ENTRE_INTENTOS)
+        # ):
+        #     continue
 
         # Mostrar mensaje de envío
         click.echo(f"  Enviando exhorto {exh_exhorto.exhorto_origen_id}")
+
+        # Consultar el Estado de destino a partir del ID del Municipio en municipio_destino_id
+        municipio = Municipio.query.get(exh_exhorto.municipio_destino_id)
+        if municipio is None:
+            click.echo(f"ERROR: No se encontró el municipio con ID {exh_exhorto.municipio_destino_id}")
+            continue
+        estado = Estado.query.get(municipio.estado_id)
+        if estado is None:
+            click.echo(f"ERROR: No se encontró el estado con ID {municipio.estado_id}")
+            continue
+
+        # Consultar el ExhExterno con el ID del Estado, tomar solo el primero
+        exh_externo = ExhExterno.query.filter_by(estado_id=estado.id).first()
+        if exh_externo is None:
+            click.echo(f"ERROR: No se encontró registro en exh_externos del estado {estado.nombre}")
+            continue
+
+        # Si exh_externo no tiene API-key
+        if exh_externo.api_key is None or exh_externo.api_key == "":
+            click.echo(f"ERROR: No tiene API-key en exh_externos el estado {estado.nombre}")
+            continue
+
+        # Si exh_externo no tiene endpoint para enviar exhortos
+        if exh_externo.endpoint_recibir_exhorto is None or exh_externo.endpoint_recibir_exhorto == "":
+            click.echo(f"ERROR: No tiene endpoint para enviar exhortos el estado {estado.nombre}")
+            continue
+
+        # Si exh_externo no tiene endpoint para enviar archivos
+        if exh_externo.endpoint_recibir_exhorto_archivo is None or exh_externo.endpoint_recibir_exhorto_archivo == "":
+            click.echo(f"ERROR: No tiene endpoint para enviar archivos el estado {estado.nombre}")
+            continue
 
         # Bucle para juntar los datos de las partes
         partes = []
@@ -220,7 +251,7 @@ def enviar(exhorto_origen_id: str):
 
         # Definir los datos del exhorto
         datos_exhorto = {
-            "exhortoOrigenId": exh_exhorto.exhorto_origen_id,
+            "exhortoOrigenId": str(exh_exhorto.exhorto_origen_id),
             "municipioDestinoId": exh_exhorto.municipio_destino_id,
             "materiaClave": exh_exhorto.materia.clave,
             "estadoOrigenId": exh_exhorto.municipio_origen.estado.clave,
@@ -235,41 +266,10 @@ def enviar(exhorto_origen_id: str):
             "fojas": exh_exhorto.fojas,
             "diasResponder": exh_exhorto.dias_responder,
             "tipoDiligenciacionNombre": exh_exhorto.tipo_diligenciacion_nombre,
-            "fechaOrigen": exh_exhorto.fecha_origen,
+            "fechaOrigen": exh_exhorto.fecha_origen.strftime("%Y-%m-%dT%H:%M:%S"),
             "observaciones": exh_exhorto.observaciones,
             "archivos": archivos,
         }
-
-        # Consultar el Estado de destino a partir del ID del Municipio en municipio_destino_id
-        municipio = Municipio.query.get(exh_exhorto.municipio_destino_id)
-        if municipio is None:
-            click.echo(f"ERROR: No se encontró el municipio con ID {exh_exhorto.municipio_destino_id}")
-            continue
-        estado = Estado.query.get(municipio.estado_id)
-        if estado is None:
-            click.echo(f"ERROR: No se encontró el estado con ID {municipio.estado_id}")
-            continue
-
-        # Consultar el ExhExterno con el ID del Estado, tomar solo el primero
-        exh_externo = ExhExterno.query.filter_by(estado_id=estado.id).first()
-        if exh_externo is None:
-            click.echo(f"ERROR: No se encontró registro en exh_externos del estado {estado.nombre}")
-            continue
-
-        # Si exh_externo no tiene API-key
-        if exh_externo.api_key is None:
-            click.echo(f"ERROR: No tiene API-key en exh_externos el estado {estado.nombre}")
-            continue
-
-        # Si exh_externo no tiene endpoint para enviar exhortos
-        if exh_externo.endpoint_recibir_exhorto is None:
-            click.echo(f"ERROR: No tiene endpoint para enviar exhortos el estado {estado.nombre}")
-            continue
-
-        # Si exh_externo no tiene endpoint para enviar archivos
-        if exh_externo.endpoint_recibir_exhorto_archivo is None:
-            click.echo(f"ERROR: No tiene endpoint para enviar archivos el estado {estado.nombre}")
-            continue
 
         # Enviar el exhorto
         comunicado_con_exito = False
@@ -314,7 +314,7 @@ def enviar(exhorto_origen_id: str):
             exh_exhorto.estado = "RECHAZADO"
             exh_exhorto.save()
             if "errors" in respuesta:
-                click.echo(f"ERRORES: {str(respuesta['errors'])}")
+                click.echo(f"ERRORES al enviar exhorto: {str(respuesta['errors'])}")
             continue
 
         # Mandar los archivos del exhorto con multipart/form-data
@@ -362,7 +362,7 @@ def enviar(exhorto_origen_id: str):
             exh_exhorto.estado = "RECHAZADO"
             exh_exhorto.save()
             if "errors" in respuesta:
-                click.echo(f"ERRORES: {str(respuesta['errors'])}")
+                click.echo(f"ERRORES al enviar archivo del exhorto: {str(respuesta['errors'])}")
             continue
 
         # Se envió con éxito, cambiar el estado del exhorto a RECIBIDO CON EXITO
