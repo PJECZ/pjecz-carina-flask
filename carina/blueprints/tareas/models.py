@@ -5,7 +5,7 @@ Tareas, modelos
 import redis
 import rq
 from flask import current_app
-from sqlalchemy import ForeignKey, String, Uuid
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from carina.extensions import database
@@ -19,7 +19,7 @@ class Tarea(database.Model, UniversalMixin):
     __tablename__ = "tareas"
 
     # Clave primaria NOTA: El id es string y es el mismo que usa el RQ worker
-    id: Mapped[str] = mapped_column(Uuid, primary_key=True)
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
 
     # Clave foránea
     usuario_id: Mapped[int] = mapped_column(ForeignKey("usuarios.id"))

@@ -12,8 +12,10 @@ import requests
 from dotenv import load_dotenv
 
 from carina.app import create_app
+from carina.blueprints.estados.models import Estado
 from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.exh_externos.models import ExhExterno
+from carina.blueprints.municipios.models import Municipio
 from carina.extensions import database
 from lib.exceptions import MyBucketNotFoundError, MyFileNotFoundError, MyNotValidParamError
 from lib.google_cloud_storage import get_blob_name_from_url, get_file_from_gcs
@@ -238,13 +240,44 @@ def enviar(exhorto_origen_id: str):
             "archivos": archivos,
         }
 
+        # Consultar el Estado de destino a partir del ID del Municipio en municipio_destino_id
+        municipio = Municipio.query.get(exh_exhorto.municipio_destino_id)
+        if municipio is None:
+            click.echo(f"ERROR: No se encontró el municipio con ID {exh_exhorto.municipio_destino_id}")
+            continue
+        estado = Estado.query.get(municipio.estado_id)
+        if estado is None:
+            click.echo(f"ERROR: No se encontró el estado con ID {municipio.estado_id}")
+            continue
+
+        # Consultar el ExhExterno con el ID del Estado, tomar solo el primero
+        exh_externo = ExhExterno.query.filter_by(estado_id=estado.id).first()
+        if exh_externo is None:
+            click.echo(f"ERROR: No se encontró registro en exh_externos del estado {estado.nombre}")
+            continue
+
+        # Si exh_externo no tiene API-key
+        if exh_externo.api_key is None:
+            click.echo(f"ERROR: No tiene API-key en exh_externos el estado {estado.nombre}")
+            continue
+
+        # Si exh_externo no tiene endpoint para enviar exhortos
+        if exh_externo.endpoint_recibir_exhorto is None:
+            click.echo(f"ERROR: No tiene endpoint para enviar exhortos el estado {estado.nombre}")
+            continue
+
+        # Si exh_externo no tiene endpoint para enviar archivos
+        if exh_externo.endpoint_recibir_exhorto_archivo is None:
+            click.echo(f"ERROR: No tiene endpoint para enviar archivos el estado {estado.nombre}")
+            continue
+
         # Enviar el exhorto
         comunicado_con_exito = False
         recibido_con_exito = False
         try:
             response = requests.post(
-                "https://ESTADO/EXHORTOS/ENVIAR",
-                headers={"X-Api-Key": "API-KEY-QUE-NOS-DIO-EL-ESTADO"},
+                exh_externo.endpoint_recibir_exhorto,
+                headers={"X-Api-Key": exh_externo.api_key},
                 timeout=TIMEOUT,
                 json=datos_exhorto,
             )
@@ -302,8 +335,8 @@ def enviar(exhorto_origen_id: str):
                 continue
             try:
                 response = requests.post(
-                    "https://ESTADO/EXHORTOS/ENVIAR_ARCHIVO",
-                    headers={"X-Api-Key": "API-KEY-QUE-NOS-DIO-EL-ESTADO"},
+                    exh_externo.endpoint_recibir_exhorto_archivo,
+                    headers={"X-Api-Key": exh_externo.api_key},
                     timeout=TIMEOUT,
                     params={"exhortoOrigenId": exh_exhorto.exhorto_origen_id},
                     files={"archivo": (exh_exhorto_archivo.nombre_archivo, archivo_contenido, "application/pdf")},
