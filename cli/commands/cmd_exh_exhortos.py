@@ -2,6 +2,7 @@
 CLI Exh Exhortos
 """
 
+import json
 import os
 import sys
 import time
@@ -38,7 +39,8 @@ def cli():
 
 @click.command()
 @click.option("--folio_seguimiento", type=str, help="folio de seguimiento de un exhorto")
-def consultar(folio_seguimiento: str):
+@click.option("--probar", is_flag=True, help="Modo de pruebas, no actualiza la base de datos, solo muestra en pantalla")
+def consultar(folio_seguimiento: str, probar: bool = False):
     """Consultar un exhorto o todos los exhortos con estado RECIBIDO CON EXITO"""
     click.echo("Consultando exhortos...")
 
@@ -148,7 +150,8 @@ def consultar(folio_seguimiento: str):
 
 @click.command()
 @click.option("--exhorto_origen_id", type=str, help="Exhorto origen ID")
-def enviar(exhorto_origen_id: str):
+@click.option("--probar", is_flag=True, help="Modo de pruebas, no envía los exhortos, solo los consulta y muestra en pantalla")
+def enviar(exhorto_origen_id: str, probar: bool = False):
     """Enviar un exhorto o todos los exhortos con estado POR ENVIAR"""
     click.echo("Enviando exhortos...")
 
@@ -227,13 +230,13 @@ def enviar(exhorto_origen_id: str):
         for exh_exhorto_parte in exh_exhorto.exh_exhortos_partes:
             partes.append(
                 {
-                    "nombre": exh_exhorto_parte.nombre,
-                    "apellidoPaterno": exh_exhorto_parte.apellido_paterno,
-                    "apellidoMaterno": exh_exhorto_parte.apellido_materno,
-                    "genero": exh_exhorto_parte.genero,
-                    "esPersonaMoral": exh_exhorto_parte.es_persona_moral,
-                    "tipoParte": exh_exhorto_parte.tipo_parte,
-                    "tipoParteNombre": exh_exhorto_parte.tipo_parte_nombre,
+                    "nombre": str(exh_exhorto_parte.nombre),
+                    "apellidoPaterno": str(exh_exhorto_parte.apellido_paterno),
+                    "apellidoMaterno": str(exh_exhorto_parte.apellido_materno),
+                    "genero": str(exh_exhorto_parte.genero),
+                    "esPersonaMoral": bool(exh_exhorto_parte.es_persona_moral),
+                    "tipoParte": int(exh_exhorto_parte.tipo_parte),
+                    "tipoParteNombre": str(exh_exhorto_parte.tipo_parte_nombre),
                 }
             )
 
@@ -242,61 +245,66 @@ def enviar(exhorto_origen_id: str):
         for exh_exhorto_archivo in exh_exhorto.exh_exhortos_archivos:
             archivos.append(
                 {
-                    "nombreArchivo": exh_exhorto_archivo.nombre_archivo,
-                    "hashSha1": exh_exhorto_archivo.hash_sha1,
-                    "hashSha256": exh_exhorto_archivo.hash_sha256,
-                    "tipoDocumento": exh_exhorto_archivo.tipo_documento,
+                    "nombreArchivo": str(exh_exhorto_archivo.nombre_archivo),
+                    "hashSha1": str(exh_exhorto_archivo.hash_sha1),
+                    "hashSha256": str(exh_exhorto_archivo.hash_sha256),
+                    "tipoDocumento": int(exh_exhorto_archivo.tipo_documento),
                 }
             )
 
         # Definir los datos del exhorto
         datos_exhorto = {
             "exhortoOrigenId": str(exh_exhorto.exhorto_origen_id),
-            "municipioDestinoId": exh_exhorto.municipio_destino_id,
-            "materiaClave": exh_exhorto.materia.clave,
-            "estadoOrigenId": exh_exhorto.municipio_origen.estado.clave,
-            "municipioOrigenId": exh_exhorto.municipio_origen.clave,
-            "juzgadoOrigenId": exh_exhorto.juzgado_origen_id,
-            "juzgadoOrigenNombre": exh_exhorto.juzgado_origen_nombre,
-            "numeroExpedienteOrigen": exh_exhorto.numero_expediente_origen,
-            "numeroOficioOrigen": exh_exhorto.numero_oficio_origen,
-            "tipoJuicioAsuntoDelitos": exh_exhorto.tipo_juicio_asunto_delitos,
-            "juezExhortante": exh_exhorto.juez_exhortante,
+            "municipioDestinoId": int(exh_exhorto.municipio_destino_id),
+            "materiaClave": str(exh_exhorto.materia.clave),
+            "estadoOrigenId": int(exh_exhorto.municipio_origen.estado.clave),
+            "municipioOrigenId": int(exh_exhorto.municipio_origen.clave),
+            "juzgadoOrigenId": str(exh_exhorto.juzgado_origen_id),
+            "juzgadoOrigenNombre": str(exh_exhorto.juzgado_origen_nombre),
+            "numeroExpedienteOrigen": str(exh_exhorto.numero_expediente_origen),
+            "numeroOficioOrigen": str(exh_exhorto.numero_oficio_origen),
+            "tipoJuicioAsuntoDelitos": str(exh_exhorto.tipo_juicio_asunto_delitos),
+            "juezExhortante": str(exh_exhorto.juez_exhortante),
             "partes": partes,
-            "fojas": exh_exhorto.fojas,
-            "diasResponder": exh_exhorto.dias_responder,
-            "tipoDiligenciacionNombre": exh_exhorto.tipo_diligenciacion_nombre,
+            "fojas": int(exh_exhorto.fojas),
+            "diasResponder": int(exh_exhorto.dias_responder),
+            "tipoDiligenciacionNombre": str(exh_exhorto.tipo_diligenciacion_nombre),
             "fechaOrigen": exh_exhorto.fecha_origen.strftime("%Y-%m-%dT%H:%M:%S"),
-            "observaciones": exh_exhorto.observaciones,
+            "observaciones": str(exh_exhorto.observaciones),
             "archivos": archivos,
         }
+
+        # Mostrar datos_exhorto en pantalla
+        if probar is True:
+            click.echo(json.dumps(datos_exhorto, indent=2))
 
         # Enviar el exhorto
         comunicado_con_exito = False
         recibido_con_exito = False
-        try:
-            response = requests.post(
-                exh_externo.endpoint_recibir_exhorto,
-                headers={"X-Api-Key": exh_externo.api_key},
-                timeout=TIMEOUT,
-                json=datos_exhorto,
-            )
-            response.raise_for_status()
-            comunicado_con_exito = True
-            respuesta = response.json()
-            if "success" not in respuesta:
-                click.echo("ERROR: En la respuesta no se encontró el campo 'success' al enviar el exhorto")
-                continue
-            recibido_con_exito = bool(respuesta["success"])
-        except requests.exceptions.ConnectionError:
-            click.echo("ERROR: No hubo respuesta del servidor al enviar el exhorto")
-        except requests.exceptions.HTTPError as error:
-            click.echo("ERROR: Status Code al enviar el exhorto: " + str(error))
-        except requests.exceptions.RequestException:
-            click.echo("ERROR: Inesperado al enviar el exhorto")
+        if probar is False:
+            try:
+                response = requests.post(
+                    exh_externo.endpoint_recibir_exhorto,
+                    headers={"X-Api-Key": exh_externo.api_key},
+                    timeout=TIMEOUT,
+                    json=datos_exhorto,
+                )
+                response.raise_for_status()
+                comunicado_con_exito = True
+                respuesta = response.json()
+                if "success" not in respuesta:
+                    click.echo("ERROR: En la respuesta no se encontró el campo 'success' al enviar el exhorto")
+                    continue
+                recibido_con_exito = bool(respuesta["success"])
+            except requests.exceptions.ConnectionError:
+                click.echo("ERROR: No hubo respuesta del servidor al enviar el exhorto")
+            except requests.exceptions.HTTPError as error:
+                click.echo("ERROR: Status Code al enviar el exhorto: " + str(error))
+            except requests.exceptions.RequestException:
+                click.echo("ERROR: Inesperado al enviar el exhorto")
 
         # Si NO se pudo comunicar...
-        if comunicado_con_exito is False:
+        if probar is False and comunicado_con_exito is False:
             # Actualizar el por_enviar_tiempo_anterior
             exh_exhorto.por_enviar_tiempo_anterior = datetime.now()
             # Incrementar por_enviar_intentos
@@ -309,7 +317,7 @@ def enviar(exhorto_origen_id: str):
             continue
 
         # Si NO se recibió con éxito...
-        if recibido_con_exito is False:
+        if probar is False and recibido_con_exito is False:
             # Cambiar el estado a RECHAZADO
             exh_exhorto.estado = "RECHAZADO"
             exh_exhorto.save()
@@ -333,32 +341,34 @@ def enviar(exhorto_origen_id: str):
             except (MyBucketNotFoundError, MyFileNotFoundError, MyNotValidParamError) as error:
                 click.echo(f"ERROR: Al tratar de bajar el archivo del storage {str(error)}")
                 continue
-            try:
-                response = requests.post(
-                    exh_externo.endpoint_recibir_exhorto_archivo,
-                    headers={"X-Api-Key": exh_externo.api_key},
-                    timeout=TIMEOUT,
-                    params={"exhortoOrigenId": exh_exhorto.exhorto_origen_id},
-                    files={"archivo": (exh_exhorto_archivo.nombre_archivo, archivo_contenido, "application/pdf")},
-                )
-                response.raise_for_status()
-                respuesta = response.json()
-                if "success" not in respuesta:
-                    click.echo("ERROR: En la respuesta no se encontró el campo 'success' al enviar el archivo")
-                    continue
-                archivo_enviado_con_exito = bool(respuesta["success"])
-            except requests.exceptions.ConnectionError:
-                click.echo("ERROR: No hubo respuesta del servidor al enviar el archivo")
-            except requests.exceptions.HTTPError as error:
-                click.echo("ERROR: Status Code al enviar el archivo: " + str(error))
-            except requests.exceptions.RequestException:
-                click.echo("ERROR: Inesperado al enviar el archivo")
-            # Si NO fue archivo_enviado_con_exito, entonces dejar de enviar archivos
-            if archivo_enviado_con_exito is False:
-                break
+            # Enviar el archivo
+            if probar is False:
+                try:
+                    response = requests.post(
+                        exh_externo.endpoint_recibir_exhorto_archivo,
+                        headers={"X-Api-Key": exh_externo.api_key},
+                        timeout=TIMEOUT,
+                        params={"exhortoOrigenId": exh_exhorto.exhorto_origen_id},
+                        files={"archivo": (exh_exhorto_archivo.nombre_archivo, archivo_contenido, "application/pdf")},
+                    )
+                    response.raise_for_status()
+                    respuesta = response.json()
+                    if "success" not in respuesta:
+                        click.echo("ERROR: En la respuesta no se encontró el campo 'success' al enviar el archivo")
+                        continue
+                    archivo_enviado_con_exito = bool(respuesta["success"])
+                except requests.exceptions.ConnectionError:
+                    click.echo("ERROR: No hubo respuesta del servidor al enviar el archivo")
+                except requests.exceptions.HTTPError as error:
+                    click.echo("ERROR: Status Code al enviar el archivo: " + str(error))
+                except requests.exceptions.RequestException:
+                    click.echo("ERROR: Inesperado al enviar el archivo")
+                # Si NO fue archivo_enviado_con_exito, entonces dejar de enviar archivos
+                if archivo_enviado_con_exito is False:
+                    break
 
         # Si falla archivo_enviado_con_exito
-        if archivo_enviado_con_exito is False:
+        if probar is False and archivo_enviado_con_exito is False:
             exh_exhorto.estado = "RECHAZADO"
             exh_exhorto.save()
             if "errors" in respuesta:
@@ -366,8 +376,9 @@ def enviar(exhorto_origen_id: str):
             continue
 
         # Se envió con éxito, cambiar el estado del exhorto a RECIBIDO CON EXITO
-        exh_exhorto.estado = "RECIBIDO CON EXITO"
-        exh_exhorto.save()
+        if probar is False:
+            exh_exhorto.estado = "RECIBIDO CON EXITO"
+            exh_exhorto.save()
 
         # Pausa de 2 segundos
         time.sleep(2)

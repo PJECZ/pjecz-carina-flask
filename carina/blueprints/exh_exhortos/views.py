@@ -141,17 +141,17 @@ def new():
                 municipio_destino_id=form.municipio_destino.data,
                 materia_id=form.materia.data,
                 municipio_origen_id=form.municipio_origen.data,
-                juzgado_origen_id=juzgado_origen.clave,
-                juzgado_origen_nombre=juzgado_origen.descripcion,
+                juzgado_origen_id=safe_string(juzgado_origen.clave),
+                juzgado_origen_nombre=safe_string(juzgado_origen.descripcion, save_enie=True),
                 numero_expediente_origen=safe_string(form.numero_expediente_origen.data),
                 numero_oficio_origen=safe_string(form.numero_oficio_origen.data),
                 tipo_juicio_asunto_delitos=safe_string(form.tipo_juicio_asunto_delitos.data),
-                juez_exhortante=safe_string(form.juez_exhortante.data),
+                juez_exhortante=safe_string(form.juez_exhortante.data, save_enie=True),
                 fojas=form.fojas.data,
                 dias_responder=form.dias_responder.data,
-                tipo_diligenciacion_nombre=form.tipo_diligenciacion_nombre.data,
+                tipo_diligenciacion_nombre=safe_string(form.tipo_diligenciacion_nombre.data, save_enie=True),
                 fecha_origen=form.fecha_origen.data,
-                observaciones=safe_message(form.observaciones.data, default_output_str=None),
+                observaciones=safe_string(form.observaciones.data, save_enie=True, max_len=1024),
                 # Datos por defecto
                 exh_area_id=1,  # valor: NO DEFINIDO
                 autoridad_id=342,  # valor por defecto: ND - NO DEFINIDO
@@ -193,17 +193,17 @@ def edit(exh_exhorto_id):
             exh_exhorto.municipio_destino_id = form.municipio_destino.data
             exh_exhorto.materia_id = form.materia.data
             exh_exhorto.municipio_origen_id = form.municipio_origen.data
-            exh_exhorto.juzgado_origen_id = juzgado_origen.clave
-            exh_exhorto.juzgado_origen_nombre = juzgado_origen.descripcion
+            exh_exhorto.juzgado_origen_id = safe_string(juzgado_origen.clave)
+            exh_exhorto.juzgado_origen_nombre = safe_string(juzgado_origen.descripcion, save_enie=True)
             exh_exhorto.numero_expediente_origen = safe_string(form.numero_expediente_origen.data)
             exh_exhorto.numero_oficio_origen = safe_string(form.numero_oficio_origen.data)
             exh_exhorto.tipo_juicio_asunto_delitos = safe_string(form.tipo_juicio_asunto_delitos.data)
-            exh_exhorto.juez_exhortante = safe_string(form.juez_exhortante.data)
+            exh_exhorto.juez_exhortante = safe_string(form.juez_exhortante.data, save_enie=True)
             exh_exhorto.fojas = form.fojas.data
             exh_exhorto.dias_responder = form.dias_responder.data
-            exh_exhorto.tipo_diligenciacion_nombre = safe_string(form.tipo_diligenciacion_nombre.data)
+            exh_exhorto.tipo_diligenciacion_nombre = safe_string(form.tipo_diligenciacion_nombre.data, save_enie=True)
             exh_exhorto.fecha_origen = form.fecha_origen.data
-            exh_exhorto.observaciones = safe_message(form.observaciones.data, default_output_str=None)
+            exh_exhorto.observaciones = safe_string(form.observaciones.data, save_enie=True, max_len=1024)
             exh_exhorto.save()
             bitacora = Bitacora(
                 modulo=Modulo.query.filter_by(nombre=MODULO).first(),
