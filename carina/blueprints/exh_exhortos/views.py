@@ -21,6 +21,9 @@ from carina.blueprints.usuarios.decorators import permission_required
 from lib.datatables import get_datatable_parameters, output_datatable_json
 from lib.safe_string import safe_clave, safe_message, safe_string
 
+from carina.blueprints.exh_exhortos_partes.models import ExhExhortoParte
+from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
+
 MODULO = "EXH EXHORTOS"
 
 exh_exhortos = Blueprint("exh_exhortos", __name__, template_folder="templates")
@@ -313,7 +316,23 @@ def get_from_externo(exh_exhorto_id):
 def send(exh_exhorto_id):
     """Lanzar tarea en el fondo para envíar Exhorto al PJ Externo"""
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
-    if exh_exhorto.estado == "PENDIENTE":
+    es_valido = True
+    # Validar que el Exhorto tenga partes
+    exh_exhorto_partes = ExhExhortoParte.query.filter_by(exh_exhorto_id=exh_exhorto_id).filter_by(estatus="A").first()
+    if exh_exhorto_partes is None:
+        es_valido = False
+        flash("Debe incluir al menos una parte al exhorto.", "warning")
+    # Validar que el Exhorto tenga archivos
+    exh_exhorto_archivos = ExhExhortoArchivo.query.filter_by(exh_exhorto_id=exh_exhorto_id).filter_by(estatus="A").first()
+    if exh_exhorto_archivos is None:
+        es_valido = False
+        flash("Debe incluir al menos un archivo al exhorto.", "warning")
+    # Validar que el estado del Exhorto sea "PENDIENTE"
+    if exh_exhorto.estado != "PENDIENTE":
+        es_valido = False
+        flash("El estado del exhorto debe ser PENDIENTE.", "warning")
+    # Hacer el cambio de estado
+    if es_valido:
         tarea = current_user.launch_task(
             comando="exh_exhortos.tasks.lanzar_consultar",
             mensaje="Enviando exhorto al externo",
@@ -325,6 +344,57 @@ def send(exh_exhorto_id):
             modulo=Modulo.query.filter_by(nombre=MODULO).first(),
             usuario=current_user,
             descripcion=safe_message(f"Exhorto POR ENVIAR {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
+
+
+@exh_exhortos.route("/exh_exhortos/regresar_a_por_enviar/<int:exh_exhorto_id>")
+@permission_required(MODULO, Permiso.MODIFICAR)
+def back_to_by_send(exh_exhorto_id):
+    """Regresar el estado del exhorto a por enviar"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    es_valido = True
+    # Validar que el estado del Exhorto sea "INTENTOS AGOTADOS"
+    if exh_exhorto.estado != "INTENTOS AGOTADOS":
+        es_valido = False
+        flash("El estado del exhorto debe ser INTENTOS AGOTADOS.", "warning")
+    # Hacer el cambio de estado
+    if es_valido:
+        exh_exhorto.estado = "POR ENVIAR"
+        exh_exhorto.por_enviar_intentos = 0
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Se reiniciaron los intentos de envío del exhorto {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+    return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
+
+
+@exh_exhortos.route("/exh_exhortos/regresar_a_pendiente/<int:exh_exhorto_id>")
+@permission_required(MODULO, Permiso.MODIFICAR)
+def back_to_pending(exh_exhorto_id):
+    """Regresar el estado del exhorto a por enviar"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    es_valido = True
+    # Validar que el estado del Exhorto sea "RECHAZADO"
+    if exh_exhorto.estado != "RECHAZADO":
+        es_valido = False
+        flash("El estado del exhorto debe ser RECHAZADO.", "warning")
+    # Hacer el cambio de estado
+    if es_valido:
+        exh_exhorto.estado = "PENDIENTE"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"El exhorto se regresó al estado PENDIENTE {exh_exhorto.exhorto_origen_id}"),
             url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
         )
         bitacora.save()
