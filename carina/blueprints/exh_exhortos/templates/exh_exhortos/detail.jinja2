@@ -9,7 +9,9 @@
     {% call topbar.page_buttons('Exhorto ' + exh_exhorto.exhorto_origen_id | string) %}
         {{ topbar.button_previous('Exhortos', url_for('exh_exhortos.list_active')) }}
         {% if current_user.can_edit('EXH EXHORTOS') %}
-            {{ topbar.button_edit('Editar', url_for('exh_exhortos.edit', exh_exhorto_id=exh_exhorto.id)) }}
+            {% if exh_exhorto.estado == "PENDIENTE" %}
+                {{ topbar.button_edit('Editar', url_for('exh_exhortos.edit', exh_exhorto_id=exh_exhorto.id)) }}
+            {% endif %}
         {% endif %}
         {% if current_user.can_admin('EXH EXHORTOS') %}
             {{ modals.button_modal('Consultar', url_for('exh_exhortos.get_from_externo', exh_exhorto_id=exh_exhorto.id), 'GetFromExterno', 'mdi:download', "¿Quiere consultar desde el PJ?") }}
@@ -76,6 +78,24 @@
                 </div>
                 <div class="col-md-6 d-grid gap-2">
                     {{ modals.button_modal("Enviar", url_for("exh_exhortos.send", exh_exhorto_id=exh_exhorto.id), "enviar_btn", "", "¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.", "btn-primary") }}
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "INTENTOS AGOTADOS" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    {{ modals.button_modal("Reiniciar Intentos", url_for("exh_exhortos.back_to_by_send", exh_exhorto_id=exh_exhorto.id), "regresar_enviar_btn", "", "¿Está seguro de querer reiniciar los intentos de envío y regresar el exhorto al estado POR ENVIAR?", "btn-primary") }}
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "RECHAZADO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    {{ modals.button_modal("Regresar a Pendiente", url_for("exh_exhortos.back_to_pending", exh_exhorto_id=exh_exhorto.id), "regresar_pendiente_btn", "", "¿Está seguro de querer regresar el estado a PENDIENTE?", "btn-warning text-dark") }}
                 </div>
             </div>
         {% endif %}
@@ -245,5 +265,11 @@
     {% if exh_exhorto.estado == 'PENDIENTE' %}
         {{ modals.custom_javascript('Cancelar', '¿Desear cancelar el exhorto?', "cancelar_btn") }}
         {{ modals.custom_javascript('Enviar', '¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.', "enviar_btn") }}
+    {% endif %}
+    {% if exh_exhorto.estado == 'INTENTOS AGOTADOS' %}
+        {{ modals.custom_javascript('Reiniciar Intentos', '¿Está seguro de querer reiniciar los intentos de envío y regresar el exhorto al estado POR ENVIAR?', "regresar_enviar_btn") }}
+    {% endif %}
+    {% if exh_exhorto.estado == 'RECHAZADO' %}
+        {{ modals.custom_javascript('Regresar a Pendiente', '¿Está seguro de querer regresar el estado a PENDIENTE?', "regresar_pendiente_btn") }}
     {% endif %}
 {% endblock %}
