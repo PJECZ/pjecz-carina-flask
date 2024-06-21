@@ -42,7 +42,6 @@ def cli():
 @click.option("--probar", is_flag=True, help="Modo de pruebas, no actualiza la base de datos, solo muestra en pantalla")
 def consultar(folio_seguimiento: str, probar: bool = False):
     """Consultar un exhorto o todos los exhortos con estado RECIBIDO CON EXITO"""
-    click.echo("Consultando exhortos...")
 
     # Inicializar el listado de exhortos a consultar
     exh_exhortos = []
@@ -67,10 +66,9 @@ def consultar(folio_seguimiento: str, probar: bool = False):
         click.echo("No hay exhortos para consultar")
         sys.exit(1)
 
-    # Bucle de exhortos RECIBIDO CON EXITO
+    # Bucle de exhortos
     contador_respondidos = 0
     for exh_exhorto in exh_exhortos:
-        # Intentar consultar el exhorto
         click.echo(f"  Consultando el exhorto {exh_exhorto.folio_seguimiento}")
 
         # Consultar el exhorto
@@ -153,7 +151,6 @@ def consultar(folio_seguimiento: str, probar: bool = False):
 @click.option("--probar", is_flag=True, help="Modo de pruebas, no envía los exhortos, solo los consulta y muestra en pantalla")
 def enviar(exhorto_origen_id: str, probar: bool = False):
     """Enviar un exhorto o todos los exhortos con estado POR ENVIAR"""
-    click.echo("Enviando exhortos...")
 
     # Inicializar el listado de exhortos a enviar
     exh_exhortos = []
@@ -166,16 +163,16 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
         # Consultar el exhorto con exhorto_origen_id
         exh_exhorto = ExhExhorto.query.filter_by(id=exhorto_origen_id).filter_by(estatus="A").first()
         if exh_exhorto is None:
-            click.echo(f"ERROR: No existe el exhorto con ID {exhorto_origen_id}")
+            click.echo(click.style(f"ERROR: No existe el exhorto con ID {exhorto_origen_id}", fg="red"))
             sys.exit(1)
         if exh_exhorto.estado != "POR ENVIAR":
-            click.echo(f"ERROR: El exhorto con ID {exhorto_origen_id} no está en estado POR ENVIAR")
+            click.echo(click.style(f"ERROR: El exhorto con ID {exhorto_origen_id} no está en estado POR ENVIAR", fg="red"))
             sys.exit(1)
         exh_exhortos.append(exh_exhorto)
 
     # Validar que haya exhortos
     if len(exh_exhortos) == 0:
-        click.echo("No hay exhortos para enviar")
+        click.echo(click.style("AVISO: No hay exhortos para enviar", fg="yellow"))
         sys.exit(0)
 
     # Definir el tiempo actual
@@ -191,38 +188,44 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
         # ):
         #     continue
 
-        # Mostrar mensaje de envío
-        click.echo(f"  Enviando exhorto {exh_exhorto.exhorto_origen_id}")
+        # Mostrar mensaje de que está enviando el exhorto
+        click.echo(f"Enviando exhorto {exh_exhorto.exhorto_origen_id}...")
 
         # Consultar el Estado de destino a partir del ID del Municipio en municipio_destino_id
         municipio = Municipio.query.get(exh_exhorto.municipio_destino_id)
         if municipio is None:
-            click.echo(f"ERROR: No se encontró el municipio con ID {exh_exhorto.municipio_destino_id}")
+            click.echo(click.style(f"AVISO: No existe el municipio con ID {exh_exhorto.municipio_destino_id}", fg="yellow"))
             continue
         estado = Estado.query.get(municipio.estado_id)
         if estado is None:
-            click.echo(f"ERROR: No se encontró el estado con ID {municipio.estado_id}")
+            click.echo(click.style(f"AVISO: No existe el estado con ID {municipio.estado_id}", fg="yellow"))
             continue
 
         # Consultar el ExhExterno con el ID del Estado, tomar solo el primero
         exh_externo = ExhExterno.query.filter_by(estado_id=estado.id).first()
         if exh_externo is None:
-            click.echo(f"ERROR: No se encontró registro en exh_externos del estado {estado.nombre}")
+            click.echo(click.style(f"AVISO: No hay datos en exh_externos del estado {estado.nombre}", fg="yellow"))
             continue
 
         # Si exh_externo no tiene API-key
         if exh_externo.api_key is None or exh_externo.api_key == "":
-            click.echo(f"ERROR: No tiene API-key en exh_externos el estado {estado.nombre}")
+            click.echo(click.style(f"AVISO: No tiene API-key en exh_externos el estado {estado.nombre}", fg="yellow"))
             continue
 
         # Si exh_externo no tiene endpoint para enviar exhortos
         if exh_externo.endpoint_recibir_exhorto is None or exh_externo.endpoint_recibir_exhorto == "":
-            click.echo(f"ERROR: No tiene endpoint para enviar exhortos el estado {estado.nombre}")
+            click.echo(click.style(f"AVISO: No tiene endpoint para enviar exhortos el estado {estado.nombre}", fg="yellow"))
             continue
 
         # Si exh_externo no tiene endpoint para enviar archivos
         if exh_externo.endpoint_recibir_exhorto_archivo is None or exh_externo.endpoint_recibir_exhorto_archivo == "":
-            click.echo(f"ERROR: No tiene endpoint para enviar archivos el estado {estado.nombre}")
+            click.echo(click.style(f"AVISO: No tiene endpoint para enviar archivos el estado {estado.nombre}", fg="yellow"))
+            continue
+
+        # Consultar el municipio de municipio_destino_id para enviar su clave INEGI
+        municipio_destino = Municipio.query.get(exh_exhorto.municipio_destino_id)
+        if municipio_destino is None:
+            click.echo(click.style(f"AVISO: No existe municipio_destino_id {exh_exhorto.municipio_destino_id}", fg="yellow"))
             continue
 
         # Bucle para juntar los datos de las partes
@@ -255,7 +258,7 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
         # Definir los datos del exhorto
         datos_exhorto = {
             "exhortoOrigenId": str(exh_exhorto.exhorto_origen_id),
-            "municipioDestinoId": int(exh_exhorto.municipio_destino_id),
+            "municipioDestinoId": int(municipio_destino.clave),
             "materiaClave": str(exh_exhorto.materia.clave),
             "estadoOrigenId": int(exh_exhorto.municipio_origen.estado.clave),
             "municipioOrigenId": int(exh_exhorto.municipio_origen.clave),
@@ -282,6 +285,7 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
         comunicado_con_exito = False
         recibido_con_exito = False
         if probar is False:
+            # Enviar el exhorto
             try:
                 response = requests.post(
                     exh_externo.endpoint_recibir_exhorto,
@@ -292,38 +296,47 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
                 response.raise_for_status()
                 comunicado_con_exito = True
                 respuesta = response.json()
-                if "success" not in respuesta:
-                    click.echo("ERROR: En la respuesta no se encontró el campo 'success' al enviar el exhorto")
-                    continue
-                recibido_con_exito = bool(respuesta["success"])
+                if not "success" in respuesta:
+                    click.echo(click.style("AVISO: La respuesta no tiene 'success' al enviar el exhorto", fg="yellow"))
+                else:
+                    recibido_con_exito = bool(respuesta["success"])
             except requests.exceptions.ConnectionError:
-                click.echo("ERROR: No hubo respuesta del servidor al enviar el exhorto")
+                click.echo(click.style("AVISO: No hubo respuesta del servidor al enviar el exhorto", fg="yellow"))
             except requests.exceptions.HTTPError as error:
-                click.echo("ERROR: Status Code al enviar el exhorto: " + str(error))
+                click.echo(click.style(f"AVISO: Status Code {str(error)} al enviar el exhorto", fg="yellow"))
             except requests.exceptions.RequestException:
-                click.echo("ERROR: Inesperado al enviar el exhorto")
+                click.echo(click.style("AVISO: Inesperado al enviar el exhorto", fg="yellow"))
 
-        # Si NO se pudo comunicar...
-        if probar is False and comunicado_con_exito is False:
-            # Actualizar el por_enviar_tiempo_anterior
-            exh_exhorto.por_enviar_tiempo_anterior = datetime.now()
-            # Incrementar por_enviar_intentos
-            exh_exhorto.por_enviar_intentos += 1
-            # Si el exhorto excede CANTIDAD_MAXIMA_INTENTOS, entonces cambiar el estado a INTENTOS AGOTADOS
-            if exh_exhorto.por_enviar_intentos > CANTIDAD_MAXIMA_INTENTOS:
-                exh_exhorto.estado = "INTENTOS AGOTADOS"
-            # Guardar los cambios
-            exh_exhorto.save()
-            continue
+            # Si se recibió con éxito...
+            if recibido_con_exito is True:
+                if "message" in respuesta:
+                    click.echo(click.style(f"Se recibió con éxito el exhorto: {str(respuesta['message'])}", fg="green"))
+                else:
+                    click.echo(click.style("Se recibió con éxito el exhorto.", fg="green"))
 
-        # Si NO se recibió con éxito...
-        if probar is False and recibido_con_exito is False:
-            # Cambiar el estado a RECHAZADO
-            exh_exhorto.estado = "RECHAZADO"
-            exh_exhorto.save()
-            if "errors" in respuesta:
-                click.echo(f"ERRORES al enviar exhorto: {str(respuesta['errors'])}")
-            continue
+            # Si NO se pudo comunicar...
+            if comunicado_con_exito is False:
+                # Actualizar el por_enviar_tiempo_anterior
+                exh_exhorto.por_enviar_tiempo_anterior = datetime.now()
+                # Incrementar por_enviar_intentos
+                exh_exhorto.por_enviar_intentos += 1
+                # Si el exhorto excede CANTIDAD_MAXIMA_INTENTOS, entonces cambiar el estado a INTENTOS AGOTADOS
+                if exh_exhorto.por_enviar_intentos > CANTIDAD_MAXIMA_INTENTOS:
+                    exh_exhorto.estado = "INTENTOS AGOTADOS"
+                # Guardar los cambios
+                exh_exhorto.save()
+                continue
+
+            # Si NO se recibió con éxito...
+            if recibido_con_exito is False:
+                # Cambiar el estado a RECHAZADO
+                exh_exhorto.estado = "RECHAZADO"
+                exh_exhorto.save()
+                if "message" in respuesta:
+                    click.echo(f"Se RECHAZO el envio del exhorto: {str(respuesta['message'])}")
+                if "errors" in respuesta:
+                    click.echo(f"Y regresa estos errores: {str(respuesta['errors'])}")
+                continue
 
         # Mandar los archivos del exhorto con multipart/form-data
         archivo_enviado_con_exito = False
@@ -371,8 +384,10 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
         if probar is False and archivo_enviado_con_exito is False:
             exh_exhorto.estado = "RECHAZADO"
             exh_exhorto.save()
+            if "message" in respuesta:
+                click.echo(f"Se RECHAZO el envio del archivo: {str(respuesta['message'])}")
             if "errors" in respuesta:
-                click.echo(f"ERRORES al enviar archivo del exhorto: {str(respuesta['errors'])}")
+                click.echo(f"Y regresa estos errores: {str(respuesta['errors'])}")
             continue
 
         # Se envió con éxito, cambiar el estado del exhorto a RECIBIDO CON EXITO
