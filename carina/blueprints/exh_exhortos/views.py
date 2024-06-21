@@ -321,12 +321,12 @@ def send(exh_exhorto_id):
     exh_exhorto_partes = ExhExhortoParte.query.filter_by(exh_exhorto_id=exh_exhorto_id).filter_by(estatus="A").first()
     if exh_exhorto_partes is None:
         es_valido = False
-        flash("Debe incluir al menos una parte al exhorto.", "warning")
+        flash("No se pudo enviar el exhorto. Debe incluir al menos una parte.", "warning")
     # Validar que el Exhorto tenga archivos
     exh_exhorto_archivos = ExhExhortoArchivo.query.filter_by(exh_exhorto_id=exh_exhorto_id).filter_by(estatus="A").first()
     if exh_exhorto_archivos is None:
         es_valido = False
-        flash("Debe incluir al menos un archivo al exhorto.", "warning")
+        flash("No se pudo enviar el exhorto. Debe incluir al menos un archivo.", "warning")
     # Validar que el estado del Exhorto sea "PENDIENTE"
     if exh_exhorto.estado != "PENDIENTE":
         es_valido = False
