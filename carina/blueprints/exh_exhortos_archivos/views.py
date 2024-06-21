@@ -5,23 +5,23 @@ Exh Exhortos Archivos, vistas
 import hashlib
 import json
 from datetime import datetime
+
 from flask import Blueprint, current_app, flash, make_response, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 from werkzeug.datastructures import CombinedMultiDict
 from werkzeug.utils import secure_filename
 
-from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.exceptions import MyBucketNotFoundError, MyUploadError, MyFileNotFoundError, MyNotValidParamError
-from lib.google_cloud_storage import get_blob_name_from_url, get_file_from_gcs, upload_file_to_gcs
-from lib.safe_string import safe_string, safe_message
-
 from carina.blueprints.bitacoras.models import Bitacora
+from carina.blueprints.exh_exhortos.models import ExhExhorto
+from carina.blueprints.exh_exhortos_archivos.forms import ExhExhortoArchivoEditForm, ExhExhortoArchivoNewForm
+from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
-from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
-from carina.blueprints.exh_exhortos.models import ExhExhorto
-from carina.blueprints.exh_exhortos_archivos.forms import ExhExhortoArchivoEditForm, ExhExhortoArchivoNewForm
+from lib.datatables import get_datatable_parameters, output_datatable_json
+from lib.exceptions import MyBucketNotFoundError, MyFileNotFoundError, MyNotValidParamError, MyUploadError
+from lib.google_cloud_storage import get_blob_name_from_url, get_file_from_gcs, upload_file_to_gcs
+from lib.safe_string import safe_message, safe_string
 
 MODULO = "EXH EXHORTOS ARCHIVOS"
 
@@ -181,7 +181,7 @@ def new_with_exh_exhorto(exh_exhorto_id):
             hash_sha256="",
             tipo_documento=form.tipo_documento.data,
             url="",
-            estado="RECIBIDO",
+            estado="PENDIENTE",
             tamano=0,
             fecha_hora_recepcion=fecha_hora_recepcion,
         )
@@ -217,6 +217,7 @@ def new_with_exh_exhorto(exh_exhorto_id):
         # Si se sube con exito, actualizar el registro con la URL del archivo
         exh_exhorto_archivo.url = archivo_pdf_url
         exh_exhorto_archivo.tamano = len(data)
+        exh_exhorto_archivo.estado = "RECIBIDO"
         exh_exhorto_archivo.save()
 
         # Insertar en la Bitácora
