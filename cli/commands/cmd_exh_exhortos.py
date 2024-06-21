@@ -179,7 +179,7 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
     tiempo_actual = datetime.now()
 
     # Bucle de exhortos POR ENVIAR
-    contador_recibidos_con_exito = 0
+    exhortos_procesados_contador = 0
     for exh_exhorto in exh_exhortos:
         # Si por_enviar_tiempo_anterior mas SEGUNDOS_ESPERA_ENTRE_INTENTOS es mayor al tiempo actual, entonces se omite
         # if (
@@ -296,10 +296,10 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
                 response.raise_for_status()
                 comunicado_con_exito = True
                 respuesta = response.json()
-                if not "success" in respuesta:
-                    click.echo(click.style("AVISO: La respuesta no tiene 'success' al enviar el exhorto", fg="yellow"))
-                else:
+                if "success" in respuesta:
                     recibido_con_exito = bool(respuesta["success"])
+                else:
+                    click.echo(click.style("AVISO: La respuesta no tiene 'success' al enviar el exhorto", fg="yellow"))
             except requests.exceptions.ConnectionError:
                 click.echo(click.style("AVISO: No hubo respuesta del servidor al enviar el exhorto", fg="yellow"))
             except requests.exceptions.HTTPError as error:
@@ -310,9 +310,8 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
             # Si se recibió con éxito...
             if recibido_con_exito is True:
                 if "message" in respuesta:
-                    click.echo(click.style(f"Se recibió con éxito el exhorto: {str(respuesta['message'])}", fg="green"))
-                else:
-                    click.echo(click.style("Se recibió con éxito el exhorto.", fg="green"))
+                    click.echo(click.style(f"MENSAJE: {str(respuesta['message'])}", fg="green"))
+                click.echo(click.style("ENVIADO con éxito el exhorto.", fg="green"))
 
             # Si NO se pudo comunicar...
             if comunicado_con_exito is False:
@@ -323,6 +322,9 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
                 # Si el exhorto excede CANTIDAD_MAXIMA_INTENTOS, entonces cambiar el estado a INTENTOS AGOTADOS
                 if exh_exhorto.por_enviar_intentos > CANTIDAD_MAXIMA_INTENTOS:
                     exh_exhorto.estado = "INTENTOS AGOTADOS"
+                    click.echo(click.style(f"AVISO: Cambie el estado del exhorto a {exh_exhorto.estado}", fg="yellow"))
+                else:
+                    click.echo(click.style(f"AVISO: Van {exh_exhorto.por_enviar_intentos} intentos", fg="yellow"))
                 # Guardar los cambios
                 exh_exhorto.save()
                 continue
@@ -332,19 +334,22 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
                 # Cambiar el estado a RECHAZADO
                 exh_exhorto.estado = "RECHAZADO"
                 exh_exhorto.save()
+                click.echo(click.style(f"AVISO: Cambie el estado del exhorto a {exh_exhorto.estado}", fg="yellow"))
                 if "message" in respuesta:
-                    click.echo(f"Se RECHAZO el envio del exhorto: {str(respuesta['message'])}")
+                    click.echo(click.style(f"MENSAJE: {str(respuesta['message'])}", fg="yellow"))
                 if "errors" in respuesta:
-                    click.echo(f"Y regresa estos errores: {str(respuesta['errors'])}")
+                    click.echo(click.style(f"ERRORES: {str(respuesta['errors'])}", fg="yellow"))
                 continue
 
         # Mandar los archivos del exhorto con multipart/form-data
-        archivo_enviado_con_exito = False
+        todos_los_archivos_enviados_con_exito = True
         for exh_exhorto_archivo in exh_exhorto.exh_exhortos_archivos:
-            # Para cada intento de enviar el archivo, se inicializa archivo_enviado_con_exito en falso
-            archivo_enviado_con_exito = False
-            # Pausa de 2 segundos
+            # Mostrar mensaje de que está enviando el archivo
+            click.echo(f"Enviando archivo {exh_exhorto_archivo.nombre_archivo}...")
+
+            # Pausa de 2 segundos entre envios de archivos
             time.sleep(2)
+
             # Obtener el contenido del archivo desde Google Storage
             try:
                 archivo_contenido = get_file_from_gcs(
@@ -352,9 +357,11 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
                     blob_name=get_blob_name_from_url(exh_exhorto_archivo.url),
                 )
             except (MyBucketNotFoundError, MyFileNotFoundError, MyNotValidParamError) as error:
-                click.echo(f"ERROR: Al tratar de bajar el archivo del storage {str(error)}")
+                click.echo(click.style(f"ERROR: Al tratar de bajar el archivo del storage {str(error)}", fg="red"))
                 continue
+
             # Enviar el archivo
+            archivo_enviado_con_exito = False
             if probar is False:
                 try:
                     response = requests.post(
@@ -366,43 +373,53 @@ def enviar(exhorto_origen_id: str, probar: bool = False):
                     )
                     response.raise_for_status()
                     respuesta = response.json()
-                    if "success" not in respuesta:
-                        click.echo("ERROR: En la respuesta no se encontró el campo 'success' al enviar el archivo")
-                        continue
-                    archivo_enviado_con_exito = bool(respuesta["success"])
+                    if "success" in respuesta:
+                        archivo_enviado_con_exito = bool(respuesta["success"])
+                    else:
+                        click.echo(click.style("AVISO: La respuesta no tiene 'success' al enviar el archivo", fg="yellow"))
                 except requests.exceptions.ConnectionError:
-                    click.echo("ERROR: No hubo respuesta del servidor al enviar el archivo")
+                    click.echo(click.style("AVISO: No hubo respuesta del servidor al enviar el archivo", fg="yellow"))
                 except requests.exceptions.HTTPError as error:
-                    click.echo("ERROR: Status Code al enviar el archivo: " + str(error))
+                    click.echo(click.style(f"AVISO: Status Code {str(error)} al enviar el archivo", fg="yellow"))
                 except requests.exceptions.RequestException:
-                    click.echo("ERROR: Inesperado al enviar el archivo")
+                    click.echo(click.style("AVISO: Inesperado al enviar el archivo", fg="yellow"))
+
+                # Si se envió con éxito, entonces mostrar mensaje
+                if archivo_enviado_con_exito is True:
+                    if "message" in respuesta:
+                        click.echo(click.style(f"MENSAJE: {str(respuesta['message'])}", fg="green"))
+                    click.echo(click.style("ENVIADO con éxito el archivo.", fg="green"))
+
                 # Si NO fue archivo_enviado_con_exito, entonces dejar de enviar archivos
                 if archivo_enviado_con_exito is False:
+                    if "message" in respuesta:
+                        click.echo(click.style(f"MENSAJE: {str(respuesta['message'])}", fg="yellow"))
+                    if "errors" in respuesta:
+                        click.echo(click.style(f"ERRORES: {str(respuesta['errors'])}", fg="yellow"))
+                    todos_los_archivos_enviados_con_exito = False
                     break
 
-        # Si falla archivo_enviado_con_exito
-        if probar is False and archivo_enviado_con_exito is False:
+        # Si falla todos_los_archivos_enviados_con_exito
+        if probar is False and todos_los_archivos_enviados_con_exito is False:
             exh_exhorto.estado = "RECHAZADO"
             exh_exhorto.save()
-            if "message" in respuesta:
-                click.echo(f"Se RECHAZO el envio del archivo: {str(respuesta['message'])}")
-            if "errors" in respuesta:
-                click.echo(f"Y regresa estos errores: {str(respuesta['errors'])}")
+            click.echo(click.style(f"AVISO: Cambie el estado del exhorto a {exh_exhorto.estado}", fg="yellow"))
             continue
 
         # Se envió con éxito, cambiar el estado del exhorto a RECIBIDO CON EXITO
         if probar is False:
             exh_exhorto.estado = "RECIBIDO CON EXITO"
             exh_exhorto.save()
+            click.echo(click.style(f"EXITO: Cambie el estado del exhorto a {exh_exhorto.estado}", fg="green"))
 
-        # Pausa de 2 segundos
+        # Pausa de 2 segundos entre envios de exhortos
         time.sleep(2)
 
         # Incrementar contador_recibidos_con_exito
-        contador_recibidos_con_exito += 1
+        exhortos_procesados_contador += 1
 
     # Mensaje final
-    click.echo(f"Se enviaron {contador_recibidos_con_exito} con éxito.")
+    click.echo(f"Se procesaron {exhortos_procesados_contador} exhortos.")
 
 
 cli.add_command(consultar)
