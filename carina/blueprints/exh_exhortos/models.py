@@ -60,10 +60,10 @@ class ExhExhorto(database.Model, UniversalMixin):
     municipio_origen: Mapped["Municipio"] = relationship(back_populates="exh_exhortos_origenes")
 
     # GUID/UUID... que sea único. Pero es opcional para nosotros cuando el estado es PENDIENTE
-    folio_seguimiento: Mapped[Optional[str]] = mapped_column(Uuid)
+    folio_seguimiento: Mapped[Optional[str]] = mapped_column(Uuid, unique=True)
 
     # UUID identificador con el que el PJ exhortante identifica el exhorto que envía
-    exhorto_origen_id: Mapped[str] = mapped_column(Uuid)
+    exhorto_origen_id: Mapped[str] = mapped_column(Uuid, unique=True)
 
     # ID de la tabla Municipios: Para el payload es el Identificador INEGI del Municipio del Estado del PJ exhortado al que se quiere enviar el Exhorto
     municipio_destino_id: Mapped[int]
