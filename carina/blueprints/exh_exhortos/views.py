@@ -12,7 +12,7 @@ from flask_login import current_user, login_required
 from carina.blueprints.autoridades.models import Autoridad
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.estados.models import Estado
-from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
+from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm, ExhExhortoTransferForm
 from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
@@ -219,7 +219,7 @@ def edit(exh_exhorto_id):
             return redirect(bitacora.url)
     # Buscar el juzgado origen en Autoridades
     juzgado_origen = Autoridad.query.filter_by(clave=exh_exhorto.juzgado_origen_id).filter_by(estatus="A").first()
-    # Cargar los valores gardados en el formulario
+    # Cargar los valores guardados en el formulario
     form.exhorto_origen_id.data = exh_exhorto.exhorto_origen_id
     form.materia.data = exh_exhorto.materia.id
     form.juzgado_origen.data = juzgado_origen.id
@@ -400,3 +400,53 @@ def back_to_pending(exh_exhorto_id):
         bitacora.save()
         flash(bitacora.descripcion, "success")
     return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
+
+
+@exh_exhortos.route("/exh_exhortos/transferir/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def transfer(exh_exhorto_id):
+    """Transferir un exhorto a un juzgado"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoTransferForm()
+    if form.validate_on_submit():
+        exh_exhorto.area = form.exh_area.data
+        exh_exhorto.autoridad_id = form.autoridad.data
+        exh_exhorto.estado = "TRANSFIRIENDO"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Exhorto Transferido {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    # Buscar el juzgado origen en Autoridades
+    juzgado_origen = Autoridad.query.filter_by(clave=exh_exhorto.juzgado_origen_id).filter_by(estatus="A").first()
+    municipio_origen = Municipio.query.filter_by(id=exh_exhorto.municipio_origen_id).first()
+    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
+    # Cargar los valores guardados en el formulario
+    form.exhorto_origen_id.data = exh_exhorto.exhorto_origen_id
+    form.estado_origen.data = municipio_origen.estado.nombre
+    form.municipio_origen.data = municipio_origen.nombre
+    form.juzgado_origen.data = juzgado_origen.clave
+    form.numero_expediente_origen.data = exh_exhorto.numero_expediente_origen
+    form.numero_oficio_origen.data = exh_exhorto.numero_oficio_origen
+    form.tipo_juicio_asunto_delitos.data = exh_exhorto.tipo_juicio_asunto_delitos
+    form.juez_exhortante.data = exh_exhorto.juez_exhortante
+    form.fojas.data = exh_exhorto.fojas
+    form.dias_responder.data = exh_exhorto.dias_responder
+    form.tipo_diligenciacion_nombre.data = exh_exhorto.tipo_diligenciacion_nombre
+    form.fecha_origen.data = exh_exhorto.fecha_origen
+    form.observaciones.data = exh_exhorto.observaciones
+    form.folio_seguimiento.data = exh_exhorto.folio_seguimiento
+    form.materia.data = exh_exhorto.materia.nombre
+    form.estado_destino.data = municipio_destino.estado.nombre
+    form.municipio_destino.data = municipio_destino.nombre
+    form.remitente.data = exh_exhorto.remitente
+    form.exh_area.data = exh_exhorto.exh_area.id
+    form.numero_exhorto.data = exh_exhorto.numero_exhorto
+    form.estado.data = exh_exhorto.estado  # Read only
+    # Entregar
+    return render_template("exh_exhortos/transfer.jinja2", form=form, exh_exhorto=exh_exhorto)

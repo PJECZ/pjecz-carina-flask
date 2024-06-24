@@ -107,6 +107,17 @@
                 </div>
             </div>
         {% endif %}
+        {% if exh_exhorto.estado == "RECIBIDO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-primary" href="javascript:void(0)" onclick="showModaltransferir_btn('{{url_for('exh_exhortos.transfer', exh_exhorto_id=exh_exhorto.id)}}', '¿Está seguro de querer transferir el exhorto a un juzgado? Esta operación no puede ser deshecha.');">
+                        <span class='iconify' data-icon='mdi:swap-horizontal'></span> Transferir a Juzgado
+                    </a>
+                </div>
+            </div>
+        {% endif %}
     {% endcall %}
     <!-- Tabla de Partes -->
     {% call detail.card("Partes") %}
@@ -279,5 +290,8 @@
     {% endif %}
     {% if exh_exhorto.estado == 'RECHAZADO' %}
         {{ modals.custom_javascript('Regresar a Pendiente', '¿Está seguro de querer regresar el estado a PENDIENTE?', "regresar_pendiente_btn") }}
+    {% endif %}
+    {% if exh_exhorto.estado == 'RECIBIDO' %}
+        {{ modals.custom_javascript('Transferir', '', "transferir_btn") }}
     {% endif %}
 {% endblock %}
