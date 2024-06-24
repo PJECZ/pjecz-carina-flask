@@ -409,7 +409,7 @@ def transfer(exh_exhorto_id):
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
     form = ExhExhortoTransferForm()
     if form.validate_on_submit():
-        exh_exhorto.area = form.exh_area.data
+        exh_exhorto.exh_area_id = form.exh_area.data
         exh_exhorto.autoridad_id = form.autoridad.data
         exh_exhorto.estado = "TRANSFIRIENDO"
         exh_exhorto.save()
