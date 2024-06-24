@@ -112,8 +112,19 @@
                 <div class="col-md-6 d-grid gap-2">
                 </div>
                 <div class="col-md-6 d-grid gap-2">
-                    <a class="btn btn-lg btn-primary" href="javascript:void(0)" onclick="showModaltransferir_btn('{{url_for('exh_exhortos.transfer', exh_exhorto_id=exh_exhorto.id)}}', '¿Está seguro de querer transferir el exhorto a un juzgado? Esta operación no puede ser deshecha.');">
+                    <a class="btn btn-lg btn-primary" href="{{url_for('exh_exhortos.transfer', exh_exhorto_id=exh_exhorto.id)}}">
                         <span class='iconify' data-icon='mdi:swap-horizontal'></span> Transferir a Juzgado
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "TRANSFIRIENDO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-warning text-dark">
+                        <span class='iconify' data-icon='mdi:recycle'></span> Procesar
                     </a>
                 </div>
             </div>
