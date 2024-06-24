@@ -1,0 +1,102 @@
+{% extends 'layouts/app.jinja2' %}
+{% import 'macros/form.jinja2' as f with context %}
+{% import 'macros/topbar.jinja2' as topbar %}
+
+{% block title %}Transferir Exhorto {{ exh_exhorto.exhorto_origen_id }}{% endblock %}
+
+{% block custom_head %}
+    <!-- Select2 bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://storage.googleapis.com/pjecz-informatica/static/css/select2.css" rel="stylesheet" />
+{% endblock %}
+
+{% block topbar_actions %}
+    {% call topbar.page_buttons('Transferir ' + exh_exhorto.exhorto_origen_id | string) %}
+        {{ topbar.button_cancel() }}
+    {% endcall %}
+{% endblock %}
+
+{% block content %}
+    {% call f.card() %}
+        {% set form_kwargs = {'exh_exhorto_id': exh_exhorto.id} %}
+        {% call f.form_tag('exh_exhortos.transfer', fid='exh_exhorto_form', **form_kwargs) %}
+            <div class="row">
+                <div class="col-md-6">
+                    {% call f.form_group(form.exhorto_origen_id, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.estado_origen, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.municipio_origen, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.juzgado_origen, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.numero_expediente_origen, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.numero_oficio_origen, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.tipo_juicio_asunto_delitos, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.juez_exhortante, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.fojas, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.dias_responder, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.tipo_diligenciacion_nombre, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.fecha_origen, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.observaciones, readonly=true) %}{% endcall %}
+                </div>
+                <div class="col-md-6">
+                    {% call f.form_group(form.folio_seguimiento, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.materia, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.estado_destino, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.municipio_destino, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.remitente, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.numero_exhorto, readonly=true) %}{% endcall %}
+                    {% call f.form_group(form.estado, readonly=true) %}{% endcall %}
+                </div>
+            </div>
+            <div class="row">
+                <hr />
+                <div class="col-md-6">
+                    {% call f.form_group(form.exh_area) %}{% endcall %}
+                    {% call f.form_group(form.distrito) %}{% endcall %}
+                    {% call f.form_group(form.autoridad) %}{% endcall %}
+                </div>
+                <div class="col-md-6">
+                </div>
+            </div>
+
+            {% call f.form_group(form.transferir) %}{% endcall %}
+        {% endcall %}
+    {% endcall %}
+{% endblock %}
+
+{% block custom_javascript %}
+    <!-- Combo select Distrito - Autoridades -->
+    <script>
+        // Llamar a /distritos/select_json para cargar el select distrito
+        fetch('/distritos/select_json?es_distrito=true')
+            .then(response => response.json())
+            .then(data => {
+                const distritoSelect = document.getElementById('distrito');
+                data.forEach(distrito => {
+                    const option = document.createElement('option');
+                    option.value = distrito.id;
+                    option.text = distrito.nombre;
+                    distritoSelect.appendChild(option);
+                });
+                // Seleccionar el distrito del usuario
+                document.getElementById('distrito').value = {{ exh_exhorto.autoridad.distrito_id }};
+                document.getElementById('distrito').dispatchEvent(new Event('change'));
+            });
+        // Llamar a /autoridades/select_json para cargar el select autoridad, si el distrito cambia
+        document.getElementById('distrito').addEventListener('change', () => {
+            const distritoId = document.getElementById('distrito').value;
+            fetch(`/autoridades/select_json/${distritoId}?es_jurisdiccional=true&es_notaria=false`)
+                .then(response => response.json())
+                .then(data => {
+                    const autoridadSelect = document.getElementById('autoridad');
+                    autoridadSelect.innerHTML = '';
+                    data.forEach(autoridad => {
+                        const option = document.createElement('option');
+                        option.value = autoridad.id;
+                        option.text = autoridad.descripcion_corta;
+                        autoridadSelect.appendChild(option);
+                    });
+                    // Seleccionar la autoridad del usuario
+                    document.getElementById('autoridad').value = {{ exh_exhorto.autoridad_id }};
+                });
+        });
+    </script>
+{% endblock %}
