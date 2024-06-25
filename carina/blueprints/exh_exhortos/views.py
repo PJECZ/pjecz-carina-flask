@@ -423,30 +423,10 @@ def transfer(exh_exhorto_id):
         flash(bitacora.descripcion, "success")
         return redirect(bitacora.url)
     # Buscar el juzgado origen en Autoridades
-    juzgado_origen = Autoridad.query.filter_by(clave=exh_exhorto.juzgado_origen_id).filter_by(estatus="A").first()
-    municipio_origen = Municipio.query.filter_by(id=exh_exhorto.municipio_origen_id).first()
     municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
     # Cargar los valores guardados en el formulario
-    form.exhorto_origen_id.data = exh_exhorto.exhorto_origen_id
-    form.estado_origen.data = municipio_origen.estado.nombre
-    form.municipio_origen.data = municipio_origen.nombre
-    form.juzgado_origen.data = juzgado_origen.clave
-    form.numero_expediente_origen.data = exh_exhorto.numero_expediente_origen
-    form.numero_oficio_origen.data = exh_exhorto.numero_oficio_origen
-    form.tipo_juicio_asunto_delitos.data = exh_exhorto.tipo_juicio_asunto_delitos
-    form.juez_exhortante.data = exh_exhorto.juez_exhortante
-    form.fojas.data = exh_exhorto.fojas
-    form.dias_responder.data = exh_exhorto.dias_responder
-    form.tipo_diligenciacion_nombre.data = exh_exhorto.tipo_diligenciacion_nombre
-    form.fecha_origen.data = exh_exhorto.fecha_origen
-    form.observaciones.data = exh_exhorto.observaciones
-    form.folio_seguimiento.data = exh_exhorto.folio_seguimiento
-    form.materia.data = exh_exhorto.materia.nombre
-    form.estado_destino.data = municipio_destino.estado.nombre
-    form.municipio_destino.data = municipio_destino.nombre
-    form.remitente.data = exh_exhorto.remitente
     form.exh_area.data = exh_exhorto.exh_area.id
-    form.numero_exhorto.data = exh_exhorto.numero_exhorto
-    form.estado.data = exh_exhorto.estado  # Read only
     # Entregar
-    return render_template("exh_exhortos/transfer.jinja2", form=form, exh_exhorto=exh_exhorto)
+    return render_template(
+        "exh_exhortos/transfer.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino
+    )

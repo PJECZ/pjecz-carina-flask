@@ -1,4 +1,5 @@
 {% extends 'layouts/app.jinja2' %}
+{% import 'macros/detail.jinja2' as detail %}
 {% import 'macros/form.jinja2' as f with context %}
 {% import 'macros/topbar.jinja2' as topbar %}
 
@@ -17,37 +18,55 @@
 {% endblock %}
 
 {% block content %}
+    {% call detail.card(estatus=exh_exhorto.estatus) %}
+        <div class="row">
+            <div class="col-md-6">
+                {{ detail.label_value('Exhorto Origen ID', exh_exhorto.exhorto_origen_id) }}
+                {% if current_user.can_view('MUNICIPIOS') %}
+                    {{ detail.label_value('Municipio Origen', exh_exhorto.municipio_origen.nombre, url_for('municipios.detail', municipio_id=exh_exhorto.municipio_origen_id)) }}
+                    {{ detail.label_value('Estado Origen', exh_exhorto.municipio_origen.estado.nombre) }}
+                {% else %}
+                    {{ detail.label_value('Municipio Origen', exh_exhorto.municipio_origen.nombre + ', ' + exh_exhorto.municipio_origen.estado.nombre) }}
+                    {{ detail.label_value('Estado Origen', exh_exhorto.municipio_origen.estado.nombre) }}
+                {% endif %}
+                {{ detail.label_value('Juzgado Origen ID', exh_exhorto.juzgado_origen_id) }}
+                {{ detail.label_value('Juzgado Origen', exh_exhorto.juzgado_origen_nombre) }}
+                {{ detail.label_value('No. Expediente', exh_exhorto.numero_expediente_origen) }}
+                {{ detail.label_value('No. Oficio', exh_exhorto.numero_oficio_origen) }}
+                {{ detail.label_value('Tipo de Juicio', exh_exhorto.tipo_juicio_asunto_delitos) }}
+                {{ detail.label_value('Juez Exhortante', exh_exhorto.juez_exhortante) }}
+                {{ detail.label_value('Fojas', exh_exhorto.fojas) }}
+                {{ detail.label_value('Días en responder', exh_exhorto.dias_responder) }}
+                {{ detail.label_value('Tipo de diligenciación', exh_exhorto.tipo_diligenciacion_nombre) }}
+                {{ detail.label_value('Fecha de origen', moment(exh_exhorto.fecha_origen).format('llll')) }}
+                {{ detail.label_value('Observaciones', exh_exhorto.observaciones) }}
+            </div>
+            <div class="col-md-6">
+                {{ detail.label_value('Folio Seguimiento', exh_exhorto.folio_seguimiento) }}
+                {{ detail.label_value('Materia', exh_exhorto.materia.nombre, url_for('materias.detail', materia_id=exh_exhorto.materia_id)) }}
+                {% if municipio_destino %}
+                    {% if current_user.can_view('MUNICIPIOS') %}
+                        {{ detail.label_value('Municipio Destino', municipio_destino.nombre, url_for('municipios.detail', municipio_id=municipio_destino.id)) }}
+                        {{ detail.label_value('Estado Destino', municipio_destino.estado.nombre) }}
+                    {% else %}
+                        {{ detail.label_value('Municipio Destino', municipio_destino.nombre) }}
+                        {{ detail.label_value('Estado Destino', municipio_destino.estado.nombre) }}
+                    {% endif %}
+                {% else %}
+                    {{ detail.label_value('Municipio Destino', 'NO DEFINIDO') }}
+                {% endif %}
+                {{ detail.label_value('Remitente', exh_exhorto.remitente) }}
+                <div class="row">
+                    <div class="col-md-3 text-end">Estado</div>
+                    <div class="col-md-9" id="estado"><strong>{{ exh_exhorto.estado }}</strong></div>
+                </div>
+            </div>
+        </div>
+    {% endcall %}
     {% call f.card() %}
         {% set form_kwargs = {'exh_exhorto_id': exh_exhorto.id} %}
         {% call f.form_tag('exh_exhortos.transfer', fid='exh_exhorto_form', **form_kwargs) %}
             <div class="row">
-                <div class="col-md-6">
-                    {% call f.form_group(form.exhorto_origen_id, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.estado_origen, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.municipio_origen, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.juzgado_origen, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.numero_expediente_origen, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.numero_oficio_origen, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.tipo_juicio_asunto_delitos, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.juez_exhortante, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.fojas, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.dias_responder, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.tipo_diligenciacion_nombre, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.fecha_origen, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.observaciones, readonly=true) %}{% endcall %}
-                </div>
-                <div class="col-md-6">
-                    {% call f.form_group(form.folio_seguimiento, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.materia, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.estado_destino, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.municipio_destino, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.remitente, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.numero_exhorto, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.estado, readonly=true) %}{% endcall %}
-                </div>
-            </div>
-            <div class="row">
-                <hr />
                 <div class="col-md-6">
                     {% call f.form_group(form.exh_area) %}{% endcall %}
                     {% call f.form_group(form.distrito) %}{% endcall %}
@@ -62,6 +81,7 @@
 {% endblock %}
 
 {% block custom_javascript %}
+    {{ detail.moment_js(moment) }}
     <!-- Combo select Distrito - Autoridades -->
     <script>
         // Llamar a /distritos/select_json para cargar el select distrito
