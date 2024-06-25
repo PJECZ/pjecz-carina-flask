@@ -101,33 +101,13 @@ class ExhExhortoEditForm(FlaskForm):
 class ExhExhortoTransferForm(FlaskForm):
     """Formulario Edit Exhorto"""
 
-    exhorto_origen_id = StringField("Exhorto Origen ID", validators=[DataRequired(), Length(max=128)])
-    estado_destino = StringField("Estado Destino")  # Read only
-    municipio_destino = StringField("Municipio Destino")  # Read only
-    materia = StringField("Materia")  # Read only
-    estado_origen = StringField("Estado Origen")  # Read only
-    municipio_origen = StringField("Municipio Origen")  # Read only
-    juzgado_origen = StringField("Juzgado Origen")  # Read only
-    numero_expediente_origen = StringField("Número de Expediente Origen")  # Read only
-    numero_oficio_origen = StringField("Número de Oficio Origen", validators=[Optional(), Length(max=256)])
-    tipo_juicio_asunto_delitos = StringField("Tipo de Juicio Asunto Delitos")  # Read only
-    juez_exhortante = StringField("Juez Exhortante", validators=[Optional(), Length(max=256)])
-    fojas = IntegerField("Fojas", validators=[Optional()])
-    dias_responder = IntegerField("Días Responder", validators=[Optional()])
-    tipo_diligenciacion_nombre = StringField("Tipo Diligenciación Nombre", validators=[Optional(), Length(max=256)])
-    fecha_origen = StringField("Fecha Origen", validators=[Optional()])
-    observaciones = TextAreaField("Observaciones", validators=[Optional(), Length(max=1024)])
-    remitente = StringField("Remitente")
     exh_area = SelectField("Área", coerce=int, validators=[DataRequired()])
-    folio_seguimiento = StringField("Folio de Seguimiento", validators=[Optional(), Length(max=256)])
     distrito = SelectField(
         "Distrito", choices=None, validate_choice=False, validators=[DataRequired()]
     )  # Las opciones se agregan con JS
     autoridad = SelectField(
         "Autoridad", choices=None, validate_choice=False, validators=[DataRequired()]
     )  # Las opciones se agregan con JS
-    numero_exhorto = StringField("Número de Exhorto", validators=[Optional(), Length(max=256)])
-    estado = StringField("Estado")  # Read only
     transferir = SubmitField("Transferir")
 
     def __init__(self, *args, **kwargs):
