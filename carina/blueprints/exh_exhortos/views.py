@@ -12,7 +12,6 @@ from flask_login import current_user, login_required
 from carina.blueprints.autoridades.models import Autoridad
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.estados.models import Estado
-from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm, ExhExhortoTransferForm
 from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
@@ -23,6 +22,12 @@ from lib.safe_string import safe_clave, safe_message, safe_string
 
 from carina.blueprints.exh_exhortos_partes.models import ExhExhortoParte
 from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
+from carina.blueprints.exh_exhortos.forms import (
+    ExhExhortoEditForm,
+    ExhExhortoNewForm,
+    ExhExhortoTransferForm,
+    ExhExhortoProcessForm,
+)
 
 MODULO = "EXH EXHORTOS"
 
@@ -429,4 +434,33 @@ def transfer(exh_exhorto_id):
     # Entregar
     return render_template(
         "exh_exhortos/transfer.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino
+    )
+
+
+@exh_exhortos.route("/exh_exhortos/procesar/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def process(exh_exhorto_id):
+    """Procesar un exhorto por un juzgado"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoProcessForm()
+    if form.validate_on_submit():
+        exh_exhorto.numero_exhorto = safe_string(form.numero_exhorto.data)
+        exh_exhorto.estado = "PROCESANDO"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Exhorto Procesando {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    # Buscar el juzgado origen en Autoridades
+    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
+    # Cargar los valores guardados en el formulario
+    form.numero_exhorto.data = exh_exhorto.numero_exhorto
+    # Entregar
+    return render_template(
+        "exh_exhortos/process.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino
     )

@@ -99,7 +99,7 @@ class ExhExhortoEditForm(FlaskForm):
 
 
 class ExhExhortoTransferForm(FlaskForm):
-    """Formulario Edit Exhorto"""
+    """Formulario Transferir Exhorto"""
 
     exh_area = SelectField("Área", coerce=int, validators=[DataRequired()])
     distrito = SelectField(
@@ -116,3 +116,10 @@ class ExhExhortoTransferForm(FlaskForm):
         self.exh_area.choices = [
             (m.id, m.clave + " - " + m.nombre) for m in ExhArea.query.filter_by(estatus="A").order_by(ExhArea.clave).all()
         ]
+
+
+class ExhExhortoProcessForm(FlaskForm):
+    """Formulario Procesar Exhorto"""
+
+    numero_exhorto = StringField("Número de Exhorto", validators=[Optional(), Length(max=256)])
+    procesar = SubmitField("Procesar")

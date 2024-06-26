@@ -3,7 +3,7 @@
 {% import 'macros/form.jinja2' as f with context %}
 {% import 'macros/topbar.jinja2' as topbar %}
 
-{% block title %}Transferir Exhorto{% endblock %}
+{% block title %}Procesando Exhorto{% endblock %}
 
 {% block custom_head %}
     <!-- Select2 bootstrap -->
@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block topbar_actions %}
-    {% call topbar.page_buttons('Transferir a Juzgado') %}
+    {% call topbar.page_buttons('Procesando Exhorto') %}
         {{ topbar.button_cancel() }}
     {% endcall %}
 {% endblock %}
@@ -56,6 +56,8 @@
                     {{ detail.label_value('Municipio Destino', 'NO DEFINIDO') }}
                 {% endif %}
                 {{ detail.label_value('Remitente', exh_exhorto.remitente) }}
+                {{ detail.label_value('Área', exh_exhorto.exh_area.clave + ' - ' + exh_exhorto.exh_area.nombre, url_for("exh_areas.detail", exh_area_id=exh_exhorto.exh_area.id)) }}
+                {{ detail.label_value('Autoridad', exh_exhorto.autoridad.clave + ' - ' + exh_exhorto.autoridad.descripcion_corta, url_for("autoridades.detail", autoridad_id=exh_exhorto.autoridad.id )) }}
                 <div class="row">
                     <div class="col-md-3 text-end">Estado</div>
                     <div class="col-md-9" id="estado"><strong>{{ exh_exhorto.estado }}</strong></div>
@@ -63,59 +65,21 @@
             </div>
         </div>
     {% endcall %}
-    {% call f.card() %}
+    {% call f.card('Asignar número de exhorto') %}
         {% set form_kwargs = {'exh_exhorto_id': exh_exhorto.id} %}
-        {% call f.form_tag('exh_exhortos.transfer', fid='exh_exhorto_form', **form_kwargs) %}
+        {% call f.form_tag('exh_exhortos.process', fid='exh_exhorto_form', **form_kwargs) %}
             <div class="row">
                 <div class="col-md-6">
-                    {% call f.form_group(form.exh_area) %}{% endcall %}
-                    {% call f.form_group(form.distrito) %}{% endcall %}
-                    {% call f.form_group(form.autoridad) %}{% endcall %}
+                    {% call f.form_group(form.numero_exhorto) %}{% endcall %}
                 </div>
                 <div class="col-md-6">
                 </div>
             </div>
-            {% call f.form_group(form.transferir) %}{% endcall %}
+            {% call f.form_group(form.procesar) %}{% endcall %}
         {% endcall %}
     {% endcall %}
 {% endblock %}
 
 {% block custom_javascript %}
     {{ detail.moment_js(moment) }}
-    <!-- Combo select Distrito - Autoridades -->
-    <script>
-        // Llamar a /distritos/select_json para cargar el select distrito
-        fetch('/distritos/select_json?es_distrito=true')
-            .then(response => response.json())
-            .then(data => {
-                const distritoSelect = document.getElementById('distrito');
-                data.forEach(distrito => {
-                    const option = document.createElement('option');
-                    option.value = distrito.id;
-                    option.text = distrito.nombre;
-                    distritoSelect.appendChild(option);
-                });
-                // Seleccionar el distrito del usuario
-                document.getElementById('distrito').value = {{ exh_exhorto.autoridad.distrito_id }};
-                document.getElementById('distrito').dispatchEvent(new Event('change'));
-            });
-        // Llamar a /autoridades/select_json para cargar el select autoridad, si el distrito cambia
-        document.getElementById('distrito').addEventListener('change', () => {
-            const distritoId = document.getElementById('distrito').value;
-            fetch(`/autoridades/select_json/${distritoId}?es_jurisdiccional=true&es_notaria=false`)
-                .then(response => response.json())
-                .then(data => {
-                    const autoridadSelect = document.getElementById('autoridad');
-                    autoridadSelect.innerHTML = '';
-                    data.forEach(autoridad => {
-                        const option = document.createElement('option');
-                        option.value = autoridad.id;
-                        option.text = autoridad.descripcion_corta;
-                        autoridadSelect.appendChild(option);
-                    });
-                    // Seleccionar la autoridad del usuario
-                    document.getElementById('autoridad').value = {{ exh_exhorto.autoridad_id }};
-                });
-        });
-    </script>
 {% endblock %}
