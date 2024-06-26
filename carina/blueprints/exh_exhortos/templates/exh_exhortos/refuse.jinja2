@@ -73,7 +73,7 @@
             {% call f.drop_zone_wrapper() %}
                 {% call f.form_group(form.archivo, class="dropzone") %}{% endcall %}
             {% endcall %}
-            {% call f.form_group(form.rechazar) %}{% endcall %}
+            <input class="btn btn-danger" id="rechazar" name="rechazar" type="submit" value="Rechazar">
         {% endcall %}
     {% endcall %}
 {% endblock %}
