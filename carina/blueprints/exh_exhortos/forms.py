@@ -3,6 +3,7 @@ Exh Exhortos, formularios
 """
 
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired
 from wtforms import IntegerField, RadioField, SelectField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Length, Optional
 
@@ -123,3 +124,24 @@ class ExhExhortoProcessForm(FlaskForm):
 
     numero_exhorto = StringField("Número de Exhorto", validators=[Optional(), Length(max=256)])
     procesar = SubmitField("Procesar")
+
+
+class ExhExhortoRefuseForm(FlaskForm):
+    """Formulario Rechazar Exhorto"""
+
+    archivo = FileField("Archivo PDF", validators=[FileRequired()])
+    rechazar = SubmitField("Rechazar")
+
+
+class ExhExhortoDiligenceForm(FlaskForm):
+    """Formulario Diligenciar Exhorto"""
+
+    archivo = FileField("Archivo PDF", validators=[FileRequired()])
+    diligenciar = SubmitField("Diligenciar")
+
+
+class ExhExhortoResponseForm(FlaskForm):
+    """Formulario Contestar Exhorto"""
+
+    archivo = FileField("Archivo PDF", validators=[FileRequired()])
+    contestar = SubmitField("Contestar")

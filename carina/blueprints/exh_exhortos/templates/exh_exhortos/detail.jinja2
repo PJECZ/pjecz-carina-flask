@@ -70,7 +70,7 @@
                 </div>
             </div>
         </div>
-        <!-- Botones de acción en estado Pendiente -->
+        <!-- Botones de acción en diferentes estados -->
         {% if exh_exhorto.estado == 'PENDIENTE' %}
             <div class="row text-center">
                 <div class="col-md-6 d-grid gap-2">
@@ -125,6 +125,31 @@
                 <div class="col-md-6 d-grid gap-2">
                     <a class="btn btn-lg btn-warning text-dark" href="{{url_for('exh_exhortos.process', exh_exhorto_id=exh_exhorto.id)}}">
                         <span class='iconify' data-icon='mdi:recycle'></span> Procesar
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "PROCESANDO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-danger" href="{{url_for('exh_exhortos.refuse', exh_exhorto_id=exh_exhorto.id)}}">
+                        <span class='iconify' data-icon='mdi:hand-back-left'></span> Rechazar
+                    </a>
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-primary" href="{{url_for('exh_exhortos.diligence', exh_exhorto_id=exh_exhorto.id)}}">
+                        <span class='iconify' data-icon='mdi:truck-delivery'></span> Diligenciar
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "DILIGENCIADO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-success" href="{{url_for('exh_exhortos.response', exh_exhorto_id=exh_exhorto.id)}}">
+                        <span class='iconify' data-icon='mdi:check-circle'></span> Contestar
                     </a>
                 </div>
             </div>
