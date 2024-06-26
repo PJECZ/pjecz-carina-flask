@@ -28,10 +28,10 @@ database.app = app
 
 def consultar(exh_exhorto_id: int) -> tuple[str, str, str]:
     """Consultar exhortos"""
-    bitacora.info("Inicia consultar exhortos")
+    bitacora.info("Inicia exh_exhortos.consultar")
 
     # Elaborar mensaje_termino
-    mensaje_termino = "Consultar exhortos ha terminado"
+    mensaje_termino = "Termina exh_exhortos.consultar"
     bitacora.info(mensaje_termino)
 
     # Entregar mensaje_termino, nombre_archivo y url_publica
@@ -42,7 +42,7 @@ def lanzar_consultar(exh_exhorto_id):
     """Lanzar tarea en el fondo para consultar exhortos"""
 
     # Iniciar la tarea en el fondo
-    set_task_progress(0, "Inicia consultar exhortos")
+    set_task_progress(0, "Se ha lanzado exh_exhortos.consultar")
 
     # Ejecutar
     try:
@@ -61,10 +61,10 @@ def lanzar_consultar(exh_exhorto_id):
 
 def enviar(exh_exhorto_id: int) -> tuple[str, str, str]:
     """Enviar exhortos"""
-    bitacora.info("Inicia enviar exhortos")
+    bitacora.info("Inicia exh_exhortos.enviar")
 
     # Elaborar mensaje_termino
-    mensaje_termino = "Enviar exhortos ha terminado"
+    mensaje_termino = "Termina exh_exhortos.consultar"
     bitacora.info(mensaje_termino)
 
     # Entregar mensaje_termino, nombre_archivo y url_publica
@@ -75,7 +75,7 @@ def lanzar_enviar(exh_exhorto_id):
     """Lanzar tarea en el fondo para enviar exhortos"""
 
     # Iniciar la tarea en el fondo
-    set_task_progress(0, "Inicia enviar exhortos")
+    set_task_progress(0, "Se ha lanzado exh_exhortos.enviar")
 
     # Ejecutar
     try:
