@@ -29,14 +29,14 @@ TIMEOUT = 30  # 30 segundos
 
 def probar_endpoints(clave: str) -> tuple[str, str, str]:
     """Probar endpoints"""
-    bitacora.info("Inicia exh_externos.probar_endpoints")
+    bitacora.info("Inicia probar_endpoints")
 
     # Limpiar clave
     clave = safe_clave(clave)
 
     # Si no se proporciona la clave, entonces se van a probar todos los exh externos
     exh_externos = []
-    if clave is None:
+    if clave == "":
         bitacora.info("Por probar TODOS los externos")
         exh_externos = ExhExterno.query.filter_by(estatus="A").all()
     else:
@@ -62,7 +62,7 @@ def probar_endpoints(clave: str) -> tuple[str, str, str]:
             continue
         if exh_externo.endpoint_consultar_materias == "":
             continue
-        bitacora.info("Probando %s con el endpoint %s", exh_externo.clave, exh_externo.endpoint_consultar_materias)
+        bitacora.info("Probando %s...", exh_externo.clave)
         mensaje_advertencia = ""
         contador_total += 1
         try:
@@ -79,16 +79,22 @@ def probar_endpoints(clave: str) -> tuple[str, str, str]:
         except requests.exceptions.HTTPError as error:
             mensaje_advertencia = f"Error HTTP {str(error)}"
         except requests.exceptions.RequestException as error:
-            mensaje_advertencia = f"  Error de request {str(error)}"
+            mensaje_advertencia = f"Error de request {str(error)}"
         if mensaje_advertencia != "":
             bitacora.warning(mensaje_advertencia)
             continue
-        bitacora.info("  Respuesta exitosa de %s", exh_externo.clave)
+        bitacora.info("Respuesta exitosa de %s del endpoint %s", exh_externo.clave, exh_externo.endpoint_consultar_materias)
         contador_exitosos += 1
 
     # Elaborar mensaje_termino
-    mensaje_termino = f"Termina exh_externos.probar_endpoints con {contador_exitosos} exitosos de {contador_total}"
-    bitacora.info(mensaje_termino)
+    if len(exh_externos) == 1:
+        if mensaje_advertencia != "":
+            mensaje_termino = f"ERROR en {exh_externo.clave} a {exh_externo.endpoint_consultar_materias} {mensaje_advertencia}"
+        else:
+            mensaje_termino = f"Éxito en {exh_externo.clave} a {exh_externo.endpoint_consultar_materias}"
+    else:
+        mensaje_termino = f"{contador_exitosos} respuestas exitosas de {contador_total}"
+    bitacora.info("Termina probar_endpoints con %s", mensaje_termino)
 
     # Entregar mensaje_termino, nombre_archivo y url_publica
     return mensaje_termino, "", ""

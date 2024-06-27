@@ -28,10 +28,10 @@ database.app = app
 
 def consultar(exh_exhorto_id: int) -> tuple[str, str, str]:
     """Consultar exhortos"""
-    bitacora.info("Inicia exh_exhortos.consultar")
+    bitacora.info("Inicia consultar")
 
     # Elaborar mensaje_termino
-    mensaje_termino = "Termina exh_exhortos.consultar"
+    mensaje_termino = "Termina consultar"
     bitacora.info(mensaje_termino)
 
     # Entregar mensaje_termino, nombre_archivo y url_publica
@@ -61,10 +61,10 @@ def lanzar_consultar(exh_exhorto_id):
 
 def enviar(exh_exhorto_id: int) -> tuple[str, str, str]:
     """Enviar exhortos"""
-    bitacora.info("Inicia exh_exhortos.enviar")
+    bitacora.info("Inicia enviar")
 
     # Elaborar mensaje_termino
-    mensaje_termino = "Termina exh_exhortos.consultar"
+    mensaje_termino = "Termina consultar"
     bitacora.info(mensaje_termino)
 
     # Entregar mensaje_termino, nombre_archivo y url_publica
