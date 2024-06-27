@@ -3,6 +3,7 @@ Exh Exhortos, formularios
 """
 
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired
 from wtforms import IntegerField, RadioField, SelectField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Length, Optional
 
@@ -96,3 +97,51 @@ class ExhExhortoEditForm(FlaskForm):
         self.exh_area.choices = [
             (m.id, m.clave + " - " + m.nombre) for m in ExhArea.query.filter_by(estatus="A").order_by(ExhArea.clave).all()
         ]
+
+
+class ExhExhortoTransferForm(FlaskForm):
+    """Formulario Transferir Exhorto"""
+
+    exh_area = SelectField("Área", coerce=int, validators=[DataRequired()])
+    distrito = SelectField(
+        "Distrito", choices=None, validate_choice=False, validators=[DataRequired()]
+    )  # Las opciones se agregan con JS
+    autoridad = SelectField(
+        "Autoridad", choices=None, validate_choice=False, validators=[DataRequired()]
+    )  # Las opciones se agregan con JS
+    transferir = SubmitField("Transferir")
+
+    def __init__(self, *args, **kwargs):
+        """Inicializar y cargar opciones para materia y exh_area"""
+        super().__init__(*args, **kwargs)
+        self.exh_area.choices = [
+            (m.id, m.clave + " - " + m.nombre) for m in ExhArea.query.filter_by(estatus="A").order_by(ExhArea.clave).all()
+        ]
+
+
+class ExhExhortoProcessForm(FlaskForm):
+    """Formulario Procesar Exhorto"""
+
+    numero_exhorto = StringField("Número de Exhorto", validators=[Optional(), Length(max=256)])
+    procesar = SubmitField("Procesar")
+
+
+class ExhExhortoRefuseForm(FlaskForm):
+    """Formulario Rechazar Exhorto"""
+
+    archivo = FileField("Archivo PDF", validators=[FileRequired()])
+    rechazar = SubmitField("Rechazar")
+
+
+class ExhExhortoDiligenceForm(FlaskForm):
+    """Formulario Diligenciar Exhorto"""
+
+    archivo = FileField("Archivo PDF", validators=[FileRequired()])
+    diligenciar = SubmitField("Diligenciar")
+
+
+class ExhExhortoResponseForm(FlaskForm):
+    """Formulario Contestar Exhorto"""
+
+    archivo = FileField("Archivo PDF", validators=[FileRequired()])
+    contestar = SubmitField("Contestar")

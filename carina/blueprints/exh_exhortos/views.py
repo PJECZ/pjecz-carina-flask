@@ -8,11 +8,12 @@ from datetime import datetime
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
+from werkzeug.datastructures import CombinedMultiDict
+from werkzeug.utils import secure_filename
 
 from carina.blueprints.autoridades.models import Autoridad
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.estados.models import Estado
-from carina.blueprints.exh_exhortos.forms import ExhExhortoEditForm, ExhExhortoNewForm
 from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
@@ -23,6 +24,15 @@ from lib.safe_string import safe_clave, safe_message, safe_string
 
 from carina.blueprints.exh_exhortos_partes.models import ExhExhortoParte
 from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
+from carina.blueprints.exh_exhortos.forms import (
+    ExhExhortoEditForm,
+    ExhExhortoNewForm,
+    ExhExhortoTransferForm,
+    ExhExhortoProcessForm,
+    ExhExhortoRefuseForm,
+    ExhExhortoDiligenceForm,
+    ExhExhortoResponseForm,
+)
 
 MODULO = "EXH EXHORTOS"
 
@@ -219,7 +229,7 @@ def edit(exh_exhorto_id):
             return redirect(bitacora.url)
     # Buscar el juzgado origen en Autoridades
     juzgado_origen = Autoridad.query.filter_by(clave=exh_exhorto.juzgado_origen_id).filter_by(estatus="A").first()
-    # Cargar los valores gardados en el formulario
+    # Cargar los valores guardados en el formulario
     form.exhorto_origen_id.data = exh_exhorto.exhorto_origen_id
     form.materia.data = exh_exhorto.materia.id
     form.juzgado_origen.data = juzgado_origen.id
@@ -321,12 +331,12 @@ def send(exh_exhorto_id):
     exh_exhorto_partes = ExhExhortoParte.query.filter_by(exh_exhorto_id=exh_exhorto_id).filter_by(estatus="A").first()
     if exh_exhorto_partes is None:
         es_valido = False
-        flash("Debe incluir al menos una parte al exhorto.", "warning")
+        flash("No se pudo enviar el exhorto. Debe incluir al menos una parte.", "warning")
     # Validar que el Exhorto tenga archivos
     exh_exhorto_archivos = ExhExhortoArchivo.query.filter_by(exh_exhorto_id=exh_exhorto_id).filter_by(estatus="A").first()
     if exh_exhorto_archivos is None:
         es_valido = False
-        flash("Debe incluir al menos un archivo al exhorto.", "warning")
+        flash("No se pudo enviar el exhorto. Debe incluir al menos un archivo.", "warning")
     # Validar que el estado del Exhorto sea "PENDIENTE"
     if exh_exhorto.estado != "PENDIENTE":
         es_valido = False
@@ -400,3 +410,140 @@ def back_to_pending(exh_exhorto_id):
         bitacora.save()
         flash(bitacora.descripcion, "success")
     return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
+
+
+@exh_exhortos.route("/exh_exhortos/transferir/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def transfer(exh_exhorto_id):
+    """Transferir un exhorto a un juzgado"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoTransferForm()
+    if form.validate_on_submit():
+        exh_exhorto.exh_area_id = form.exh_area.data
+        exh_exhorto.autoridad_id = form.autoridad.data
+        exh_exhorto.estado = "TRANSFIRIENDO"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Exhorto Transferido {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    # Buscar el juzgado origen en Autoridades
+    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
+    # Cargar los valores guardados en el formulario
+    form.exh_area.data = exh_exhorto.exh_area.id
+    # Entregar
+    return render_template(
+        "exh_exhortos/transfer.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino
+    )
+
+
+@exh_exhortos.route("/exh_exhortos/procesar/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def process(exh_exhorto_id):
+    """Procesar un exhorto por un juzgado"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoProcessForm()
+    if form.validate_on_submit():
+        exh_exhorto.numero_exhorto = safe_string(form.numero_exhorto.data)
+        exh_exhorto.estado = "PROCESANDO"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Exhorto Procesando {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    # Buscar el juzgado origen en Autoridades
+    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
+    # Cargar los valores guardados en el formulario
+    form.numero_exhorto.data = exh_exhorto.numero_exhorto
+    # Entregar
+    return render_template(
+        "exh_exhortos/process.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino
+    )
+
+
+@exh_exhortos.route("/exh_exhortos/rechazar/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def refuse(exh_exhorto_id):
+    """Rechazar un exhorto por un juzgado"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoRefuseForm(CombinedMultiDict((request.files, request.form)))
+    if form.validate_on_submit():
+        exh_exhorto.estado = "RECHAZADO"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Exhorto Rechazado {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    # Buscar el juzgado origen en Autoridades
+    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
+    # Entregar
+    return render_template(
+        "exh_exhortos/refuse.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino
+    )
+
+
+@exh_exhortos.route("/exh_exhortos/deligenciar/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def diligence(exh_exhorto_id):
+    """Diligenciado exhorto por un juzgado"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoDiligenceForm(CombinedMultiDict((request.files, request.form)))
+    if form.validate_on_submit():
+        exh_exhorto.estado = "DILIGENCIADO"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Exhorto Diligenciado {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    # Buscar el juzgado origen en Autoridades
+    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
+    # Entregar
+    return render_template(
+        "exh_exhortos/diligence.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino
+    )
+
+
+@exh_exhortos.route("/exh_exhortos/contestado/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def response(exh_exhorto_id):
+    """Contestado exhorto por un juzgado"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoResponseForm(CombinedMultiDict((request.files, request.form)))
+    if form.validate_on_submit():
+        exh_exhorto.estado = "CONTESTADO"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Exhorto Contestado {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    # Buscar el juzgado origen en Autoridades
+    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
+    # Entregar
+    return render_template(
+        "exh_exhortos/response.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino
+    )

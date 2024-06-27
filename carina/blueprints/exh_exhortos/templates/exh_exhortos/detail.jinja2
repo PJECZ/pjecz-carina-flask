@@ -15,7 +15,7 @@
         {% endif %}
         {% if current_user.can_admin('EXH EXHORTOS') %}
             {{ modals.button_modal('Consultar', url_for('exh_exhortos.get_from_externo', exh_exhorto_id=exh_exhorto.id), 'GetFromExterno', 'mdi:download', "¿Quiere consultar desde el PJ?") }}
-            {{ modals.button_modal('Enviar', url_for('exh_exhortos.send', exh_exhorto_id=exh_exhorto.id), 'SendToExterno', 'mdi:send', "¿Quiere enviar al PJ?") }}
+            {# {{ modals.button_modal('Enviar', url_for('exh_exhortos.send', exh_exhorto_id=exh_exhorto.id), 'SendToExterno', 'mdi:send', "¿Quiere enviar al PJ?") }} #}
             {% if exh_exhorto.estatus == 'A' %}{{ topbar.button_delete('Eliminar', url_for('exh_exhortos.delete', exh_exhorto_id=exh_exhorto.id)) }}{% endif %}
             {% if exh_exhorto.estatus == 'B' %}{{ topbar.button_recover('Recuperar', url_for('exh_exhortos.recover', exh_exhorto_id=exh_exhorto.id)) }}{% endif %}
         {% endif %}
@@ -70,14 +70,18 @@
                 </div>
             </div>
         </div>
-        <!-- Botones de acción en estado Pendiente -->
+        <!-- Botones de acción en diferentes estados -->
         {% if exh_exhorto.estado == 'PENDIENTE' %}
             <div class="row text-center">
                 <div class="col-md-6 d-grid gap-2">
-                    {{ modals.button_modal("Cancelar", url_for("exh_exhortos.cancel", exh_exhorto_id=exh_exhorto.id), "cancelar_btn", "", "¿Desea cancelar el exhorto?", "btn-danger") }}
+                    <a class="btn btn-lg btn-danger" href="javascript:void(0)" onclick="showModalcancelar_btn('{{url_for('exh_exhortos.cancel', exh_exhorto_id=exh_exhorto.id)}}', '¿Desea cancelar el exhorto?');">
+                        <span class='iconify' data-icon='mdi:cancel'></span> Cancelar
+                    </a>
                 </div>
                 <div class="col-md-6 d-grid gap-2">
-                    {{ modals.button_modal("Enviar", url_for("exh_exhortos.send", exh_exhorto_id=exh_exhorto.id), "enviar_btn", "", "¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.", "btn-primary") }}
+                    <a class="btn btn-lg btn-primary" href="javascript:void(0)" onclick="showModalenviar_btn('{{url_for('exh_exhortos.send', exh_exhorto_id=exh_exhorto.id)}}', '¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.');">
+                        <span class='iconify' data-icon='mdi:send'></span> Enviar
+                    </a>
                 </div>
             </div>
         {% endif %}
@@ -86,7 +90,9 @@
                 <div class="col-md-6 d-grid gap-2">
                 </div>
                 <div class="col-md-6 d-grid gap-2">
-                    {{ modals.button_modal("Reiniciar Intentos", url_for("exh_exhortos.back_to_by_send", exh_exhorto_id=exh_exhorto.id), "regresar_enviar_btn", "", "¿Está seguro de querer reiniciar los intentos de envío y regresar el exhorto al estado POR ENVIAR?", "btn-primary") }}
+                    <a class="btn btn-lg btn-primary" href="javascript:void(0)" onclick="showModalregresar_enviar_btn('{{url_for('exh_exhortos.back_to_by_send', exh_exhorto_id=exh_exhorto.id)}}', '¿Está seguro de querer reiniciar los intentos de envío y regresar el exhorto al estado POR ENVIAR?');">
+                        <span class='iconify' data-icon='mdi:refresh'></span> Reiniciar Intentos
+                    </a>
                 </div>
             </div>
         {% endif %}
@@ -95,7 +101,56 @@
                 <div class="col-md-6 d-grid gap-2">
                 </div>
                 <div class="col-md-6 d-grid gap-2">
-                    {{ modals.button_modal("Regresar a Pendiente", url_for("exh_exhortos.back_to_pending", exh_exhorto_id=exh_exhorto.id), "regresar_pendiente_btn", "", "¿Está seguro de querer regresar el estado a PENDIENTE?", "btn-warning text-dark") }}
+                    <a class="btn btn-lg btn-warning text-dark" href="javascript:void(0)" onclick="showModalregresar_pendiente_btn('{{url_for('exh_exhortos.back_to_pending', exh_exhorto_id=exh_exhorto.id)}}', '¿Está seguro de querer regresar el estado a PENDIENTE?');">
+                        <span class='iconify' data-icon='mdi:refresh'></span> Regresar a Pendiente
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "RECIBIDO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-primary" href="{{url_for('exh_exhortos.transfer', exh_exhorto_id=exh_exhorto.id)}}">
+                        <span class='iconify' data-icon='mdi:swap-horizontal'></span> Transferir a Juzgado
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "TRANSFIRIENDO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-warning text-dark" href="{{url_for('exh_exhortos.process', exh_exhorto_id=exh_exhorto.id)}}">
+                        <span class='iconify' data-icon='mdi:recycle'></span> Procesar
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "PROCESANDO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-danger" href="{{url_for('exh_exhortos.refuse', exh_exhorto_id=exh_exhorto.id)}}">
+                        <span class='iconify' data-icon='mdi:hand-back-left'></span> Rechazar
+                    </a>
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-primary" href="{{url_for('exh_exhortos.diligence', exh_exhorto_id=exh_exhorto.id)}}">
+                        <span class='iconify' data-icon='mdi:truck-delivery'></span> Diligenciar
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "DILIGENCIADO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-success" href="{{url_for('exh_exhortos.response', exh_exhorto_id=exh_exhorto.id)}}">
+                        <span class='iconify' data-icon='mdi:check-circle'></span> Contestar
+                    </a>
                 </div>
             </div>
         {% endif %}
@@ -252,9 +307,9 @@
             case "CONTESTADO":      bgcolor = "bg-success";             icon="check-circle";        break;
             case "PENDIENTE":       bgcolor = 'bg-warning text-dark';   icon="note-edit";           break;
             case "CANCELADO":       bgcolor = "bg-secondary";           icon="close-circle";        break;
-            case "POR ENVIAR":      bgcolor = 'bg-primary';             icon="package-up";          break;
+            case "POR ENVIAR":      bgcolor = 'bg-warning text-dark';   icon="package-up";          break;
             case "INTENTOS AGOTADOS": bgcolor = 'bg-danger';            icon="alert-decagram";      break;
-            case "RECIBIDO CON EXITO": bgcolor = 'bg-warning text-dark';icon="briefcase-check";     break;
+            case "RECIBIDO CON EXITO": bgcolor = 'bg-primary';          icon="briefcase-check";     break;
             case "NO FUE RESPONDIDO": bgcolor = 'bg-danger';            icon="cancel";              break;
             case "RESPONDIDO":      bgcolor = 'bg-success';             icon="crown-circle";        break;
         }
@@ -271,5 +326,8 @@
     {% endif %}
     {% if exh_exhorto.estado == 'RECHAZADO' %}
         {{ modals.custom_javascript('Regresar a Pendiente', '¿Está seguro de querer regresar el estado a PENDIENTE?', "regresar_pendiente_btn") }}
+    {% endif %}
+    {% if exh_exhorto.estado == 'RECIBIDO' %}
+        {{ modals.custom_javascript('Transferir', '', "transferir_btn") }}
     {% endif %}
 {% endblock %}
