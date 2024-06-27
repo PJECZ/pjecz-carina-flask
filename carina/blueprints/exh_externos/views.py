@@ -259,7 +259,7 @@ def test_endpoints(exh_externo_id):
     tarea = current_user.launch_task(
         comando="exh_externos.tasks.lanzar_probar_endpoints",
         mensaje="Probando endpoints",
-        exh_externo_id=exh_externo.id,
+        clave=exh_externo.clave,
     )
     flash("Se ha lanzado la tarea en el fondo. Esta página se va a recargar en 10 segundos...", "info")
     return redirect(url_for("tareas.detail", tarea_id=tarea.id))
