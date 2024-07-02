@@ -15,8 +15,6 @@ app = create_app()
 app.app_context().push()
 database.app = app
 
-TIMEOUT = 30  # 30 segundos
-
 
 @click.group()
 def cli():
