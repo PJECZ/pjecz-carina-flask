@@ -14,25 +14,24 @@ from werkzeug.utils import secure_filename
 from carina.blueprints.autoridades.models import Autoridad
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.estados.models import Estado
+from carina.blueprints.exh_exhortos.forms import (
+    ExhExhortoDiligenceForm,
+    ExhExhortoEditForm,
+    ExhExhortoNewForm,
+    ExhExhortoProcessForm,
+    ExhExhortoRefuseForm,
+    ExhExhortoResponseForm,
+    ExhExhortoTransferForm,
+)
 from carina.blueprints.exh_exhortos.models import ExhExhorto
+from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
+from carina.blueprints.exh_exhortos_partes.models import ExhExhortoParte
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from lib.datatables import get_datatable_parameters, output_datatable_json
 from lib.safe_string import safe_clave, safe_message, safe_string
-
-from carina.blueprints.exh_exhortos_partes.models import ExhExhortoParte
-from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
-from carina.blueprints.exh_exhortos.forms import (
-    ExhExhortoEditForm,
-    ExhExhortoNewForm,
-    ExhExhortoTransferForm,
-    ExhExhortoProcessForm,
-    ExhExhortoRefuseForm,
-    ExhExhortoDiligenceForm,
-    ExhExhortoResponseForm,
-)
 
 MODULO = "EXH EXHORTOS"
 
@@ -326,39 +325,31 @@ def get_from_externo(exh_exhorto_id):
 def send(exh_exhorto_id):
     """Lanzar tarea en el fondo para envíar Exhorto al PJ Externo"""
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
-    es_valido = True
     # Validar que el Exhorto tenga partes
     exh_exhorto_partes = ExhExhortoParte.query.filter_by(exh_exhorto_id=exh_exhorto_id).filter_by(estatus="A").first()
     if exh_exhorto_partes is None:
-        es_valido = False
         flash("No se pudo enviar el exhorto. Debe incluir al menos una parte.", "warning")
+        return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
     # Validar que el Exhorto tenga archivos
     exh_exhorto_archivos = ExhExhortoArchivo.query.filter_by(exh_exhorto_id=exh_exhorto_id).filter_by(estatus="A").first()
     if exh_exhorto_archivos is None:
-        es_valido = False
         flash("No se pudo enviar el exhorto. Debe incluir al menos un archivo.", "warning")
+        return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
     # Validar que el estado del Exhorto sea "PENDIENTE"
     if exh_exhorto.estado != "PENDIENTE":
-        es_valido = False
         flash("El estado del exhorto debe ser PENDIENTE.", "warning")
-    # Hacer el cambio de estado
-    if es_valido:
-        tarea = current_user.launch_task(
-            comando="exh_exhortos.tasks.lanzar_consultar",
-            mensaje="Enviando exhorto al externo",
-            exh_exhorto_id=exh_exhorto.id,
-        )
-        exh_exhorto.estado = "POR ENVIAR"
-        exh_exhorto.save()
-        bitacora = Bitacora(
-            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
-            usuario=current_user,
-            descripcion=safe_message(f"Exhorto POR ENVIAR {exh_exhorto.exhorto_origen_id}"),
-            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
-        )
-        bitacora.save()
-        flash(bitacora.descripcion, "success")
-    return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
+        return redirect(url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id))
+    # Cambiar el estado a POR ENVIAR
+    exh_exhorto.estado = "POR ENVIAR"
+    exh_exhorto.save()
+    # Lanzar tarea en el fondo
+    tarea = current_user.launch_task(
+        comando="exh_exhortos.tasks.lanzar_enviar",
+        mensaje="Enviando exhorto al externo",
+        exhorto_origen_id=exh_exhorto.exhorto_origen_id,
+    )
+    flash("Se ha lanzado la tarea en el fondo. Esta página se va a recargar en 10 segundos...", "info")
+    return redirect(url_for("tareas.detail", tarea_id=tarea.id))
 
 
 @exh_exhortos.route("/exh_exhortos/regresar_a_por_enviar/<int:exh_exhorto_id>")

@@ -129,6 +129,30 @@ class ExhExhorto(database.Model, UniversalMixin):
     # Y se lleva un contador de intentos
     por_enviar_intentos: Mapped[int] = mapped_column(Integer, default=0)
 
+    # Acuse fecha hora local en el que el Poder Judicial exhortado marca que se recibió el Exhorto
+    acuse_fecha_hora_recepcion: Mapped[Optional[datetime]]
+
+    # Acuse Identificador del muncipio en donde se recibió o turnó el exhorto.
+    # Puede dar el caso que el exhorto se turne directamente al Juzgado, por lo que este dato seria
+    # el identificador del municipio donde está el Juzgado.
+    # En caso que se tenga una "Oficialía Virtual", no es necesario especificar este dato.
+    # NOTA: este dato corresponde al catálogo de municipios del INEGI.
+    acuse_municipio_area_recibe_id: Mapped[Optional[int]]
+
+    # Acuse Identificador del área o Juzgado turnado en donde se recibe el Exhorto.
+    # En caso que todavía no esté turnado o se disponga de una "Oficialía Virtual",
+    # este dato puede no ir en la respuesta.
+    acuse_area_recibe_id: Mapped[Optional[str]] = mapped_column(String(256))
+
+    # Acuse Nombre del área o Juzgado turnado en donde se encuentra el Exhorto.
+    # En caso de tener una "Oficialía Virtual", este dato puede omitirse
+    acuse_area_recibe_nombre: Mapped[Optional[str]] = mapped_column(String(256))
+
+    # Acuse Contiene una URL para abrir una página con la información referente a la recepción del exhorto que se realizó.
+    # Esta página el Juzgado que envió el exhorto la puede imprimir como acuse de recibido y evidencia de que el exhorto
+    # fue enviado correctamente al Poder Judicial exhortado o también una página que muestre el estatus del exhorto.
+    acuse_url_info: Mapped[Optional[str]] = mapped_column(String(256))
+
     def __repr__(self):
         """Representación"""
         return f"<ExhExhorto {self.id}>"

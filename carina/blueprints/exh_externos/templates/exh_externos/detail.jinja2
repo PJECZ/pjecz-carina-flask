@@ -27,7 +27,8 @@
         {{ detail.label_value('Descripción', exh_externo.descripcion) }}
         {{ detail.label_value('Estado', exh_externo.estado.nombre) }}
         {{ detail.label_value('Api-Key', exh_externo.api_key) }}
-        <hr />
+    {% endcall %}
+    {% call detail.card(title='End-points', estatus=exh_externo.estatus) %}
         {{ detail.label_value('Consultar Materias', exh_externo.endpoint_consultar_materias) }}
         {{ detail.label_value('Recibir Exhorto', exh_externo.endpoint_recibir_exhorto) }}
         {{ detail.label_value('Recibir Exhorto Archivo', exh_externo.endpoint_recibir_exhorto_archivo) }}
@@ -37,8 +38,14 @@
         {{ detail.label_value('Actualizar Exhorto', exh_externo.endpoint_actualizar_exhorto) }}
         {{ detail.label_value('Recibir Promoción', exh_externo.endpoint_recibir_promocion) }}
         {{ detail.label_value('Recibir Promoción Archivo', exh_externo.endpoint_recibir_promocion_archivo) }}
-        {# detail.label_value('Creado', moment(exh_externo.creado, local=True).format('DD MMM YYYY')) #}
     {% endcall %}
+    {% if exh_externo.materias %}
+        {% call detail.card(title='Materias', estatus=exh_externo.estatus) %}
+            {% for materia in exh_externo.materias %}
+                {{ detail.label_value('Clave ' + materia.clave, materia.nombre) }}
+            {% endfor %}
+        {% endcall %}
+    {% endif %}
 {% endblock %}
 
 {% block custom_javascript %}

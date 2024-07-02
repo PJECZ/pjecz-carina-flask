@@ -4,7 +4,7 @@ Exh Externos, modelos
 
 from typing import Optional
 
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import JSON, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from carina.extensions import database
@@ -28,6 +28,9 @@ class ExhExterno(database.Model, UniversalMixin):
     clave: Mapped[str] = mapped_column(String(16), unique=True)
     descripcion: Mapped[str] = mapped_column(String(256))
     api_key: Mapped[Optional[str]] = mapped_column(String(128))
+
+    # Columna materias es JSON con clave y nombre para cada una
+    materias: Mapped[Optional[dict]] = mapped_column(JSON)
 
     # Columnas endpoints
     endpoint_consultar_materias: Mapped[Optional[str]] = mapped_column(String(256))
