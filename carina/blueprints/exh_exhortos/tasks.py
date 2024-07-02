@@ -423,9 +423,12 @@ def enviar(exhorto_origen_id: str = "") -> tuple[str, str, str]:
 
         # Validar que en acuse tenga "fechaHoraRecepcion"
         try:
-            acuse_fecha_hora_recepcion = datetime.strptime(acuse["fechaHoraRecepcion"], "%Y-%m-%dT%H:%M:%S")
+            acuse_fecha_hora_recepcion = datetime.strptime(acuse["fechaHoraRecepcion"], "%Y-%m-%d %H:%M:%S")
         except (KeyError, ValueError):
-            mensaje_advertencia = "Faltó o es incorrecto fechaHoraRecepcion en el acuse"
+            try:
+                acuse_fecha_hora_recepcion = datetime.strptime(acuse["fechaHoraRecepcion"], "%Y-%m-%dT%H:%M:%S")
+            except (KeyError, ValueError):
+                mensaje_advertencia = "Faltó o es incorrecto fechaHoraRecepcion en el acuse"
 
         # Puede venir "municipioAreaRecibeId" en acuse porque es opcional
         acuse_municipio_area_recibe_id = None
