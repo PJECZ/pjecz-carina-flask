@@ -410,30 +410,44 @@ def enviar(exhorto_origen_id: str = "") -> tuple[str, str, str]:
         # Validar que en acuse tenga "exhortoOrigenId"
         try:
             acuse_exhorto_origen_id = str(acuse["exhortoOrigenId"])
-            if acuse_exhorto_origen_id != exh_exhorto.exhorto_origen_id:
+            if acuse_exhorto_origen_id != str(exh_exhorto.exhorto_origen_id):
                 mensaje_advertencia = "exhortoOrigenId no coincide en el acuse"
+            bitacora.info("Acuse exhortoOrigenId: %s", acuse_exhorto_origen_id)
         except KeyError:
             mensaje_advertencia = "Faltó exhortoOrigenId en el acuse"
 
         # Validar que en acuse tenga "folioSeguimiento"
         try:
             acuse_folio_seguimiento = str(acuse["folioSeguimiento"])
+            bitacora.info("Acuse folioSeguimiento: %s", acuse_folio_seguimiento)
         except KeyError:
             mensaje_advertencia = "Faltó folioSeguimiento en el acuse"
 
         # Validar que en acuse tenga "fechaHoraRecepcion"
         try:
-            acuse_fecha_hora_recepcion = datetime.strptime(acuse["fechaHoraRecepcion"], "%Y-%m-%d %H:%M:%S")
-        except (KeyError, ValueError):
+            acuse_fecha_hora_recepcion_str = str(acuse["fechaHoraRecepcion"])
+            bitacora.info("Acuse fechaHoraRecepcion: %s", acuse_fecha_hora_recepcion_str)
+        except KeyError:
+            mensaje_advertencia = "Faltó fechaHoraRecepcion en el acuse"
+        try:
+            acuse_fecha_hora_recepcion = datetime.strptime(acuse_fecha_hora_recepcion_str, "%Y-%m-%d %H:%M:%S.%f")
+        except ValueError:
             try:
-                acuse_fecha_hora_recepcion = datetime.strptime(acuse["fechaHoraRecepcion"], "%Y-%m-%dT%H:%M:%S")
-            except (KeyError, ValueError):
-                mensaje_advertencia = "Faltó o es incorrecto fechaHoraRecepcion en el acuse"
+                acuse_fecha_hora_recepcion = datetime.strptime(acuse_fecha_hora_recepcion_str, "%Y-%m-%dT%H:%M:%S.%f")
+            except ValueError:
+                try:
+                    acuse_fecha_hora_recepcion = datetime.strptime(acuse_fecha_hora_recepcion_str, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    try:
+                        acuse_fecha_hora_recepcion = datetime.strptime(acuse_fecha_hora_recepcion_str, "%Y-%m-%dT%H:%M:%S")
+                    except ValueError:
+                        mensaje_advertencia = "fechaHoraRecepcion en formato incorrecto"
 
         # Puede venir "municipioAreaRecibeId" en acuse porque es opcional
         acuse_municipio_area_recibe_id = None
         try:
             acuse_municipio_area_recibe_id = int(acuse["municipioAreaRecibeId"])
+            bitacora.info("Acuse municipioAreaRecibeId: %s", acuse_municipio_area_recibe_id)
         except (KeyError, ValueError):
             pass
 
@@ -441,6 +455,7 @@ def enviar(exhorto_origen_id: str = "") -> tuple[str, str, str]:
         acuse_area_recibe_id = None
         try:
             acuse_area_recibe_id = str(acuse["areaRecibeId"])
+            bitacora.info("Acuse areaRecibeId: %s", acuse_area_recibe_id)
         except KeyError:
             pass
 
@@ -448,6 +463,7 @@ def enviar(exhorto_origen_id: str = "") -> tuple[str, str, str]:
         acuse_area_recibe_nombre = None
         try:
             acuse_area_recibe_nombre = str(acuse["areaRecibeNombre"])
+            bitacora.info("Acuse areaRecibeNombre: %s", acuse_area_recibe_nombre)
         except KeyError:
             pass
 
@@ -455,6 +471,7 @@ def enviar(exhorto_origen_id: str = "") -> tuple[str, str, str]:
         acuse_url_info = None
         try:
             acuse_url_info = str(acuse["urlInfo"])
+            bitacora.info("Acuse urlInfo: %s", acuse_url_info)
         except KeyError:
             pass
 
