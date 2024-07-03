@@ -321,7 +321,7 @@ def enviar(exhorto_origen_id: str = "") -> tuple[str, str, str]:
                     exh_externo.endpoint_recibir_exhorto_archivo,
                     headers={"X-Api-Key": exh_externo.api_key},
                     timeout=TIMEOUT,
-                    params={"exhortoOrigenId": exh_exhorto.exhorto_origen_id},
+                    data={"exhortoOrigenId": exh_exhorto.exhorto_origen_id},
                     files={"archivo": (exh_exhorto_archivo.nombre_archivo, archivo_contenido, "application/pdf")},
                 )
                 response.raise_for_status()
