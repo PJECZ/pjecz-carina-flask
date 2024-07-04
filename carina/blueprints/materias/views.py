@@ -14,6 +14,7 @@ from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from carina.blueprints.materias.models import Materia
+from carina.blueprints.exh_externos.models import ExhExterno
 
 MODULO = "MATERIAS"
 
@@ -83,3 +84,20 @@ def detail(materia_id):
     """Detalle de una Materia"""
     materia = Materia.query.get_or_404(materia_id)
     return render_template("materias/detail.jinja2", materia=materia)
+
+
+@materias.route("/materias/select_json/<int:estado_id>", methods=["GET", "POST"])
+def select_json(estado_id=None):
+    """Select JSON para Materias"""
+    # Si estado_id es None, entonces no se entrega nada
+    if estado_id is None:
+        return json.dumps([])
+    # Consultar
+    consulta = ExhExterno.query.filter_by(estado_id=estado_id, estatus="A")
+    # Elaborar datos para Select
+    data = []
+    resultado = consulta.first()
+    if resultado:
+        data = resultado.materias
+    # Entregar JSON
+    return json.dumps(data)
