@@ -37,9 +37,9 @@
             </div>
                 <div class="col-md-6">
                     {% call f.form_group(form.folio_seguimiento, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.materia) %}{% endcall %}
                     {% call f.form_group(form.estado_destino) %}{% endcall %}
                     {% call f.form_group(form.municipio_destino) %}{% endcall %}
+                    {% call f.form_group(form.materia) %}{% endcall %}
                     {% call f.form_group(form.estado, readonly=true) %}{% endcall %}
                 </div>
             </div>
@@ -79,6 +79,24 @@
                         option.text = municipio.nombre;
                         municipioSelect.appendChild(option);
                     });
+                });
+            // Llamar a exh_externos para cambiar las materias según el estado elegido
+            fetch(`/materias/select_json/${estadoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const materiaSelect = document.getElementById('materia');
+                    materiaSelect.innerHTML = '';
+                    materiaSelect.disabled = false;
+                    if (data === null) {
+                        materiaSelect.disabled = true;
+                        return;
+                    }
+                    data.forEach(materia => {
+                        const option = document.createElement('option');
+                        option.value = materia.clave;
+                        option.text = materia.nombre;
+                        materiaSelect.appendChild(option);
+                    })
                 });
         });
     </script>
