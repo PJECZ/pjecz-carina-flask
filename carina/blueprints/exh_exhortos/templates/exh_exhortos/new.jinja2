@@ -51,7 +51,7 @@
 {% block custom_javascript %}
     <!-- Combo select Estados Destino - Municipios Destino -->
     <script>
-        // Llamar a /estados/select_json para cargar el select estados
+        // Llamar a /estados/select_json para cargar las opciones en el select estados
         fetch('/estados/select_json')
             .then(response => response.json())
             .then(data => {
@@ -65,9 +65,10 @@
                 // Efectuar el cambio de selección
                 document.getElementById('estado_destino').dispatchEvent(new Event('change'));
             });
-        // Llamar a /municipios/select_json para cargar el select municipio, si el municipio cambia
+        // Si estado_destino cambia...
         document.getElementById('estado_destino').addEventListener('change', () => {
             const estadoId = document.getElementById('estado_destino').value;
+            // Llamar a /municipios/select_json para cambiar las opciones en el select municipio
             fetch(`/municipios/select_json/${estadoId}`)
                 .then(response => response.json())
                 .then(data => {
@@ -80,8 +81,8 @@
                         municipioSelect.appendChild(option);
                     });
                 });
-            // Llamar a exh_externos para cambiar las materias según el estado elegido
-            fetch(`/materias/select_json/${estadoId}`)
+            // Llamar a /exh_externos/select_materias_json para cambiar las opciones en el select materia
+            fetch(`/exh_externos/select_materias_json/${estadoId}`)
                 .then(response => response.json())
                 .then(data => {
                     const materiaSelect = document.getElementById('materia');
@@ -102,7 +103,7 @@
     </script>
     <!-- Combo select Estados Origen - Municipios Origen -->
     <script>
-        // Llamar a /estados/select_json para cargar el select estados
+        // Llamar a /estados/select_json para cargar las opciones en el select estados
         fetch('/estados/select_json')
             .then(response => response.json())
             .then(data => {
@@ -116,8 +117,9 @@
                 // Efectuar el cambio de selección
                 document.getElementById('estado_origen').dispatchEvent(new Event('change'));
             });
-        // Llamar a /municipios/select_json para cargar el select municipio, si el municipio cambia
+        // Si el municipio cambia...
         document.getElementById('estado_origen').addEventListener('change', () => {
+            // Llamar a /municipios/select_json para cargar las opciones en el select municipio
             fetch(`/municipios/select_json/{{ estado_origen_id }}`)
                 .then(response => response.json())
                 .then(data => {
