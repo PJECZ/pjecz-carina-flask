@@ -26,6 +26,7 @@ from carina.blueprints.exh_exhortos.forms import (
 from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
 from carina.blueprints.exh_exhortos_partes.models import ExhExhortoParte
+from carina.blueprints.materias.models import Materia
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
@@ -124,12 +125,10 @@ def list_inactive():
 @exh_exhortos.route("/exh_exhortos/<int:exh_exhorto_id>")
 def detail(exh_exhorto_id):
     """Detalle de un Exhorto"""
-    # Consultar exh_exhorto
+    # Consultar exhorto
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
-
-    # Consultar municipio_destino_id, porque no es una clave foránea
+    # Consultar el municipio de origen porque NO es una relacion
     municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
-
     # Entregar
     return render_template(
         "exh_exhortos/detail.jinja2",
@@ -144,14 +143,26 @@ def new():
     """Nuevo Exhorto"""
     form = ExhExhortoNewForm()
     if form.validate_on_submit():
+        es_valido = True
+        # Consultar la autoridad que sera el juzgado de origen
         juzgado_origen = Autoridad.query.filter_by(id=form.juzgado_origen.data).filter_by(estatus="A").first()
         if juzgado_origen is None:
             flash("El juzgado de origen no es válido", "warning")
-        else:
+            es_valido = False
+        # Consultar la materia
+        materia_id = form.materia.data
+        materia = Materia.query.get(materia_id)
+        if materia is None:
+            flash("La materia no es válida", "warning")
+            es_valido = False
+        # Si es valido, guardar
+        if es_valido:
             exh_exhorto = ExhExhorto(
                 exhorto_origen_id=form.exhorto_origen_id.data,
                 municipio_destino_id=form.municipio_destino.data,
-                materia_id=form.materia.data,
+                materia_id=materia_id,
+                materia_clave=materia.clave,
+                materia_nombre=materia.nombre,
                 municipio_origen_id=form.municipio_origen.data,
                 juzgado_origen_id=safe_string(juzgado_origen.clave),
                 juzgado_origen_nombre=safe_string(juzgado_origen.descripcion, save_enie=True),
@@ -198,12 +209,24 @@ def edit(exh_exhorto_id):
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
     form = ExhExhortoEditForm()
     if form.validate_on_submit():
+        es_valido = False
+        # Consultar la autoridad que es el juzgado de origen
         juzgado_origen = Autoridad.query.filter_by(id=form.juzgado_origen.data).filter_by(estatus="A").first()
         if juzgado_origen is None:
             flash("El juzgado de origen no es válido", "warning")
-        else:
+            es_valido = False
+        # Consultar la materia
+        materia_id = form.materia.data
+        materia = Materia.query.get(materia_id)
+        if materia is None:
+            flash("La materia no es válida", "warning")
+            es_valido = False
+        # Si es valido, actualizar
+        if es_valido:
             exh_exhorto.municipio_destino_id = form.municipio_destino.data
-            exh_exhorto.materia_id = form.materia.data
+            exh_exhorto.materia_id = materia_id
+            exh_exhorto.materia_clave = materia.clave
+            exh_exhorto.materia_nombre = materia.nombre
             exh_exhorto.municipio_origen_id = form.municipio_origen.data
             exh_exhorto.juzgado_origen_id = safe_string(juzgado_origen.clave)
             exh_exhorto.juzgado_origen_nombre = safe_string(juzgado_origen.descripcion, save_enie=True)

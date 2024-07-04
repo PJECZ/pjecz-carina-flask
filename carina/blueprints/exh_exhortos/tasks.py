@@ -212,7 +212,7 @@ def enviar(exhorto_origen_id: str = "") -> tuple[str, str, str]:
         datos_exhorto = {
             "exhortoOrigenId": str(exh_exhorto.exhorto_origen_id),
             "municipioDestinoId": int(municipio_destino.clave),
-            "materiaClave": str(exh_exhorto.materia.clave),
+            "materiaClave": str(exh_exhorto.materia_clave),
             "estadoOrigenId": int(exh_exhorto.municipio_origen.estado.clave),
             "municipioOrigenId": int(exh_exhorto.municipio_origen.clave),
             "juzgadoOrigenId": str(exh_exhorto.juzgado_origen_id),

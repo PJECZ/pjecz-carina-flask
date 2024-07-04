@@ -55,6 +55,10 @@ class ExhExhorto(database.Model, UniversalMixin):
     materia_id: Mapped[int] = mapped_column(ForeignKey("materias.id"))
     materia: Mapped["Materia"] = relationship(back_populates="exh_exhortos")
 
+    # Materia (el que se obtuvo en la consulta de materias del PJ exhortado) al que el Exhorto hace referencia
+    materia_clave: Mapped[str] = mapped_column(String(24))
+    materia_nombre: Mapped[str] = mapped_column(String(256))
+
     # Clave foránea: Identificador INEGI del Municipio donde está localizado el Juzgado del PJ exhortante
     municipio_origen_id: Mapped[int] = mapped_column(ForeignKey("municipios.id"))
     municipio_origen: Mapped["Municipio"] = relationship(back_populates="exh_exhortos_origenes")
@@ -63,7 +67,7 @@ class ExhExhorto(database.Model, UniversalMixin):
     folio_seguimiento: Mapped[Optional[str]] = mapped_column(Uuid, unique=True)
 
     # UUID identificador con el que el PJ exhortante identifica el exhorto que envía
-    exhorto_origen_id: Mapped[str] = mapped_column(Uuid, unique=True)
+    exhorto_origen_id: Mapped[str] = mapped_column(String)
 
     # ID de la tabla Municipios: Para el payload es el Identificador INEGI del Municipio del Estado del PJ exhortado al que se quiere enviar el Exhorto
     municipio_destino_id: Mapped[int]
