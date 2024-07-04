@@ -81,7 +81,7 @@
                     });
                 });
             // Llamar a exh_externos para cambiar las materias según el estado elegido
-            fetch(`/exh_externos/select_json_materias/${estadoId}`)
+            fetch(`/materias/select_json/${estadoId}`)
                 .then(response => response.json())
                 .then(data => {
                     const materiaSelect = document.getElementById('materia');

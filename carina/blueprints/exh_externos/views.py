@@ -74,23 +74,6 @@ def datatable_json():
     return output_datatable_json(draw, total, data)
 
 
-@exh_externos.route("/exh_externos/select_json_materias/<int:estado_id>", methods=["GET", "POST"])
-def select_json_materias(estado_id=None):
-    """Select JSON para Materias"""
-    # Si estado_id es None, entonces no se entrega nada
-    if estado_id is None:
-        return json.dumps([])
-    # Consultar
-    consulta = ExhExterno.query.filter_by(estado_id=estado_id, estatus="A")
-    # Elaborar datos para Select
-    data = []
-    resultado = consulta.first()
-    if resultado:
-        data = resultado.materias
-    # Entregar JSON
-    return json.dumps(data)
-
-
 @exh_externos.route("/exh_externos")
 def list_active():
     """Listado de Externos activos"""
