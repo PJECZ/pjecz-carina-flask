@@ -263,3 +263,20 @@ def test_endpoints(exh_externo_id):
     )
     flash("Se ha lanzado la tarea en el fondo. Esta página se va a recargar en 10 segundos...", "info")
     return redirect(url_for("tareas.detail", tarea_id=tarea.id))
+
+
+@exh_externos.route("/exh_externos/select_materias_json/<int:estado_id>", methods=["GET", "POST"])
+def select_materias_json(estado_id=None):
+    """Select JSON para usar en Select2 y elegir una materia de un ExhExterno"""
+    # Si estado_id es None, entonces no se entrega nada
+    if estado_id is None:
+        return json.dumps([])
+    # Consultar
+    consulta = ExhExterno.query.filter_by(estado_id=estado_id, estatus="A")
+    # Elaborar datos para Select
+    data = []
+    resultado = consulta.first()
+    if resultado:
+        data = resultado.materias
+    # Entregar JSON
+    return json.dumps(data)

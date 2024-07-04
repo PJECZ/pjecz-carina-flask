@@ -3,18 +3,14 @@ Materias, vistas
 """
 
 import json
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+
+from flask import Blueprint, render_template, request
 from flask_login import current_user, login_required
 
-from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_string, safe_message
-
-from carina.blueprints.bitacoras.models import Bitacora
-from carina.blueprints.modulos.models import Modulo
+from carina.blueprints.materias.models import Materia
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
-from carina.blueprints.materias.models import Materia
-from carina.blueprints.exh_externos.models import ExhExterno
+from lib.datatables import get_datatable_parameters, output_datatable_json
 
 MODULO = "MATERIAS"
 
@@ -84,20 +80,3 @@ def detail(materia_id):
     """Detalle de una Materia"""
     materia = Materia.query.get_or_404(materia_id)
     return render_template("materias/detail.jinja2", materia=materia)
-
-
-@materias.route("/materias/select_json/<int:estado_id>", methods=["GET", "POST"])
-def select_json(estado_id=None):
-    """Select JSON para Materias"""
-    # Si estado_id es None, entonces no se entrega nada
-    if estado_id is None:
-        return json.dumps([])
-    # Consultar
-    consulta = ExhExterno.query.filter_by(estado_id=estado_id, estatus="A")
-    # Elaborar datos para Select
-    data = []
-    resultado = consulta.first()
-    if resultado:
-        data = resultado.materias
-    # Entregar JSON
-    return json.dumps(data)
