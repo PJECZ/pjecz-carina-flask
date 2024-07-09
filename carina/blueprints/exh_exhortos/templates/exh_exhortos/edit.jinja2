@@ -106,6 +106,9 @@
                         option.text = materia.nombre;
                         materiaSelect.appendChild(option);
                     })
+                    // Efectuar el cambio de selección
+                    document.getElementById('materia').value = {{ exh_exhorto.materia_clave }};
+                    document.getElementById('materia').dispatchEvent(new Event('change'));
                 });
         });
     </script>
