@@ -60,7 +60,7 @@ class ExhExhortoEditForm(FlaskForm):
     municipio_origen = SelectField("Municipio Origen", choices=None, validate_choice=False, validators=[DataRequired()])
     estado_destino = SelectField("Estado Destino", choices=None, validate_choice=False, validators=[DataRequired()])
     municipio_destino = SelectField("Municipio Destino", choices=None, validate_choice=False, validators=[DataRequired()])
-    materia = SelectField("Materia", coerce=int, validators=[DataRequired()])
+    materia = SelectField("Materia", choices=None, validate_choice=False, validators=[DataRequired()])
 
     # Campos Select2
     juzgado_origen = SelectField("Juzgado Origen", coerce=int, validate_choice=False, validators=[DataRequired()])

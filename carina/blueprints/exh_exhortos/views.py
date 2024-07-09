@@ -227,13 +227,13 @@ def edit(exh_exhorto_id):
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
     form = ExhExhortoEditForm()
     if form.validate_on_submit():
-        es_valido = False
+        es_valido = True
         # Consultar la autoridad que es el juzgado de origen
         juzgado_origen = Autoridad.query.filter_by(id=form.juzgado_origen.data).filter_by(estatus="A").first()
         if juzgado_origen is None:
             flash("El juzgado de origen no es válido", "warning")
             es_valido = False
-        # Inicilizar las variables para la clave y el nombre de la materia
+        # Inicializar las variables para la clave y el nombre de la materia
         materia_clave = form.materia.data
         materia_nombre = ""
         # Consultar el municipio de destino
@@ -308,7 +308,13 @@ def edit(exh_exhorto_id):
     form.numero_exhorto.data = exh_exhorto.numero_exhorto
     form.estado.data = exh_exhorto.estado  # Read only
     # Entregar
-    return render_template("exh_exhortos/edit.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino)
+    return render_template(
+        "exh_exhortos/edit.jinja2",
+        form=form,
+        exh_exhorto=exh_exhorto,
+        juzgado_origen=juzgado_origen,
+        municipio_destino=municipio_destino,
+    )
 
 
 @exh_exhortos.route("/exh_exhortos/eliminar/<int:exh_exhorto_id>")

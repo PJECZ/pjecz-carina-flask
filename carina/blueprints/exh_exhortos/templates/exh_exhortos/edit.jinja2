@@ -188,7 +188,7 @@
         $(document).ready(function(){
             $('#juzgado_origen').addClass('js-example-placeholder-single');
             // --- Carga de la opción elegida --- //
-            const newJuzgadoOption = new Option('{{exh_exhorto.juzgado_origen_id}}', '{{exh_exhorto.juzgado_origen_id}}', false, false);
+            const newJuzgadoOption = new Option('{{juzgado_origen.clave}}', '{{juzgado_origen.id}}', false, false);
             $('#juzgado_origen').append(newJuzgadoOption).trigger('change');
             // --- Carga por Ajax --- //
             $("#juzgado_origen").select2({
