@@ -167,9 +167,10 @@ def new():
                     flash(f"No hay materias en externos para el estado de destino {estado_destino.nombre}", "warning")
                     es_valido = False
                 else:
-                    try:
-                        materia_nombre = exh_externo.materias[materia_clave]
-                    except KeyError:
+                    for materia in exh_externo.materias:
+                        if materia["clave"] == materia_clave:
+                            materia_nombre = materia["nombre"]
+                    if materia_nombre == "PENDIENTE":
                         flash(f"La clave de materia {materia_clave} no se encuentra en externo {exh_externo.clave}", "warning")
                         es_valido = False
         # Si es valido, guardar
