@@ -64,6 +64,9 @@ def copiar_tabla(tabla: str):
         # Elaborar comandos SQL para insertar
         insert_query = f"INSERT INTO {tabla} ({', '.join(colnames)}) VALUES %s"
 
+        # Use register_adapter() to adapt any Python dictionary to JSON
+        psycopg2.extras.register_json(source_cursor, psycopg2.extras.Json)
+
         # Insertar registros
         psycopg2.extras.execute_values(destination_cursor, insert_query, rows)
 

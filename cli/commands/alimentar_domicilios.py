@@ -10,6 +10,7 @@ import click
 
 from carina.blueprints.distritos.models import Distrito
 from carina.blueprints.domicilios.models import Domicilio
+from carina.extensions import database
 from lib.safe_string import safe_clave, safe_string
 
 DOMICILIOS_CSV = "seed/domicilios.csv"
@@ -24,6 +25,7 @@ def alimentar_domicilios():
     if not ruta.is_file():
         click.echo(f"AVISO: {ruta.name} no es un archivo.")
         sys.exit(1)
+    sesion = database.session
     click.echo("Alimentando domicilios: ", nl=False)
     contador = 0
     with open(ruta, encoding="utf8") as puntero:
@@ -60,8 +62,10 @@ def alimentar_domicilios():
                 estatus=estatus,
             )
             domicilio.completo = domicilio.elaborar_completo()
-            domicilio.save()
+            sesion.add(domicilio)
             contador += 1
             click.echo(click.style(".", fg="green"), nl=False)
+    sesion.commit()
+    sesion.close()
     click.echo()
     click.echo(click.style(f"  {contador} distritos alimentados.", fg="green"))

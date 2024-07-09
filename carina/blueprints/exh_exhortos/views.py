@@ -3,7 +3,6 @@ Exh Exhortos, vistas
 """
 
 import json
-import uuid
 from datetime import datetime
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
@@ -25,11 +24,13 @@ from carina.blueprints.exh_exhortos.forms import (
 from carina.blueprints.exh_exhortos.models import ExhExhorto
 from carina.blueprints.exh_exhortos_archivos.models import ExhExhortoArchivo
 from carina.blueprints.exh_exhortos_partes.models import ExhExhortoParte
+from carina.blueprints.exh_externos.models import ExhExterno
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.municipios.models import Municipio
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.usuarios.decorators import permission_required
 from lib.datatables import get_datatable_parameters, output_datatable_json
+from lib.pwgen import generar_identificador
 from lib.safe_string import safe_clave, safe_message, safe_string
 
 MODULO = "EXH EXHORTOS"
@@ -123,12 +124,10 @@ def list_inactive():
 @exh_exhortos.route("/exh_exhortos/<int:exh_exhorto_id>")
 def detail(exh_exhorto_id):
     """Detalle de un Exhorto"""
-    # Consultar exh_exhorto
+    # Consultar exhorto
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
-
-    # Consultar municipio_destino_id, porque no es una clave foránea
+    # Consultar el municipio de origen porque NO es una relacion
     municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
-
     # Entregar
     return render_template(
         "exh_exhortos/detail.jinja2",
@@ -143,14 +142,43 @@ def new():
     """Nuevo Exhorto"""
     form = ExhExhortoNewForm()
     if form.validate_on_submit():
-        juzgado_origen = Autoridad.query.filter_by(id=form.juzgado_origen.data).filter_by(estatus="A").first()
+        es_valido = True
+        # Consultar el juzgado de origen
+        juzgado_origen = Autoridad.query.get(form.juzgado_origen.data)
         if juzgado_origen is None:
             flash("El juzgado de origen no es válido", "warning")
+            es_valido = False
+        # Consultar el municipio de destino
+        municipio_destino = Municipio.query.get(form.municipio_destino.data)
+        if municipio_destino is None:
+            flash("El municipio de destino no es válido", "warning")
+            es_valido = False
         else:
+            estado_destino = municipio_destino.estado
+            # Consultar el estado de destino y validar la materia
+            materia_clave = form.materia.data
+            materia_nombre = "PENDIENTE"
+            exh_externo = ExhExterno.query.filter_by(estado_id=estado_destino.id).first()
+            if exh_externo is None:
+                flash(f"No hay registro en externos para el estado de destino {estado_destino.nombre}", "warning")
+                es_valido = False
+            else:
+                if exh_externo.materias is None:
+                    flash(f"No hay materias en externos para el estado de destino {estado_destino.nombre}", "warning")
+                    es_valido = False
+                else:
+                    try:
+                        materia_nombre = exh_externo.materias[materia_clave]
+                    except KeyError:
+                        flash(f"La clave de materia {materia_clave} no se encuentra en externo {exh_externo.clave}", "warning")
+                        es_valido = False
+        # Si es valido, guardar
+        if es_valido:
             exh_exhorto = ExhExhorto(
-                exhorto_origen_id=form.exhorto_origen_id.data,
+                exhorto_origen_id=generar_identificador(),
                 municipio_destino_id=form.municipio_destino.data,
-                materia_id=form.materia.data,
+                materia_clave=materia_clave,
+                materia_nombre=materia_nombre,
                 municipio_origen_id=form.municipio_origen.data,
                 juzgado_origen_id=safe_string(juzgado_origen.clave),
                 juzgado_origen_nombre=safe_string(juzgado_origen.descripcion, save_enie=True),
@@ -180,7 +208,7 @@ def new():
             bitacora.save()
             flash(bitacora.descripcion, "success")
             return redirect(bitacora.url)
-    form.exhorto_origen_id.data = str(uuid.uuid4())  # Elaborar un UUID para mostrar READ ONLY
+    form.exhorto_origen_id.data = "0" * 24  # Read only
     form.estado_origen.data = "COAHUILA DE ZARAGOZA"
     form.estado.data = "PENDIENTE"
     form.fecha_origen.data = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -197,12 +225,41 @@ def edit(exh_exhorto_id):
     exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
     form = ExhExhortoEditForm()
     if form.validate_on_submit():
+        es_valido = False
+        # Consultar la autoridad que es el juzgado de origen
         juzgado_origen = Autoridad.query.filter_by(id=form.juzgado_origen.data).filter_by(estatus="A").first()
         if juzgado_origen is None:
             flash("El juzgado de origen no es válido", "warning")
+            es_valido = False
+        # Consultar el municipio de destino
+        municipio_destino = Municipio.query.get(form.municipio_destino.data)
+        if municipio_destino is None:
+            flash("El municipio de destino no es válido", "warning")
+            es_valido = False
         else:
+            estado_destino = municipio_destino.estado
+            # Consultar el estado de destino y validar la materia
+            materia_clave = form.materia.data
+            materia_nombre = "PENDIENTE"
+            exh_externo = ExhExterno.query.filter_by(estado_id=estado_destino.id).first()
+            if exh_externo is None:
+                flash(f"No hay registro en externos para el estado de destino {estado_destino.nombre}", "warning")
+                es_valido = False
+            else:
+                if exh_externo.materias is None:
+                    flash(f"No hay materias en externos para el estado de destino {estado_destino.nombre}", "warning")
+                    es_valido = False
+                else:
+                    try:
+                        materia_nombre = exh_externo.materias[materia_clave]
+                    except KeyError:
+                        flash(f"La clave de materia {materia_clave} no se encuentra en externo {exh_externo.clave}", "warning")
+                        es_valido = False
+        # Si es valido, actualizar
+        if es_valido:
             exh_exhorto.municipio_destino_id = form.municipio_destino.data
-            exh_exhorto.materia_id = form.materia.data
+            exh_exhorto.materia_clave = materia_clave
+            exh_exhorto.materia_nombre = materia_nombre
             exh_exhorto.municipio_origen_id = form.municipio_origen.data
             exh_exhorto.juzgado_origen_id = safe_string(juzgado_origen.clave)
             exh_exhorto.juzgado_origen_nombre = safe_string(juzgado_origen.descripcion, save_enie=True)

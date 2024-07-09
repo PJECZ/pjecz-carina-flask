@@ -3,6 +3,7 @@ Generadores de contraseñas
 """
 import random
 import string
+import time
 
 from hashids import Hashids
 
@@ -38,3 +39,10 @@ def generar_aleatorio(largo=16):
     todos = minusculas + mayusculas + digitos
     temp = random.sample(todos, largo)
     return "".join(temp)
+
+
+def generar_identificador(largo: int = 16) -> str:
+    """Generar identificador con el tiempo actual y algo aleatorio, todo con letras en mayúsculas y dígitos"""
+    timestamp_unique = str(int(time.time() * 1000))
+    random_characters = "".join(random.sample(string.ascii_uppercase + string.digits, k=largo))
+    return f"{timestamp_unique}{random_characters}"[:largo]

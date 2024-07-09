@@ -9,6 +9,7 @@ from pathlib import Path
 import click
 
 from carina.blueprints.modulos.models import Modulo
+from carina.extensions import database
 from lib.safe_string import safe_string
 
 MODULOS_CSV = "seed/modulos.csv"
@@ -23,6 +24,7 @@ def alimentar_modulos():
     if not ruta_csv.is_file():
         click.echo(f"AVISO: {ruta_csv.name} no es un archivo.")
         sys.exit(1)
+    sesion = database.session
     click.echo("Alimentando modulos: ", nl=False)
     contador = 0
     with open(ruta_csv, encoding="utf8") as puntero:
@@ -42,19 +44,23 @@ def alimentar_modulos():
             if modulo_id != contador + 1:
                 click.echo(click.style(f"  AVISO: modulo_id {modulo_id} no es consecutivo", fg="red"))
                 sys.exit(1)
-            Modulo(
-                nombre=nombre,
-                nombre_corto=nombre_corto,
-                icono=icono,
-                ruta=ruta,
-                en_navegacion=en_navegacion,
-                en_plataforma_carina=en_plataforma_carina,
-                en_plataforma_hercules=en_plataforma_hercules,
-                en_plataforma_web=en_plataforma_web,
-                en_portal_notarias=en_portal_notarias,
-                estatus=estatus,
-            ).save()
+            sesion.add(
+                Modulo(
+                    nombre=nombre,
+                    nombre_corto=nombre_corto,
+                    icono=icono,
+                    ruta=ruta,
+                    en_navegacion=en_navegacion,
+                    en_plataforma_carina=en_plataforma_carina,
+                    en_plataforma_hercules=en_plataforma_hercules,
+                    en_plataforma_web=en_plataforma_web,
+                    en_portal_notarias=en_portal_notarias,
+                    estatus=estatus,
+                )
+            )
             contador += 1
             click.echo(click.style(".", fg="green"), nl=False)
+    sesion.commit()
+    sesion.close()
     click.echo()
     click.echo(click.style(f"  {contador} modulos alimentados.", fg="green"))

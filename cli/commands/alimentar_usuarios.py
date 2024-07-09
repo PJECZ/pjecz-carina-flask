@@ -12,7 +12,7 @@ import click
 from carina.blueprints.autoridades.models import Autoridad
 from carina.blueprints.oficinas.models import Oficina
 from carina.blueprints.usuarios.models import Usuario
-from carina.extensions import pwd_context
+from carina.extensions import database, pwd_context
 from lib.pwgen import generar_contrasena
 from lib.safe_string import safe_clave, safe_email, safe_string
 
@@ -28,6 +28,7 @@ def alimentar_usuarios():
     if not ruta.is_file():
         click.echo(f"AVISO: {ruta.name} no es un archivo.")
         sys.exit(1)
+    sesion = database.session
     click.echo("Alimentando usuarios: ", nl=False)
     contador = 0
     with open(ruta, encoding="utf8") as puntero:
@@ -54,21 +55,25 @@ def alimentar_usuarios():
             if oficina is None:
                 click.echo(click.style(f"  AVISO: oficina_id {oficina_id} no existe", fg="red"))
                 sys.exit(1)
-            Usuario(
-                autoridad=autoridad,
-                oficina=oficina,
-                email=email,
-                nombres=nombres,
-                apellido_paterno=apellido_paterno,
-                apellido_materno=apellido_materno,
-                curp=curp,
-                puesto=puesto,
-                estatus=estatus,
-                api_key="",
-                api_key_expiracion=datetime(year=2000, month=1, day=1),
-                contrasena=pwd_context.hash(generar_contrasena()),
-            ).save()
+            sesion.add(
+                Usuario(
+                    autoridad=autoridad,
+                    oficina=oficina,
+                    email=email,
+                    nombres=nombres,
+                    apellido_paterno=apellido_paterno,
+                    apellido_materno=apellido_materno,
+                    curp=curp,
+                    puesto=puesto,
+                    estatus=estatus,
+                    api_key="",
+                    api_key_expiracion=datetime(year=2000, month=1, day=1),
+                    contrasena=pwd_context.hash(generar_contrasena()),
+                )
+            )
             contador += 1
             click.echo(click.style(".", fg="green"), nl=False)
+    sesion.commit()
+    sesion.close()
     click.echo()
     click.echo(click.style(f"  {contador} usuarios alimentados.", fg="green"))
