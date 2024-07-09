@@ -287,7 +287,6 @@ def edit(exh_exhorto_id):
     juzgado_origen = Autoridad.query.filter_by(clave=exh_exhorto.juzgado_origen_id).filter_by(estatus="A").first()
     # Cargar los valores guardados en el formulario
     form.exhorto_origen_id.data = exh_exhorto.exhorto_origen_id
-    form.materia.data = exh_exhorto.materia.id
     form.juzgado_origen.data = juzgado_origen.id
     form.numero_expediente_origen.data = exh_exhorto.numero_expediente_origen
     form.numero_oficio_origen.data = exh_exhorto.numero_oficio_origen
@@ -298,12 +297,13 @@ def edit(exh_exhorto_id):
     form.tipo_diligenciacion_nombre.data = exh_exhorto.tipo_diligenciacion_nombre
     form.fecha_origen.data = exh_exhorto.fecha_origen
     form.observaciones.data = exh_exhorto.observaciones
-    form.remitente.data = exh_exhorto.remitente
-    form.exh_area.data = exh_exhorto.exh_area.id
     form.folio_seguimiento.data = exh_exhorto.folio_seguimiento
+    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
+    # form.materia.data = exh_exhorto.materia.id
+    form.exh_area.data = exh_exhorto.exh_area.nombre
+    form.remitente.data = exh_exhorto.remitente
     form.numero_exhorto.data = exh_exhorto.numero_exhorto
     form.estado.data = exh_exhorto.estado  # Read only
-    municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
     # Entregar
     return render_template("exh_exhortos/edit.jinja2", form=form, exh_exhorto=exh_exhorto, municipio_destino=municipio_destino)
 

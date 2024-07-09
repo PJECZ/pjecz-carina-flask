@@ -38,9 +38,9 @@
                 </div>
                 <div class="col-md-6">
                     {% call f.form_group(form.folio_seguimiento, readonly=true) %}{% endcall %}
-                    {% call f.form_group(form.materia) %}{% endcall %}
                     {% call f.form_group(form.estado_destino) %}{% endcall %}
                     {% call f.form_group(form.municipio_destino) %}{% endcall %}
+                    {% call f.form_group(form.materia) %}{% endcall %}
                     {% call f.form_group(form.exh_area, readonly=true) %}{% endcall %}
                     {% call f.form_group(form.remitente, readonly=true) %}{% endcall %}
                     {% call f.form_group(form.distrito, readonly=true) %}{% endcall %}
@@ -88,6 +88,24 @@
                     });
                     // Seleccionar el municipio del exhorto
                     document.getElementById('municipio_destino').value = {{ exh_exhorto.municipio_destino_id }};
+                });
+            // Llamar a /exh_externos/select_materias_json para cambiar las opciones en el select materia
+            fetch(`/exh_externos/select_materias_json/${estadoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const materiaSelect = document.getElementById('materia');
+                    materiaSelect.innerHTML = '';
+                    materiaSelect.disabled = false;
+                    if (data === null) {
+                        materiaSelect.disabled = true;
+                        return;
+                    }
+                    data.forEach(materia => {
+                        const option = document.createElement('option');
+                        option.value = materia.clave;
+                        option.text = materia.nombre;
+                        materiaSelect.appendChild(option);
+                    })
                 });
         });
     </script>
