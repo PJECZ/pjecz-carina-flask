@@ -40,9 +40,9 @@
         {{ detail.label_value('Recibir Promoción Archivo', exh_externo.endpoint_recibir_promocion_archivo) }}
     {% endcall %}
     {% if exh_externo.materias %}
-        {% call detail.card(title='Materias', estatus=exh_externo.estatus) %}
+        {% call detail.card(title='Materias (Clave - Nombre)', estatus=exh_externo.estatus) %}
             {% for materia in exh_externo.materias %}
-                {{ detail.label_value('Clave ' + materia.clave, materia.nombre) }}
+                {{ detail.label_value(materia.clave, materia.nombre) }}
             {% endfor %}
         {% endcall %}
     {% endif %}

@@ -11,6 +11,7 @@ import click
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.permisos.models import Permiso
 from carina.blueprints.roles.models import Rol
+from carina.extensions import database
 
 PERMISOS_CSV = "seed/roles_permisos.csv"
 
@@ -28,6 +29,7 @@ def alimentar_permisos():
     if len(modulos) == 0:
         click.echo(click.style("  AVISO: No hay modulos alimentados.", fg="red"))
         sys.exit(1)
+    sesion = database.session
     click.echo("Alimentando permisos: ", nl=False)
     contador = 0
     with open(ruta, encoding="utf8") as puntero:
@@ -53,14 +55,18 @@ def alimentar_permisos():
                     nivel = 0
                 if nivel > 4:
                     nivel = 4
-                Permiso(
-                    rol=rol,
-                    modulo=modulo,
-                    nivel=nivel,
-                    nombre=f"{rol.nombre} puede {Permiso.NIVELES[nivel]} en {modulo.nombre}",
-                    estatus=estatus,
-                ).save()
+                sesion.add(
+                    Permiso(
+                        rol=rol,
+                        modulo=modulo,
+                        nivel=nivel,
+                        nombre=f"{rol.nombre} puede {Permiso.NIVELES[nivel]} en {modulo.nombre}",
+                        estatus=estatus,
+                    )
+                )
             contador += 1
             click.echo(click.style(".", fg="green"), nl=False)
+    sesion.commit()
+    sesion.close()
     click.echo()
     click.echo(click.style(f"  {contador} permisos alimentados.", fg="green"))

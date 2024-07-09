@@ -41,7 +41,7 @@ class ExhExhortoParte(database.Model, UniversalMixin):
     # 'M' = Masculino,
     # 'F' = Femenino.
     # Solo cuando aplique y se quiera especificar (que se tenga el dato). NO aplica para persona moral.
-    genero: Mapped[str] = mapped_column(Enum(*GENEROS, name="exh_exhortos_partes_generos", native_enum=False))
+    genero: Mapped[str] = mapped_column(Enum(*GENEROS, name="exh_exhortos_partes_generos"))
 
     # Valor que indica si la parte es una persona moral.
     es_persona_moral: Mapped[bool] = mapped_column(Boolean)

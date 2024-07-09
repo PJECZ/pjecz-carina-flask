@@ -12,6 +12,7 @@ from carina.blueprints.autoridades.models import Autoridad
 from carina.blueprints.distritos.models import Distrito
 from carina.blueprints.materias.models import Materia
 from carina.blueprints.municipios.models import Municipio
+from carina.extensions import database
 from lib.safe_string import safe_clave, safe_string
 
 AUTORIDADES_CSV = "seed/autoridades.csv"
@@ -26,6 +27,7 @@ def alimentar_autoridades():
     if not ruta.is_file():
         click.echo(f"AVISO: {ruta.name} no es un archivo.")
         sys.exit(1)
+    sesion = database.session
     click.echo("Alimentando autoridades: ", nl=False)
     contador = 0
     with open(ruta, encoding="utf8") as puntero:
@@ -69,31 +71,35 @@ def alimentar_autoridades():
             if municipio is None:
                 click.echo(click.style(f"  AVISO: municipio_id {municipio_id} no existe", fg="red"))
                 sys.exit(1)
-            Autoridad(
-                distrito=distrito,
-                materia=materia,
-                municipio=municipio,
-                clave=clave,
-                descripcion=descripcion,
-                descripcion_corta=descripcion_corta,
-                es_archivo_solicitante=es_archivo_solicitante,
-                es_cemasc=es_cemasc,
-                es_defensoria=es_defensoria,
-                es_extinto=es_extinto,
-                es_jurisdiccional=es_jurisdiccional,
-                es_notaria=es_notaria,
-                es_organo_especializado=es_organo_especializado,
-                es_revisor_escrituras=es_revisor_escrituras,
-                organo_jurisdiccional=organo_jurisdiccional,
-                directorio_edictos=directorio_edictos,
-                directorio_glosas=directorio_glosas,
-                directorio_listas_de_acuerdos=directorio_listas_de_acuerdos,
-                directorio_sentencias=directorio_sentencias,
-                audiencia_categoria=audiencia_categoria,
-                limite_dias_listas_de_acuerdos=limite_dias_listas_de_acuerdos,
-                estatus=estatus,
-            ).save()
+            sesion.add(
+                Autoridad(
+                    distrito=distrito,
+                    materia=materia,
+                    municipio=municipio,
+                    clave=clave,
+                    descripcion=descripcion,
+                    descripcion_corta=descripcion_corta,
+                    es_archivo_solicitante=es_archivo_solicitante,
+                    es_cemasc=es_cemasc,
+                    es_defensoria=es_defensoria,
+                    es_extinto=es_extinto,
+                    es_jurisdiccional=es_jurisdiccional,
+                    es_notaria=es_notaria,
+                    es_organo_especializado=es_organo_especializado,
+                    es_revisor_escrituras=es_revisor_escrituras,
+                    organo_jurisdiccional=organo_jurisdiccional,
+                    directorio_edictos=directorio_edictos,
+                    directorio_glosas=directorio_glosas,
+                    directorio_listas_de_acuerdos=directorio_listas_de_acuerdos,
+                    directorio_sentencias=directorio_sentencias,
+                    audiencia_categoria=audiencia_categoria,
+                    limite_dias_listas_de_acuerdos=limite_dias_listas_de_acuerdos,
+                    estatus=estatus,
+                )
+            )
             contador += 1
             click.echo(click.style(".", fg="green"), nl=False)
+    sesion.commit()
+    sesion.close()
     click.echo()
     click.echo(click.style(f"  {contador} autoridades alimentadas.", fg="green"))

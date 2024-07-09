@@ -11,6 +11,7 @@ import click
 from carina.blueprints.roles.models import Rol
 from carina.blueprints.usuarios.models import Usuario
 from carina.blueprints.usuarios_roles.models import UsuarioRol
+from carina.extensions import database
 
 USUARIOS_ROLES_CSV = "seed/usuarios_roles.csv"
 
@@ -25,6 +26,7 @@ def alimentar_usuarios_roles():
         click.echo(f"AVISO: {ruta.name} no es un archivo.")
         sys.exit(1)
     usuarios_que_no_existen = []
+    sesion = database.session
     click.echo("Alimentando usuarios-roles: ", nl=False)
     contador = 0
     with open(ruta, encoding="utf8") as puntero:
@@ -41,13 +43,17 @@ def alimentar_usuarios_roles():
                 rol = Rol.query.filter_by(nombre=rol_nombre).first()
                 if rol is None:
                     continue
-                UsuarioRol(
-                    usuario=usuario,
-                    rol=rol,
-                    descripcion=f"{usuario.email} en {rol.nombre}",
-                ).save()
+                sesion.add(
+                    UsuarioRol(
+                        usuario=usuario,
+                        rol=rol,
+                        descripcion=f"{usuario.email} en {rol.nombre}",
+                    )
+                )
                 contador += 1
                 click.echo(click.style(".", fg="green"), nl=False)
+    sesion.commit()
+    sesion.close()
     click.echo()
     if usuarios_que_no_existen:
         click.echo(click.style(f"  AVISO: {','.join(usuarios_que_no_existen)} usuarios no existen.", fg="red"))

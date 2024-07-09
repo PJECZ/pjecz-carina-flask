@@ -12,6 +12,7 @@ import click
 from carina.blueprints.distritos.models import Distrito
 from carina.blueprints.domicilios.models import Domicilio
 from carina.blueprints.oficinas.models import Oficina
+from carina.extensions import database
 from lib.safe_string import safe_clave, safe_string
 
 OFICINAS_CSV = "seed/oficinas.csv"
@@ -26,6 +27,7 @@ def alimentar_oficinas():
     if not ruta.is_file():
         click.echo(f"AVISO: {ruta.name} no es un archivo.")
         sys.exit(1)
+    sesion = database.session
     click.echo("Alimentando oficinas: ", nl=False)
     contador = 0
     with open(ruta, encoding="utf8") as puntero:
@@ -55,21 +57,25 @@ def alimentar_oficinas():
             if domicilio is None:
                 click.echo(click.style(f"  AVISO: domicilio_id {domicilio_id} no existe", fg="red"))
                 sys.exit(1)
-            Oficina(
-                domicilio=domicilio,
-                distrito=distrito,
-                clave=clave,
-                descripcion=descripcion,
-                descripcion_corta=descripcion_corta,
-                es_jurisdiccional=es_jurisdiccional,
-                apertura=apertura,
-                cierre=cierre,
-                limite_personas=limite_personas,
-                telefono=telefono,
-                extension=extension,
-                estatus=estatus,
-            ).save()
+            sesion.add(
+                Oficina(
+                    domicilio=domicilio,
+                    distrito=distrito,
+                    clave=clave,
+                    descripcion=descripcion,
+                    descripcion_corta=descripcion_corta,
+                    es_jurisdiccional=es_jurisdiccional,
+                    apertura=apertura,
+                    cierre=cierre,
+                    limite_personas=limite_personas,
+                    telefono=telefono,
+                    extension=extension,
+                    estatus=estatus,
+                )
+            )
             contador += 1
             click.echo(click.style(".", fg="green"), nl=False)
+    sesion.commit()
+    sesion.close()
     click.echo()
     click.echo(click.style(f"  {contador} oficinas alimentadas.", fg="green"))

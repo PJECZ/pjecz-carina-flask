@@ -28,7 +28,6 @@ class Materia(database.Model, UniversalMixin):
 
     # Hijos
     autoridades: Mapped[List["Autoridad"]] = relationship("Autoridad", back_populates="materia")
-    exh_exhortos: Mapped[List["ExhExhorto"]] = relationship("ExhExhorto", back_populates="materia")
 
     def __repr__(self):
         """Representación"""

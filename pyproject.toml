@@ -1,11 +1,11 @@
 [tool.poetry]
+package-mode = false
 name = "pjecz-carina-flask"
 version = "0.1.0"
-description = "PJECZ Carina es un sistema web hecho con Flaskpara para la interconexión de exhortos entre Poderes Judiciales."
+description = "Carina es un sistema web hecho con Flaskpara para la interconexión de exhortos entre Poderes Judiciales."
 authors = ["Guillermo Valdes <guillermo@movimientolibre.com>"]
 license = "AGPL3"
 readme = "README.md"
-packages = [{include = "carina"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
