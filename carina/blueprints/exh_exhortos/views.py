@@ -302,7 +302,6 @@ def edit(exh_exhorto_id):
     form.observaciones.data = exh_exhorto.observaciones
     form.folio_seguimiento.data = exh_exhorto.folio_seguimiento
     municipio_destino = Municipio.query.filter_by(id=exh_exhorto.municipio_destino_id).first()
-    # form.materia.data = exh_exhorto.materia.id
     form.exh_area.data = exh_exhorto.exh_area.nombre
     form.remitente.data = exh_exhorto.remitente
     form.numero_exhorto.data = exh_exhorto.numero_exhorto
