@@ -60,10 +60,10 @@ class ExhExhorto(database.Model, UniversalMixin):
     municipio_origen: Mapped["Municipio"] = relationship(back_populates="exh_exhortos_origenes")
 
     # GUID/UUID... que sea único. Pero es opcional para nosotros cuando el estado es PENDIENTE
-    folio_seguimiento: Mapped[Optional[str]] = mapped_column(String(36), unique=True)
+    folio_seguimiento: Mapped[Optional[str]] = mapped_column(String(48), unique=True)
 
     # UUID identificador con el que el PJ exhortante identifica el exhorto que envía
-    exhorto_origen_id: Mapped[str] = mapped_column(String)
+    exhorto_origen_id: Mapped[str] = mapped_column(String(48))
 
     # ID de la tabla Municipios: Para el payload es el Identificador INEGI del Municipio del Estado del PJ exhortado al que se quiere enviar el Exhorto
     municipio_destino_id: Mapped[int]
@@ -106,10 +106,10 @@ class ExhExhorto(database.Model, UniversalMixin):
     observaciones: Mapped[Optional[str]] = mapped_column(String(1024))
 
     # Estado de recepción del documento
-    estado: Mapped[str] = mapped_column(Enum(*ESTADOS, name="exh_exhortos_estados"), index=True)
+    estado: Mapped[str] = mapped_column(Enum(*ESTADOS, name="exh_exhortos_estados", native_enum=False), index=True)
 
     # Campo para saber si es un proceso interno o extorno
-    remitente: Mapped[str] = mapped_column(Enum(*REMITENTES, name="exh_exhortos_remitentes"), index=True)
+    remitente: Mapped[str] = mapped_column(Enum(*REMITENTES, name="exh_exhortos_remitentes", native_enum=False), index=True)
 
     # Número de Exhorto con el que se radica en el Juzgado/Área que se turnó el exhorto.
     # Este número sirve para que el usuario pueda indentificar su exhorto dentro del Juzgado/Área donde se turnó,

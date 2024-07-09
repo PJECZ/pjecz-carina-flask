@@ -148,6 +148,9 @@ def new():
         if juzgado_origen is None:
             flash("El juzgado de origen no es válido", "warning")
             es_valido = False
+        # Inicilizar las variables para la clave y el nombre de la materia
+        materia_clave = form.materia.data
+        materia_nombre = ""
         # Consultar el municipio de destino
         municipio_destino = Municipio.query.get(form.municipio_destino.data)
         if municipio_destino is None:
@@ -155,23 +158,22 @@ def new():
             es_valido = False
         else:
             estado_destino = municipio_destino.estado
-            # Consultar el estado de destino y validar la materia
-            materia_clave = form.materia.data
-            materia_nombre = "PENDIENTE"
+            # Consultar en exh_externos al estado de destino
             exh_externo = ExhExterno.query.filter_by(estado_id=estado_destino.id).first()
             if exh_externo is None:
                 flash(f"No hay registro en externos para el estado de destino {estado_destino.nombre}", "warning")
                 es_valido = False
             else:
+                # Validar la clave de la materia y obtener el nombre de la misma
                 if exh_externo.materias is None:
                     flash(f"No hay materias en externos para el estado de destino {estado_destino.nombre}", "warning")
                     es_valido = False
                 else:
-                    try:
-                        materia_nombre = exh_externo.materias[materia_clave]
-                    except KeyError:
+                    materia = next((materia for materia in exh_externo.materias if materia["clave"] == materia_clave), None)
+                    if materia is None:
                         flash(f"La clave de materia {materia_clave} no se encuentra en externo {exh_externo.clave}", "warning")
                         es_valido = False
+                    materia_nombre = materia["nombre"]
         # Si es valido, guardar
         if es_valido:
             exh_exhorto = ExhExhorto(
@@ -231,6 +233,9 @@ def edit(exh_exhorto_id):
         if juzgado_origen is None:
             flash("El juzgado de origen no es válido", "warning")
             es_valido = False
+        # Inicilizar las variables para la clave y el nombre de la materia
+        materia_clave = form.materia.data
+        materia_nombre = ""
         # Consultar el municipio de destino
         municipio_destino = Municipio.query.get(form.municipio_destino.data)
         if municipio_destino is None:
@@ -238,23 +243,22 @@ def edit(exh_exhorto_id):
             es_valido = False
         else:
             estado_destino = municipio_destino.estado
-            # Consultar el estado de destino y validar la materia
-            materia_clave = form.materia.data
-            materia_nombre = "PENDIENTE"
+            # Consultar en exh_externos al estado de destino
             exh_externo = ExhExterno.query.filter_by(estado_id=estado_destino.id).first()
             if exh_externo is None:
                 flash(f"No hay registro en externos para el estado de destino {estado_destino.nombre}", "warning")
                 es_valido = False
             else:
+                # Validar la clave de la materia y obtener el nombre de la misma
                 if exh_externo.materias is None:
                     flash(f"No hay materias en externos para el estado de destino {estado_destino.nombre}", "warning")
                     es_valido = False
                 else:
-                    try:
-                        materia_nombre = exh_externo.materias[materia_clave]
-                    except KeyError:
+                    materia = next((materia for materia in exh_externo.materias if materia["clave"] == materia_clave), None)
+                    if materia is None:
                         flash(f"La clave de materia {materia_clave} no se encuentra en externo {exh_externo.clave}", "warning")
                         es_valido = False
+                    materia_nombre = materia["nombre"]
         # Si es valido, actualizar
         if es_valido:
             exh_exhorto.municipio_destino_id = form.municipio_destino.data
