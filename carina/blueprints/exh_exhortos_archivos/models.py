@@ -65,7 +65,7 @@ class ExhExhortoArchivo(database.Model, UniversalMixin):
     fecha_hora_recepcion: Mapped[datetime] = mapped_column(DateTime, default=now())
 
     # Identifica si el archivo es del exhorto inicial o es parte de la respuesta
-    es_respuesta: Mapped[bool]
+    es_respuesta: Mapped[bool] = mapped_column(default=False)
 
     @property
     def tipo_documento_nombre(self):
