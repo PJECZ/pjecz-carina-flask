@@ -6,7 +6,7 @@
 {% block title %}Exhorto{% endblock %}
 
 {% block topbar_actions %}
-    {% call topbar.page_buttons('Exhorto ' + exh_exhorto.exhorto_origen_id | string) %}
+    {% call topbar.page_buttons('Exhorto ' + exh_exhorto.exhorto_origen_id | string + ' <span id="titulo-estado">NO DEFINIDO</span>') %}
         {{ topbar.button_previous('Exhortos', url_for('exh_exhortos.list_active')) }}
         {% if current_user.can_edit('EXH EXHORTOS') %}
             {% if exh_exhorto.estado == "PENDIENTE" %}
@@ -23,16 +23,14 @@
 {% endblock %}
 
 {% block content %}
-    {% call detail.card(estatus=exh_exhorto.estatus) %}
+    {% call detail.card("Datos del exhorto", estatus=exh_exhorto.estatus) %}
         <div class="row">
             <div class="col-md-6">
                 {{ detail.label_value('Exhorto Origen ID', exh_exhorto.exhorto_origen_id) }}
                 {% if current_user.can_view('MUNICIPIOS') %}
-                    {{ detail.label_value('Municipio Origen', exh_exhorto.municipio_origen.nombre, url_for('municipios.detail', municipio_id=exh_exhorto.municipio_origen_id)) }}
-                    {{ detail.label_value('Estado Origen', exh_exhorto.municipio_origen.estado.nombre) }}
+                    {{ detail.label_value('Municipio Origen', exh_exhorto.municipio_origen.nombre + ', ' + exh_exhorto.municipio_origen.estado.nombre, url_for('municipios.detail', municipio_id=exh_exhorto.municipio_origen_id)) }}
                 {% else %}
                     {{ detail.label_value('Municipio Origen', exh_exhorto.municipio_origen.nombre + ', ' + exh_exhorto.municipio_origen.estado.nombre) }}
-                    {{ detail.label_value('Estado Origen', exh_exhorto.municipio_origen.estado.nombre) }}
                 {% endif %}
                 {{ detail.label_value('Juzgado Origen ID', exh_exhorto.juzgado_origen_id) }}
                 {{ detail.label_value('Juzgado Origen', exh_exhorto.juzgado_origen_nombre) }}
@@ -47,16 +45,13 @@
                 {{ detail.label_value('Observaciones', exh_exhorto.observaciones) }}
             </div>
             <div class="col-md-6">
-                {{ detail.label_value('Folio Seguimiento', exh_exhorto.folio_seguimiento) }}
                 {{ detail.label_value('Materia clave', exh_exhorto.materia_clave) }}
                 {{ detail.label_value('Materia nombre', exh_exhorto.materia_nombre) }}
                 {% if municipio_destino %}
                     {% if current_user.can_view('MUNICIPIOS') %}
-                        {{ detail.label_value('Municipio Destino', municipio_destino.nombre, url_for('municipios.detail', municipio_id=municipio_destino.id)) }}
-                        {{ detail.label_value('Estado Destino', municipio_destino.estado.nombre) }}
+                        {{ detail.label_value('Municipio Destino', municipio_destino.nombre + ', ' + municipio_destino.estado.nombre, url_for('municipios.detail', municipio_id=municipio_destino.id)) }}
                     {% else %}
-                        {{ detail.label_value('Municipio Destino', municipio_destino.nombre) }}
-                        {{ detail.label_value('Estado Destino', municipio_destino.estado.nombre) }}
+                        {{ detail.label_value('Municipio Destino', municipio_destino.nombre + ', ' + municipio_destino.estado.nombre) }}
                     {% endif %}
                 {% else %}
                     {{ detail.label_value('Municipio Destino', 'NO DEFINIDO') }}
@@ -194,6 +189,48 @@
             {% endif %}
         {% endif %}
     {% endcall %}
+    <!-- Acuse de recibido -->
+    {% if exh_exhorto.acuse_fecha_hora_recepcion %}
+        <div class="card bg-warning mb-3">
+            <div class="card-header">Acuse de recepción</div>
+            <div class="card-body bg-light">
+                {{ detail.label_value('Folio Seguimiento', exh_exhorto.folio_seguimiento) }}
+                {{ detail.label_value('Fecha Hora Recepción', moment(exh_exhorto.acuse_fecha_hora_recepcion).format('llll')) }}
+                {{ detail.label_value('Municipio Área Recibida Id', exh_exhorto.acuse_municipio_area_recibe_id) }}
+                {{ detail.label_value('Área Recibida', exh_exhorto.acuse_area_recibe_id + ': ' + exh_exhorto.acuse_area_recibe_nombre) }}
+                {{ detail.label_value('URL Info', exh_exhorto.acuse_url_info) }}
+            </div>
+        </div>
+    {% endif %}
+    <!-- Acuse de respuesta -->
+    {% if exh_exhorto.respuesta_fecha_hora_recepcion %}
+        <div class="card bg-success mb-3">
+            <div class="card-header text-light">Acuse de respuesta</div>
+            <div class="card-body bg-light">
+                {{ detail.label_value('Respuesta Origen Id', exh_exhorto.respuesta_respuesta_origen_id) }}
+                {{ detail.label_value('Fecha Hora de Recepción', moment(exh_exhorto.respuesta_fecha_hora_recepcion).format('llll')) }}
+                {{ detail.label_value('Observaciones', exh_exhorto.respuesta_observaciones) }}
+            </div>
+        </div>
+        <!-- Archvivos de respuesta -->
+        <div class="card bg-success mb-3">
+            <div class="card-header text-light">Archivos de respuesta</div>
+            <div class="card-body bg-light">
+                <table id="exh_exhortos_archivos_respuesta_datatable" class="table display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Archivo</th>
+                            <th>Descargar</th>
+                            <th>Tipo Documento</th>
+                            <th>Estado</th>
+                            <th>Recepción</th>
+                            <th>Tamaño</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block custom_javascript %}
@@ -296,6 +333,7 @@
     <!-- Renderizar el campo estado con colores e iconos -->
     <script>
         const campo_estado = document.getElementById("estado")
+        let titulo_estado = document.getElementById("titulo-estado")
         const valor = "{{ exh_exhorto.estado }}";
         let bgcolor = "bg-dark";
         let icon = "circle-small";
@@ -316,6 +354,7 @@
         }
         html = '<h4><span class="badge rounded-pill ' + bgcolor + '"><span class="iconify" data-icon="mdi:' + icon + '"></span> ' + valor + '</span></h4>';
         campo_estado.innerHTML = html;
+        titulo_estado.innerHTML = html;
     </script>
     <!-- Botones de acción en estado Pendiente -->
     {% if exh_exhorto.estado == 'PENDIENTE' %}
