@@ -159,6 +159,16 @@ class ExhExhorto(database.Model, UniversalMixin):
     # fue enviado correctamente al Poder Judicial exhortado o también una página que muestre el estatus del exhorto.
     acuse_url_info: Mapped[Optional[str]] = mapped_column(String(256))
 
+    # Respuesta a un exhorto
+    # Identificador propio del Poder Judicial exhortado con el que identifica la respuesta del exhorto. Este dato puede ser un número consecutivo (ej "1", "2", "3"...), un GUID/UUID o cualquíer otro valor con que se identifique la respuesta
+    respuesta_respuesta_origen_id: Mapped[Optional[str]] = mapped_column(String(48))
+
+    # Texto simple referente a alguna observación u observaciones correspondientes a la respuesta del Exhorto
+    respuesta_observaciones: Mapped[Optional[str]] = mapped_column(String(1024))
+
+    # Fecha hora local en el que el Poder Judicial exhortante marca la Respuesta del Exhorto como recibida
+    respuesta_fecha_hora_recepcion: Mapped[Optional[datetime]]
+
     def __repr__(self):
         """Representación"""
         return f"<ExhExhorto {self.id}>"
