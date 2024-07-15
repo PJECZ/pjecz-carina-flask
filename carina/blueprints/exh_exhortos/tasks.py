@@ -318,7 +318,7 @@ def enviar(exhorto_origen_id: str = "") -> tuple[str, str, str]:
             mensaje_advertencia = ""
             try:
                 response = requests.post(
-                    exh_externo.endpoint_recibir_exhorto_archivo,
+                    url=exh_externo.endpoint_recibir_exhorto_archivo,
                     headers={"X-Api-Key": exh_externo.api_key},
                     timeout=TIMEOUT,
                     data={"exhortoOrigenId": exh_exhorto.exhorto_origen_id},

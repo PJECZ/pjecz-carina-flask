@@ -4,7 +4,7 @@ Exh Exhortos Partes, modelos
 
 from typing import Optional
 
-from sqlalchemy import Boolean, Enum, ForeignKey, String
+from sqlalchemy import Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from carina.extensions import database
@@ -44,7 +44,7 @@ class ExhExhortoParte(database.Model, UniversalMixin):
     genero: Mapped[str] = mapped_column(Enum(*GENEROS, name="exh_exhortos_partes_generos", native_enum=False))
 
     # Valor que indica si la parte es una persona moral.
-    es_persona_moral: Mapped[bool] = mapped_column(Boolean)
+    es_persona_moral: Mapped[bool]
 
     # Indica el tipo de parte:
     # 1 = Actor, Promovente, Ofendido;

@@ -5,7 +5,7 @@ Exh Exhortos, modelos
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, String
+from sqlalchemy import Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.functions import now
 
@@ -65,7 +65,8 @@ class ExhExhorto(database.Model, UniversalMixin):
     # UUID identificador con el que el PJ exhortante identifica el exhorto que envía
     exhorto_origen_id: Mapped[str] = mapped_column(String(48))
 
-    # ID de la tabla Municipios: Para el payload es el Identificador INEGI del Municipio del Estado del PJ exhortado al que se quiere enviar el Exhorto
+    # ID de la tabla Municipios: Para el payload es el Identificador INEGI del Municipio del Estado del PJ exhortado
+    # al que se quiere enviar el Exhorto
     municipio_destino_id: Mapped[int]
 
     # Identificador propio del Juzgado/Área que envía el Exhorto, opcional
@@ -88,11 +89,11 @@ class ExhExhorto(database.Model, UniversalMixin):
     juez_exhortante: Mapped[Optional[str]] = mapped_column(String(256))
 
     # Número de fojas que contiene el exhorto. El valor 0 significa "No Especificado"
-    fojas: Mapped[int] = mapped_column(Integer, default=0)
+    fojas: Mapped[int] = mapped_column(default=0)
 
     # Cantidad de dias a partir del día que se recibió en el Poder Judicial exhortado que se tiene para responder el Exhorto.
     # El valor de 0 significa "No Especificado"
-    dias_responder: Mapped[int] = mapped_column(Integer, default=0)
+    dias_responder: Mapped[int] = mapped_column(default=0)
 
     # Nombre del tipo de diligenciación que le corresponde al exhorto enviado.
     # Este puede contener valores como "Oficio", "Petición de Parte", opcional
@@ -100,7 +101,7 @@ class ExhExhorto(database.Model, UniversalMixin):
 
     # Fecha y hora en que el Poder Judicial exhortante registró que se envió el exhorto en su hora local.
     # En caso de no enviar este dato, el Poder Judicial exhortado puede tomar su fecha hora local.
-    fecha_origen: Mapped[datetime] = mapped_column(DateTime, default=now())
+    fecha_origen: Mapped[datetime] = mapped_column(default=now())
 
     # Texto simple que contenga información extra o relevante sobre el exhorto, opcional
     observaciones: Mapped[Optional[str]] = mapped_column(String(1024))
@@ -123,12 +124,16 @@ class ExhExhorto(database.Model, UniversalMixin):
     # que se van a recibir el Poder Judicial exhortado en el envío del Exhorto.
     exh_exhortos_archivos: Mapped[List["ExhExhortoArchivo"]] = relationship("ExhExhortoArchivo", back_populates="exh_exhorto")
 
+    # Hijos: Colección de objetos de tipo VideoAcceso que representan los accesos a
+    # los videos de las audiencias que forman parte de la respuesta.
+    exh_exhortos_videos: Mapped[List["ExhExhortoVideo"]] = relationship("ExhExhortoVideo", back_populates="exh_exhorto")
+
     # Cuando el exhorto esta en estado POR ENVIAR
     # Puede tener un tiempo con su anterior intento, si es nulo es que no ha sido enviado aun
-    por_enviar_tiempo_anterior: Mapped[Optional[datetime]] = mapped_column(DateTime)
+    por_enviar_tiempo_anterior: Mapped[Optional[datetime]]
 
     # Y se lleva un contador de intentos
-    por_enviar_intentos: Mapped[int] = mapped_column(Integer, default=0)
+    por_enviar_intentos: Mapped[int] = mapped_column(default=0)
 
     # Acuse fecha hora local en el que el Poder Judicial exhortado marca que se recibió el Exhorto
     acuse_fecha_hora_recepcion: Mapped[Optional[datetime]]
