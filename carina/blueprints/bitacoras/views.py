@@ -5,13 +5,13 @@ Bitácoras
 from flask import Blueprint, render_template, request, url_for
 from flask_login import current_user, login_required
 
-from lib.datatables import get_datatable_parameters, output_datatable_json
-from lib.safe_string import safe_email, safe_string
 from carina.blueprints.bitacoras.models import Bitacora
 from carina.blueprints.modulos.models import Modulo
 from carina.blueprints.permisos.models import Permiso
-from carina.blueprints.usuarios.models import Usuario
 from carina.blueprints.usuarios.decorators import permission_required
+from carina.blueprints.usuarios.models import Usuario
+from lib.datatables import get_datatable_parameters, output_datatable_json
+from lib.safe_string import safe_email, safe_string
 
 MODULO = "BITACORAS"
 
@@ -36,9 +36,9 @@ def datatable_json():
     consulta = consulta.join(Modulo).filter(Modulo.en_plataforma_carina == True)
     # Primero filtrar por columnas propias
     if "modulo_id" in request.form:
-        consulta = consulta.filter(Bitacora.modulo_id==request.form["modulo_id"])
+        consulta = consulta.filter(Bitacora.modulo_id == request.form["modulo_id"])
     if "usuario_id" in request.form:
-        consulta = consulta.filter(Bitacora.usuario_id==request.form["usuario_id"])
+        consulta = consulta.filter(Bitacora.usuario_id == request.form["usuario_id"])
     # Luego filtrar por columnas de otras tablas
     if "modulo_nombre" in request.form:
         modulo_nombre = safe_string(request.form["modulo_nombre"], save_enie=True)

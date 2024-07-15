@@ -6,10 +6,10 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import String, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from lib.universal_mixin import UniversalMixin
 from carina.extensions import database
+from lib.universal_mixin import UniversalMixin
 
 
 class ExhExhortoVideo(database.Model, UniversalMixin):
@@ -21,7 +21,10 @@ class ExhExhortoVideo(database.Model, UniversalMixin):
     # Clave primaria
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Columnas
+    # Clave foránea
+    exh_exhorto_id: Mapped[int] = mapped_column(ForeignKey("exh_exhortos.id"))
+    exh_exhorto: Mapped["ExhExhorto"] = relationship(back_populates="exh_exhortos_videos")
+
     # El titulo del video, esto para que pueda identificarse
     titulo: Mapped[str] = mapped_column(String(256))
 
