@@ -5,7 +5,7 @@ ExhExhorto_Videos, modelos
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import String, Text
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from carina.extensions import database
@@ -29,7 +29,7 @@ class ExhExhortoVideo(database.Model, UniversalMixin):
     titulo: Mapped[str] = mapped_column(String(256))
 
     # Descripción del video/audiencia realizada
-    descripcion: Mapped[Optional[str]] = mapped_column(Text(1024))
+    descripcion: Mapped[Optional[str]] = mapped_column(String(1024))
 
     # Fecha (o fecha hora) en que se realizó el video y/o audiencia.
     fecha: Mapped[Optional[datetime]]
