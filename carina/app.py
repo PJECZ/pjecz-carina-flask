@@ -16,6 +16,7 @@ from carina.blueprints.exh_areas.views import exh_areas
 from carina.blueprints.exh_exhortos.views import exh_exhortos
 from carina.blueprints.exh_exhortos_archivos.views import exh_exhortos_archivos
 from carina.blueprints.exh_exhortos_partes.views import exh_exhortos_partes
+from carina.blueprints.exh_exhortos_videos.views import exh_exhortos_videos
 from carina.blueprints.exh_externos.views import exh_externos
 from carina.blueprints.materias.views import materias
 from carina.blueprints.modulos.views import modulos
@@ -55,6 +56,7 @@ def create_app():
     app.register_blueprint(exh_exhortos)
     app.register_blueprint(exh_exhortos_archivos)
     app.register_blueprint(exh_exhortos_partes)
+    app.register_blueprint(exh_exhortos_videos)
     app.register_blueprint(exh_externos)
     app.register_blueprint(materias)
     app.register_blueprint(modulos)
