@@ -4,7 +4,7 @@ Exh Exhortos, formularios
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from wtforms import IntegerField, SelectField, StringField, SubmitField, TextAreaField
+from wtforms import IntegerField, SelectField, StringField, SubmitField, TextAreaField, DateTimeField
 from wtforms.validators import DataRequired, Length, Optional
 
 from carina.blueprints.exh_areas.models import ExhArea
@@ -75,6 +75,28 @@ class ExhExhortoEditForm(FlaskForm):
     tipo_diligenciacion_nombre = StringField("Tipo Diligenciación Nombre", validators=[Optional(), Length(max=256)])
     observaciones = TextAreaField("Observaciones", validators=[Optional(), Length(max=1024)])
     guardar = SubmitField("Guardar")
+
+
+class ExhExhortoSendManuallyForm(FlaskForm):
+    """Formulario Enviar Manualmente Exhorto"""
+
+    folio_seguimiento = StringField("Folio de Seguimiento", validators=[DataRequired()])
+    acuse_fecha_hora_recepcion = DateTimeField("Fecha Hora de Recepción", validators=[DataRequired()])
+    # acuse_municipio_area_recibe_id
+    acuse_area_recibe_id = StringField("Área ID", validators=[DataRequired(), Length(max=256)])
+    acuse_area_recibe_nombre = StringField("Área Nombre", validators=[DataRequired(), Length(max=256)])
+    acuse_url_info = StringField("URL info", validators=[Optional(), Length(max=256)])
+    recibir = SubmitField("Recibir")
+
+
+class ExhExhortoRecibeResponseManuallyForm(FlaskForm):
+    """Formulario Recibir respuesta Manualmente Exhorto"""
+
+    respuesta_respuesta_origen_id = StringField("Respuesta Origen ID", validators=[DataRequired()])
+    respuesta_observaciones = TextAreaField("Observaciones", validators=[Optional(), Length(max=1024)])
+    respuesta_fecha_hora_recepcion = DateTimeField("Fecha Hora de Recepción", validators=[DataRequired()])
+    archivo = FileField("Archivo PDF", validators=[FileRequired()])
+    recibir = SubmitField("Recibir")
 
 
 class ExhExhortoTransferForm(FlaskForm):

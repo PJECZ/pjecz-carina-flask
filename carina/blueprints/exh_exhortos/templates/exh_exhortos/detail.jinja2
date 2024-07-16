@@ -6,7 +6,7 @@
 {% block title %}Exhorto{% endblock %}
 
 {% block topbar_actions %}
-    {% call topbar.page_buttons('Exhorto ' + exh_exhorto.exhorto_origen_id | string + ' <span id="titulo-estado">NO DEFINIDO</span>') %}
+    {% call topbar.page_buttons('Exhorto <span id="titulo-estado">NO DEFINIDO</span>') %}
         {{ topbar.button_previous('Exhortos', url_for('exh_exhortos.list_active')) }}
         {% if current_user.can_edit('EXH EXHORTOS') %}
             {% if exh_exhorto.estado == "PENDIENTE" %}
@@ -28,9 +28,9 @@
             <div class="col-md-6">
                 {{ detail.label_value('Exhorto Origen ID', exh_exhorto.exhorto_origen_id) }}
                 {% if current_user.can_view('MUNICIPIOS') %}
-                    {{ detail.label_value('Municipio Origen', exh_exhorto.municipio_origen.nombre + ', ' + exh_exhorto.municipio_origen.estado.nombre, url_for('municipios.detail', municipio_id=exh_exhorto.municipio_origen_id)) }}
+                    {{ detail.label_value('Origen', exh_exhorto.municipio_origen.nombre + ', ' + exh_exhorto.municipio_origen.estado.nombre, url_for('municipios.detail', municipio_id=exh_exhorto.municipio_origen_id)) }}
                 {% else %}
-                    {{ detail.label_value('Municipio Origen', exh_exhorto.municipio_origen.nombre + ', ' + exh_exhorto.municipio_origen.estado.nombre) }}
+                    {{ detail.label_value('Origen', exh_exhorto.municipio_origen.nombre + ', ' + exh_exhorto.municipio_origen.estado.nombre) }}
                 {% endif %}
                 {{ detail.label_value('Juzgado Origen ID', exh_exhorto.juzgado_origen_id) }}
                 {{ detail.label_value('Juzgado Origen', exh_exhorto.juzgado_origen_nombre) }}
@@ -49,9 +49,9 @@
                 {{ detail.label_value('Materia nombre', exh_exhorto.materia_nombre) }}
                 {% if municipio_destino %}
                     {% if current_user.can_view('MUNICIPIOS') %}
-                        {{ detail.label_value('Municipio Destino', municipio_destino.nombre + ', ' + municipio_destino.estado.nombre, url_for('municipios.detail', municipio_id=municipio_destino.id)) }}
+                        {{ detail.label_value('Destino', municipio_destino.nombre + ', ' + municipio_destino.estado.nombre, url_for('municipios.detail', municipio_id=municipio_destino.id)) }}
                     {% else %}
-                        {{ detail.label_value('Municipio Destino', municipio_destino.nombre + ', ' + municipio_destino.estado.nombre) }}
+                        {{ detail.label_value('Destino', municipio_destino.nombre + ', ' + municipio_destino.estado.nombre) }}
                     {% endif %}
                 {% else %}
                     {{ detail.label_value('Municipio Destino', 'NO DEFINIDO') }}
@@ -60,10 +60,10 @@
                 {{ detail.label_value('Remitente', exh_exhorto.remitente) }}
                 {{ detail.label_value('Autoridad', exh_exhorto.autoridad.clave + ' - ' + exh_exhorto.autoridad.descripcion_corta, url_for("autoridades.detail", autoridad_id=exh_exhorto.autoridad.id )) }}
                 {{ detail.label_value('Número de Exhorto', exh_exhorto.numero_exhorto) }}
-                <div class="row">
+                {# <div class="row">
                     <div class="col-md-3 text-end">Estado</div>
                     <div class="col-md-9" id="estado">{{ exh_exhorto.estado }}</div>
-                </div>
+                </div> #}
             </div>
         </div>
         <!-- Botones de acción en diferentes estados -->
@@ -77,6 +77,26 @@
                 <div class="col-md-6 d-grid gap-2">
                     <a class="btn btn-lg btn-primary" href="javascript:void(0)" onclick="showModalenviar_btn('{{url_for('exh_exhortos.send', exh_exhorto_id=exh_exhorto.id)}}', '¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.');">
                         <span class='iconify' data-icon='mdi:send'></span> Enviar
+                    </a>
+                </div>
+            </div>
+            <div class="row text-center mt-2">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-secondary" href="javascript:void(0)" onclick="showModalenviar_btn('{{url_for('exh_exhortos.send_manually', exh_exhorto_id=exh_exhorto.id)}}', '¿Está seguro de enviar el exhorto? Porque una vez enviado ya no podrá ni editarlo ni cancelarlo.');">
+                        <span class='iconify' data-icon='mdi:send'></span> Enviar Manualmente
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+        {% if exh_exhorto.estado == "RECIBIDO CON EXITO" %}
+            <div class="row text-center">
+                <div class="col-md-6 d-grid gap-2">
+                </div>
+                <div class="col-md-6 d-grid gap-2">
+                    <a class="btn btn-lg btn-secondary" href="{{url_for('exh_exhortos.recibe_response_manually', exh_exhorto_id=exh_exhorto.id)}}">
+                        <span class='iconify' data-icon='mdi:inbox-arrow-down'></span> Recibir respuesta manualmente
                     </a>
                 </div>
             </div>
@@ -332,7 +352,6 @@
     {{ detail.moment_js(moment) }}
     <!-- Renderizar el campo estado con colores e iconos -->
     <script>
-        const campo_estado = document.getElementById("estado")
         let titulo_estado = document.getElementById("titulo-estado")
         const valor = "{{ exh_exhorto.estado }}";
         let bgcolor = "bg-dark";
@@ -352,8 +371,7 @@
             case "NO FUE RESPONDIDO": bgcolor = 'bg-danger';            icon="cancel";              break;
             case "RESPONDIDO":      bgcolor = 'bg-success';             icon="crown-circle";        break;
         }
-        html = '<h4><span class="badge rounded-pill ' + bgcolor + '"><span class="iconify" data-icon="mdi:' + icon + '"></span> ' + valor + '</span></h4>';
-        campo_estado.innerHTML = html;
+        html = '<span class="badge rounded-pill ' + bgcolor + '"><span class="iconify" data-icon="mdi:' + icon + '"></span> ' + valor + '</span>';
         titulo_estado.innerHTML = html;
     </script>
     <!-- Botones de acción en estado Pendiente -->
