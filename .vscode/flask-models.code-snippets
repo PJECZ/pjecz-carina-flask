@@ -10,9 +10,8 @@
       "from datetime import datetime",
       "from typing import List, Optional",
       "",
-      "from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, JSON, Integer, String, Text, Uuid",
+      "from sqlalchemy import Enum, ForeignKey, String",
       "from sqlalchemy.orm import Mapped, mapped_column, relationship",
-      "from sqlalchemy.sql.functions import now",
       "",
       "from lib.universal_mixin import UniversalMixin",
       "from carina.extensions import database",
@@ -36,7 +35,7 @@
       "\tclave: Mapped[str] = mapped_column(String(16), unique=True)",
       "\tdescripcion: Mapped[str] = mapped_column(String(256))",
       "\tcantidad: Mapped[int]",
-      "\tfecha_hora: Mapped[datetime] = mapped_column(DateTime, default=now())",
+      "\tfecha_hora: Mapped[datetime]",
       "\tes_adulto_mayor: Mapped[bool] = mapped_column(default=False)",
       "\testado: Mapped[str] = mapped_column(Enum(*ESTADOS, name=\"${3:tabla}_estados\", native_enum=False), index=True)",
       "\tobservaciones: Mapped[Optional[str]] = mapped_column(String(1024))",
@@ -62,7 +61,7 @@
   "Flask models child": {
     "scope": "python",
     "prefix": "fmodels_hijo",
-    "body": "${1:plural_hijos}: Mapped[List[\"${2:Clase_hijo}\"]] = relationship(back_populates=\"${3:singular_esta_clase}\")",
+    "body": "${1:plural_hijos}: Mapped[List[\"${2:Clase_hijo}\"]] = relationship(\"${2:Clase_hijo}\", back_populates=\"${3:singular_esta_clase}\")",
     "description": "Hijo"
   }
 }

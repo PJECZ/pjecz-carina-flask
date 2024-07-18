@@ -19,9 +19,9 @@ hashids = Hashids(salt=settings.SALT, min_length=8)
 class UniversalMixin:
     """Columnas y metodos universales"""
 
-    creado: Mapped[datetime] = mapped_column(default=now())
-    modificado: Mapped[datetime] = mapped_column(default=now(), onupdate=now())
-    estatus: Mapped[str] = mapped_column(CHAR, server_default="A", default="A")
+    creado: Mapped[datetime] = mapped_column(default=now(), server_default=now())
+    modificado: Mapped[datetime] = mapped_column(default=now(), onupdate=now(), server_default=now())
+    estatus: Mapped[str] = mapped_column(CHAR, default="A", server_default="A")
 
     def delete(self):
         """Eliminar registro"""
