@@ -251,6 +251,25 @@
             </div>
         </div>
     {% endif %}
+    <!-- Archivos de respuesta como Videos -->
+    {% if exh_exhorto.estado in ('DILIGENCIADO', 'CONTESTADO') %}
+        <div class="card bg-primary mb-3">
+            <div class="card-header text-light">Archivos de respuesta videos</div>
+            <div class="card-body bg-light">
+                <table id="exh_exhortos_respuesta_videos_datatable" class="table display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Título</th>
+                            <th>Descripción</th>
+                        </tr>
+                    </thead>
+                </table>
+                {% if exh_exhorto.estado == 'DILIGENCIADO' and current_user.can_insert('EXH EXHORTOS VIDEOS') %}
+                    <a class="btn btn-primary" href="{{url_for('exh_exhortos_videos.new_with_exh_exhorto', exh_exhorto_id=exh_exhorto.id)}}">Agregar</a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block custom_javascript %}
@@ -348,6 +367,33 @@
         // Filtros Exhortos Archivos
         const filtrosArchivos = new FiltrosDataTable('#exh_exhortos_archivos_datatable', configDTArchivos);
         filtrosArchivos.precargar();
+    </script>
+    <!-- Tabla de Videos -->
+    <script>
+        // DataTable Videos
+        let configDTVideos = constructorDataTable.config();
+        configDTVideos['ajax']['url'] = '/exh_exhortos_videos/datatable_json';
+        configDTVideos['ajax']['data'] = {'estatus':'A', 'exh_exhorto_id':{{exh_exhorto.id}}};
+        configDTVideos['columns'] = [
+            { data: 'detalle' },
+            { data: 'descripcion' },
+        ];
+        configDTVideos['columnDefs'] = [
+            {
+                targets: 0, // detalle
+                data: null,
+                render: function(data, type, row, meta) {
+                    if (data.url != '') {
+                        return '<a href="' + data.url + '">' + data.titulo + '</a>';
+                    } else {
+                        return data.titulo;
+                    }
+                }
+            }
+        ];
+        // Filtros Exhortos Videos
+        const filtrosVideos = new FiltrosDataTable('#exh_exhortos_respuesta_videos_datatable', configDTVideos);
+        filtrosVideos.precargar();
     </script>
     {{ detail.moment_js(moment) }}
     <!-- Renderizar el campo estado con colores e iconos -->
