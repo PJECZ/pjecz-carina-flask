@@ -17,8 +17,10 @@ from carina.blueprints.exh_exhortos.forms import (
     ExhExhortoEditForm,
     ExhExhortoNewForm,
     ExhExhortoProcessForm,
+    ExhExhortoRecibeResponseManuallyForm,
     ExhExhortoRefuseForm,
     ExhExhortoResponseForm,
+    ExhExhortoSendManuallyForm,
     ExhExhortoTransferForm,
 )
 from carina.blueprints.exh_exhortos.models import ExhExhorto
@@ -415,6 +417,60 @@ def send(exh_exhorto_id):
     )
     flash("Se ha lanzado la tarea en el fondo. Esta página se va a recargar en 10 segundos...", "info")
     return redirect(url_for("tareas.detail", tarea_id=tarea.id))
+
+
+@exh_exhortos.route("/exh_exhortos/enviar_manual/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def send_manually(exh_exhorto_id):
+    """Lanzar tarea en el fondo para envíar Exhorto al PJ Externo"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoSendManuallyForm()
+    if form.validate_on_submit():
+        exh_exhorto.folio_seguimiento = form.folio_seguimiento.data
+        exh_exhorto.acuse_area_recibe_id = form.acuse_area_recibe_id.data
+        exh_exhorto.acuse_area_recibe_nombre = safe_string(form.acuse_area_recibe_nombre.data)
+        exh_exhorto.acuse_url_info = form.acuse_url_info.data
+        exh_exhorto.acuse_fecha_hora_recepcion = form.acuse_fecha_hora_recepcion.data
+        exh_exhorto.estado = "RECIBIDO CON EXITO"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Exhorto Enviado Manualmete {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    # Entregar
+    return render_template("exh_exhortos/send_manually.jinja2", form=form, exh_exhorto=exh_exhorto)
+
+
+@exh_exhortos.route("/exh_exhortos/recibir_respuesta_manualmente/<int:exh_exhorto_id>", methods=["GET", "POST"])
+@permission_required(MODULO, Permiso.MODIFICAR)
+def recibe_response_manually(exh_exhorto_id):
+    """Lanzar tarea en el fondo para envíar Exhorto al PJ Externo"""
+    exh_exhorto = ExhExhorto.query.get_or_404(exh_exhorto_id)
+    form = ExhExhortoRecibeResponseManuallyForm()
+    if form.validate_on_submit():
+        exh_exhorto.respuesta_respuesta_origen_id = form.respuesta_respuesta_origen_id.data
+        exh_exhorto.respuesta_fecha_hora_recepcion = form.respuesta_fecha_hora_recepcion.data
+        exh_exhorto.respuesta_observaciones = safe_message(
+            form.respuesta_observaciones.data, max_len=1024, default_output_str=None
+        )
+        exh_exhorto.estado = "RESPONDIDO"
+        exh_exhorto.save()
+        bitacora = Bitacora(
+            modulo=Modulo.query.filter_by(nombre=MODULO).first(),
+            usuario=current_user,
+            descripcion=safe_message(f"Exhorto Enviado Manualmete {exh_exhorto.exhorto_origen_id}"),
+            url=url_for("exh_exhortos.detail", exh_exhorto_id=exh_exhorto.id),
+        )
+        bitacora.save()
+        flash(bitacora.descripcion, "success")
+        return redirect(bitacora.url)
+    # Entregar
+    return render_template("exh_exhortos/recibe_response_manually.jinja2", form=form, exh_exhorto=exh_exhorto)
 
 
 @exh_exhortos.route("/exh_exhortos/regresar_a_por_enviar/<int:exh_exhorto_id>")
